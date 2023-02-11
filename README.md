@@ -83,3 +83,6 @@ Step 8
 ./lark/build/run/run_all.sh
 
 ```
+
+### 视频教程地址
+https://space.bilibili.com/178350755
