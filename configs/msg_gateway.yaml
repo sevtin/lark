@@ -1,0 +1,75 @@
+name: lark_msg_gateway_server
+server_id: 1
+log: "./configs/logger.yaml"
+monitor:
+  port: 7302
+grpc_server:
+  name: lark_msg_gateway_server
+  server_id: 1
+  port: 7300
+  max_connection_idle: 0
+  max_connection_age: 0
+  max_connection_age_grace: 0
+  time: 7200000
+  timeout: 20000
+  connection_limit: 2000
+  streams_limit: 2000
+  max_recv_msg_size: 0
+  credential:
+    cert_file: ./configs/tls/grpc/server.pem
+    key_file: ./configs/tls/grpc/server.key
+    enabled: true
+  jaeger:
+    host_port: "lark-jaeger:6831"
+    sampler_type: "const"
+    param: 1
+    log_spans: true
+    buffer_flush_interval: 1
+    max_packet_size: 0
+    enabled: false
+message_server:
+  name: lark_message_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+etcd:
+  endpoints: ["lark-etcd:12379"]
+  username:
+  password:
+  schema: lark
+  read_timeout: 5000
+  write_timeout: 5000
+  dial_timeout: 5000
+ws_server: # 时间单位为（毫秒）
+  server_id:
+  name: lark_ws_server
+  port: 7301 # 为grpc端口+1
+  write_wait: 10000
+  pong_wait: 600000
+  ping_period: 540000
+  max_message_size: 4096
+  read_buffer_size: 4096
+  write_buffer_size: 4096
+  header_length: 4
+  chan_client_send_message: 100
+  chan_server_read_message: 1000
+  chan_server_register: 1000
+  chan_server_unregister: 1000
+  max_connections: 20000
+  minimum_time_interval: -1
+  log:
+redis:
+  address: ["lark-redis:63791"]
+  db: 0
+  password: lark2022
+  prefix: "LK:"
+msg_producer:
+  address: ["lark-kafka:9092"]
+  topic: "to_cloud_msg" # msg_gateway->cloud_msg
+msg_consumer:
+  address: ["lark-kafka:9092"]
+  topic: ["to_msg_gateway"] # dist->msg_gateway
+  group_id: online
+goroutine:
+  limit: 500000

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s                  # 默认每15秒采集一次
+  external_labels:
+    monitor: lark-monitor
+scrape_configs:
+  - job_name: msg_gateway               # 名称
+    scrape_interval: 5s                 # 覆盖默认值，设置5秒一次
+    static_configs:
+      - targets: ["10.0.115.108:7302"]  # 设置监控地址 prometheus会定时去 ip:port/metrics 下抓取数据
+  - job_name: dist
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["10.0.115.108:7401"]

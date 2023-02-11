@@ -1,0 +1,20 @@
+syntax ="proto3";
+package pb_order;
+option go_package = "./pb_order;pb_order";
+
+message OrderReq {
+  int64 uid = 1;
+  int64 token = 2; // 防重令牌
+  int64 goods_id = 3; // 商品ID
+  int64 quantity = 4; // 数量
+  int64 price = 5; // 单价(分) 不同用户价格可能存在差异
+}
+
+message OrderResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service Order {
+  rpc Order(OrderReq) returns(OrderResp);
+}

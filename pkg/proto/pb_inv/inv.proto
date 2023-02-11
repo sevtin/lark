@@ -1,0 +1,18 @@
+syntax ="proto3";
+package pb_order;
+option go_package = "./pb_order;pb_order";
+
+message LockGoodsReq {
+  int64 order_id = 1; // 订单ID
+  int64 goods_id = 2; // 商品ID
+  int64 quantity = 3; // 数量
+}
+
+message LockGoodsResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service Inventory {
+  rpc LockGoods(LockGoodsReq) returns(LockGoodsResp);
+}

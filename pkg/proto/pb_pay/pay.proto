@@ -1,0 +1,50 @@
+syntax ="proto3";
+package pb_pay;
+option go_package = "./pb_pay;pb_pay";
+
+message PayReq {
+  string out_trade_no = 1; // 商户网站唯一订单号
+  string merchant_order_no = 2; // 商户原始订单号
+  int64 total_amount = 3; // 订单总金额
+  string subject = 4; // 订单标题
+  int64 time_expire = 5; // 绝对超时时间 时间戳
+  string notify_url = 6; // 回调商户url
+  repeated GoodsInfo goods_list = 7; // 商品列表
+}
+
+message GoodsInfo {
+  string goods_no = 1; // 商家统一商品编号
+  string goods_name = 2; // 商品名称
+  string goods_desc = 3; // 商品描述
+  string show_url = 4; // 商品的展示地址
+  int32 quantity = 5; // 商品数量
+  int64 price = 6; // 商品单价
+}
+
+message PayResp {
+  int32 code = 1;
+  string msg = 2;
+  PayResult result = 6;
+}
+
+message PayResult {
+  string sign = 1; // 签名
+  string sign_type = 2; // 签名类型
+  PayDetails details = 3;
+}
+
+message PayDetails {
+  string app_id = 1;
+  string auth_app_id = 2;
+  string charset = 3;
+  int64 timestamp = 4;
+  string out_trade_no = 5; // 商户网站唯一订单号
+  string merchant_order_no = 6; // 商户原始订单号
+  int64 total_amount = 7; // 该笔订单的资金总额
+  int64 trade_no = 8; // 该交易在支付系统中的单号
+  string seller_id = 9; // 收款账号对应的支付系统唯一用户号
+}
+
+service Pay {
+  rpc Pay(PayReq) returns(PayResp);
+}

@@ -1,0 +1,28 @@
+jobmanager.rpc.address: lark-flink-jobmanager
+jobmanager.rpc.port: 6123
+jobmanager.heap.size: 1024m
+taskmanager.memory.process.size: 1568m
+taskmanager.numberOfTaskSlots: 4
+parallelism.default: 2
+
+
+#Flink中Jobmanager、TaskManager组件常用优化配置项
+#jobmanager.rpc.address
+#Jobmanager RPC通信地址，一般需要配置指定的Jobmanager的IP地址，默认的localhost不适合多节点集群模式
+#
+#jobmanager.heap.mb
+#Jobmanager的JVM堆内存，默认为1024M，可以根据集群规模适当增加
+#
+#taskmanager.heap.mb
+#TaskManager的JVM堆内存，默认为1024M，可以根据数据计算规模以及状态大小进行调整
+#
+#taskmanager.numberOfTaskSlots
+#配置每个TaskManager能够提供的Slot数量，根据TaskManager所在机器能够提供给Flink的CPU数量决定
+#
+#parallelism.default
+#Flink任务默认并行度，与整个集群的CPU数量有关，增加parallelism可以提高任务并行的计算的实例数，提升数据处理效率，但也会占用更过Slot
+#
+#taskmanager.tmp.dirs
+#集群临时文件夹地址，Flink会将中间计算数据放置在相应的路径中
+blob.server.port: 6124
+query.server.port: 6125

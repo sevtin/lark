@@ -1,0 +1,10 @@
+# 集群名称
+cluster.name: lark-es-cluster
+network.host: 0.0.0.0
+# 支持跨域访问
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+# 安全认证
+xpack.security.enabled: true
+xpack.security.authc.api_key.enabled: true
+#http.cors.allow-headers: "Authorization"

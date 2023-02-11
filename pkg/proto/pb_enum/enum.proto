@@ -1,0 +1,137 @@
+syntax ="proto3";
+package pb_enum;
+option go_package = "lark/pkg/proto/pb_enum;pb_enum";
+
+enum ACCOUNT_TYPE
+{
+  UNKNOWN_ACCOUNT_TYPE = 0;
+  MOBILE = 1; // 手机登录
+  LARK = 2; // lark账户登录
+}
+
+enum TOPIC
+{
+  UNKNOWN_TOPIC = 0;
+  CHAT = 1; // 聊天
+  CHAT_INVITE = 2; // 聊天邀请
+}
+
+enum SUB_TOPIC
+{
+  UNKNOWN_SUB_TOPIC = 0;
+  // 1000~1999
+  CHAT_MSG = 1000; // 聊天消息
+  CHAT_OPERATION = 1001; // 消息操作
+  CHAT_JOINED_GROUP_CHAT = 1002; // 加入群通知
+  CHAT_QUIT_GROUP_CHAT = 1003; // 退出群通知
+  CHAT_REMOVE_CHAT_MEMBER = 1004; // 移除群
+
+  // 2000~2999
+  CHAT_INVITE_REQUEST = 2000; // 加入Chat邀请
+  // CHAT_INVITE_ADDED_CONTACT = 2001; // 成为联系人
+}
+
+enum MESSAGE_TYPE
+{
+  NEW = 0;
+  RESP = 1;
+}
+
+enum CHAT_TYPE
+{
+  UNKNOWN_CHAT_TYPE = 0;
+  PRIVATE = 1; // 私聊
+  GROUP = 2; // 群聊
+}
+
+enum PLATFORM_TYPE
+{
+  UNKNOWN_PLATFORM_TYPE = 0;
+  IOS = 1;
+  ANDROID = 2;
+  MAC = 3;
+  WINDOWS = 4;
+  WEB = 5;
+}
+
+enum MSG_FROM
+{
+  UNKNOWN_MSG_FROM = 0;
+  USER = 1; // 用户消息
+  SYSTEM = 2; // 系统消息
+}
+
+enum MSG_TYPE
+{
+  UNKNOWN_MSG_TYPE = 0;
+  TEXT = 1; // 文本
+  POST = 2;
+  IMAGE = 3;
+  FILE = 4;
+  AUDIO = 5;
+  MEDIA = 6;
+  STICKER = 7;
+  INTERACTIVE = 8;
+  SHARE_CHAT = 9;
+  SHARE_USER = 10;
+  CHAT_INVITE_MSG = 11; // 邀请
+  ACCEPTED_CHAT_INVITE = 12; // 同意邀请
+  JOINED_GROUP_CHAT = 13; // 加入群聊
+  QUIT_GROUP_CHAT = 14; // 退出群聊
+  REMOVE_CHAT_MEMBER = 15; // 移除群
+}
+
+enum CHAT_STATUS
+{
+  NORMAL = 0; // 正常模式
+  MUTE = 1; // 开启免打扰
+  BANNED = 2; // 被禁言
+  QUITTED = 3; // 退出会话
+  DELETED = 4; // 被删除
+  REMOVED = 5; // 被删除(CHAT GROUP)
+  NON_CONTACT = 6; // 非联系人
+}
+
+enum INVITE_ROLE
+{
+  UNKNOWN_INVITE_ROLE = 0;
+  INITIATOR = 1; // 发起者
+  APPROVER = 2; // 审批人
+}
+
+enum INVITE_HANDLE_RESULT
+{
+  UNKNOWN_INVITE_HANDLE_RESULT = 0;
+  ACCEPT = 1; // 同意
+  REFUSE = 2; // 拒绝
+}
+
+enum AVATAR_OWNER
+{
+  UNKNOWN_AVATAR_OWNER = 0;
+  USER_AVATAR = 1; // 用户头像
+  CHAT_AVATAR = 2; // 群头像
+}
+
+enum MSG_OPERATION {
+  UNKNOWN_MSG_OPERATION = 0;
+  RECALL = 1; // 消息撤回
+  URGENT = 2; // 消息加急
+}
+
+enum CHAT_GROUP_ROLE {
+  ORDINARY_MEMBER  = 0; // 普通成员
+  ADMINISTRATOR = 8; // 管理员
+  MASTER = 9; // 群主
+}
+
+enum ORDER_TYPE {
+  ASC = 0;
+  DESC = 1;
+}
+
+enum GENDER {
+  UNKNOWN_GENDER = 0;
+  MALE = 1; // 男
+  FEMALE = 2; // 女
+}

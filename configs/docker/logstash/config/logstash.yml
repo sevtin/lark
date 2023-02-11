@@ -1,0 +1,15 @@
+#  https://www.elastic.co/guide/en/logstash/current/docker-config.html
+node.name: logstash
+http.host: "0.0.0.0"
+#http.port: 7701
+xpack.monitoring.elasticsearch.hosts: ["http://lark-es:9200"]
+
+xpack.monitoring.enabled: true
+#xpack:monitoring:elasticsearch.url: [ "http://lark-es:9200"]
+xpack.monitoring.elasticsearch.username: elastic
+xpack.monitoring.elasticsearch.password: lark2022
+
+#path.config: /usr/share/logstash/config/conf.d/*.conf
+#path.logs: /usr/share/logstash/logs
+
+#xpack.monitoring.elasticsearch.ssl.certificate_authority: /usr/share/logstash/config/certs/client.cer

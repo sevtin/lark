@@ -1,0 +1,74 @@
+# The MySQL server is configured with binlog_format MIXED rather than ROW, which is required for this connector to work properly. Change the MySQL configuration to use a binlog_format=ROW and restart the connector.
+# Unable to convert to LocalTime from unexpected value '1648857600000' of type
+version: "3"
+services:
+  lark-flink-sql-client:
+    image: saeipi/lark-flink:1.14.6
+    container_name: lark-flink-sql-client
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.140"
+    depends_on:
+      - lark-flink-jobmanager
+    environment:
+      FLINK_JOBMANAGER_HOST: lark-flink-jobmanager
+  lark-flink-jobmanager:
+    image: flink:1.14.6-scala_2.11-java8
+    container_name: lark-flink-jobmanager
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.141"
+    volumes:
+      - ./configs/docker/flink/job/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=lark-flink-jobmanager
+      - TZ=Asia/Shanghai
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '2'
+          memory: 1G
+  lark-flink-taskmanager:
+    image: flink:1.14.6-scala_2.11-java8
+    container_name: lark-flink-taskmanager
+    expose:
+      - "6121"
+      - "6122"
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.142"
+    volumes:
+      - ./configs/docker/flink/task/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+    depends_on:
+      - lark-flink-jobmanager
+    command: taskmanager
+    links:
+      - "lark-flink-jobmanager:lark-flink-jobmanager"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=lark-flink-jobmanager
+      - TZ=Asia/Shanghai
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
+networks:
+  lark-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.9.0/24
+          ip_range: 192.168.9.0/24

@@ -1,0 +1,291 @@
+version: "3"
+#  docker-compose -h                                # 查看帮助
+#  docker-compose up                                # 启动所有docker-compose服务
+#  docker-compose up -d                             # 启动所有docker-compose服务并后台运行
+#  docker-compose -f docker-compose-test.yaml up -d # 指定配置文件启动
+#  docker-compose down                              # 停止并删除容器、网络、卷、镜像。
+#  docker-compose exec  yml里面的服务id               # 进入容器实例内部  docker-compose exec docker-compose.yml文件中写的服务id /bin/bash
+#  docker-compose ps                                # 展示当前docker-compose编排过的运行的所有容器
+#  docker-compose top                               # 展示当前docker-compose编排过的容器进程
+#  docker-compose logs  yml里面的服务id               # 查看容器输出日志
+#  docker-compose config                            # 检查配置
+#  docker-compose config -q                         # 检查配置，有问题才有输出
+#  docker-compose restart                           # 重启服务
+#  docker-compose start                             # 启动服务
+#  docker-compose stop                              # 停止服务
+#  docker stats                                     # 查看运行状态
+#  docker exec -it f848ddd6aee0 /bin/bash
+#  docker inspect f848ddd6aee0|tail -n 20
+#  docker network inspect 1b7d65c22c41
+#  apt-get update
+#  apt -y install iputils-ping
+#  docker rmi -f 8b2b1febb358
+
+#  sudo mkdir -p /opt/lark
+#  sudo chmod 777 lark
+#  chmod -R 777 *
+#  mkdir -p /opt/lark/volumes
+#  mkdir -p /var/log/lark
+
+#  elasticsearch:bin/elasticsearch-create-enrollment-token --scope kibana
+#  kibana:bin/kibana-verification-code
+
+#  curl --user elastic:lark2022 -X GET localhost:9200/_cat
+#  docker logs kibana
+#  ./bin/elasticsearch-setup-passwords auto
+#  ./bin/elasticsearch-setup-passwords interactive
+
+# redis-cli -p 6379 -c  # 集群方式连接
+# cat /dev/null > file_name # 清空日志
+
+# docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq) # 显示所有容器IP地址
+# docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' centos-proxy # 查看ip
+
+services:
+  lark-etcd:
+    image: bitnami/etcd:3.5
+    container_name: lark-etcd
+    restart: always
+    ports:
+      - 12379:2379
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.10"
+    privileged: true
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+#    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+
+  lark-mysql-user:
+    image: mysql:8.0.29
+    container_name: lark-mysql-user
+    restart: always
+    ports:
+      - 13306:3306
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.20"
+    volumes:
+      - ./configs/docker/mysql/lark_user:/docker-entrypoint-initdb.d
+      - /Volumes/data/lark/mysql/user/data:/var/lib/mysql
+      #- /Volumes/data/lark/mysql/user/conf:/etc/mysql
+      - /Volumes/data/lark/mysql/user/mysql-files:/var/lib/mysql-files
+      - /Volumes/data/lark/mysql/user/log:/var/log/mysql
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: lark2022
+      MYSQL_USER: lark
+      MYSQL_PASSWORD: lark2022
+      ALLOW_HOST: "%"
+      MYSQL_DATABASE: lark_user
+      LANG: en_US.UTF-8
+    command: [
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
+        '--default-time-zone=+8:00'
+    ]
+
+  lark-mysql-msg:
+    image: mysql:8.0.29
+    container_name: lark-mysql-msg
+    restart: always
+    ports:
+      - 13307:3306
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.21"
+    volumes:
+      - ./configs/docker/mysql/lark_chat_msg:/docker-entrypoint-initdb.d
+      - /Volumes/data/lark/mysql/chat_msg/data:/var/lib/mysql
+      #- /Volumes/data/lark/mysql/chat_msg/conf:/etc/mysql
+      - /Volumes/data/lark/mysql/chat_msg/mysql-files:/var/lib/mysql-files
+      - /Volumes/data/lark/mysql/chat_msg/log:/var/log/mysql
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: lark2022
+      MYSQL_USER: lark
+      MYSQL_PASSWORD: lark2022
+      ALLOW_HOST: "%"
+      MYSQL_DATABASE: lark_chat_msg
+      LANG: en_US.UTF-8
+    command: [
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
+        '--default-time-zone=+8:00'
+    ]
+
+  lark-redis:
+    image: redis:6.2.7
+    container_name: lark-redis
+    restart: always
+    ports:
+      - 63791:6379
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.30"
+    volumes:
+      - ./configs/docker/redis/scripts/load_script.sh:/scripts/redis/load_script.sh
+      - /Volumes/data/lark/redis/data:/data
+      - /Volumes/data/lark/redis/conf:/usr/local/etc/redis
+      # redis config file
+      - /Volumes/data/lark/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+    sysctls:
+      net.core.somaxconn: 1024
+    command: [
+#    'redis-server --requirepass lark2022 --appendonly yes',
+    '/scripts/redis/load_script.sh',
+    ]
+
+#  lark-mongo-msg:
+#    image: mongo:5.0.9
+#    container_name: lark-mongo-msg
+#    restart: always
+#    ports:
+#      - 27017:27017
+#    networks:
+#      lark-network:
+#        ipv4_address: "192.168.9.40"
+#    volumes:
+#      - /Volumes/data/lark/mongodb/data/db:/data/db
+#      - /Volumes/data/lark/mongodb/data/conf:/etc/mongo
+#      - /Volumes/data/lark/mongodb/data/logs:/data/logs
+#    privileged: true
+#    environment:
+#      TZ: Asia/Shanghai
+#      MONGO_INITDB_ROOT_USERNAME: admin
+#      MONGO_INITDB_ROOT_PASSWORD: lark2022
+#    command: --wiredTigerCacheSizeGB 2
+#  rabbitmq:
+#    image: rabbitmq:3.10.6-management
+#    container_name: lark-rabbitmq
+#    restart: always
+#    networks:
+#      - lark-network
+#    ports:
+#      - 5671:5671
+#      - 5672:5672
+#      - 4369:4369
+#      - 25672:25672
+#      - 15671:15671
+#      - 15672:15672
+#    volumes:
+#      - /Volumes/data/lark/rabbitmq/data:/var/lib/rabbitmq
+#    environment:
+#      - RABBITMQ_DEFAULT_USER=root
+#      - RABBITMQ_DEFAULT_PASS=root
+
+  lark-zookeeper:
+    image: bitnami/zookeeper:3.7.1
+    container_name: lark-zookeeper
+    restart: always
+    ports:
+      - 2181:2181
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.50"
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+      ALLOW_ANONYMOUS_LOGIN: yes
+
+  lark-kafka:
+    image: bitnami/kafka:3.2.1
+    container_name: lark-kafka
+    restart: always
+    ports:
+      - 9092:9092
+      - 9093:9093
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.60"
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: lark-zookeeper:2181
+      KAFKA_CREATE_TOPICS: "to_inbox:8:1,to_msg_gateway:8:1,to_cloud_msg:8:1"
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://lark-kafka:9092,OUTSIDE://lark-kafka:9093
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_CFG_LOG_RETENTION_HOURS: 1
+      ALLOW_PLAINTEXT_LISTENER: yes
+    depends_on:
+      - lark-zookeeper
+
+  lark-minio:
+    image: bitnami/minio:2022.12.12
+    container_name: lark-minio
+    restart: always
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.70"
+    volumes:
+      - /Volumes/data/lark/minio/data:/data
+      - /Volumes/data/lark/minio/config:/root/.minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: lark2022
+      MINIO_ACCESS_KEY: SEv0QKlwqQ36M1eV
+      MINIO_SECRET_KEY: sZVZR1RD8Pcy73NANvk6vbMmoDsGSSOk
+
+  lark-prometheus:
+    image: bitnami/prometheus:2.36.2
+    container_name: lark-prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.80"
+    volumes:
+      - ./configs/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  lark-grafana:
+    image: grafana/grafana:8.2.6
+    container_name: lark-grafana
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.90"
+
+  lark-jaeger:
+    image: jaegertracing/all-in-one:1.37
+    container_name: lark-jaeger
+    restart: always
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+#      - 5778:5778
+      - 16686:16686
+#      - 14268:14268
+#      - 14250:14250
+      - 9411:9411
+#      - 16685:16685
+    networks:
+      lark-network:
+        ipv4_address: "192.168.9.100"
+    privileged: true
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+
+networks:
+  lark-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.9.0/24
+          ip_range: 192.168.9.0/24

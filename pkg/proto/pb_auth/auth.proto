@@ -1,0 +1,81 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_user/user.proto";
+package pb_auth;
+option go_package = "./pb_auth;pb_auth";
+
+message SignUpReq {
+  pb_enum.PLATFORM_TYPE  reg_platform = 1; // 注册平台
+  string nickname = 2; // 昵称
+  string password = 3; // 密码
+  string firstname = 4; // firstname
+  string lastname = 5; // lastname
+  int32 gender = 6; // 性别
+  int64 birth_ts = 7; // 生日
+  string email = 8; // Email
+  string mobile = 9; // 手机号
+  string avatar_key = 10; // 头像
+  int64 city_id = 11; // 城市ID
+  int64 code = 12; // 验证码
+  string udid = 13; // udid
+  int64 server_id = 14; // server id
+}
+
+message SignUpResp {
+  int32 code = 1;
+  string msg = 2;
+  pb_user.UserInfo user_info = 3;
+  Token access_token = 4;
+  Token refresh_token = 5;
+}
+
+message SignInReq {
+  pb_enum.ACCOUNT_TYPE account_type = 1; // 账户类型 1:手机号 2:lark账户
+  pb_enum.PLATFORM_TYPE platform = 2; // 平台
+  string account = 3; // 手机号/lark账户
+  string udid = 4; // 设备唯一编号
+  string verification_code = 5; // 验证码
+  string password = 6; // 密码
+}
+
+message SignInResp {
+  int32 code = 1;
+  string msg = 2;
+  pb_user.UserInfo user_info = 3;
+  Token access_token = 4;
+  Token refresh_token = 5;
+}
+
+message RefreshTokenReq {
+  string refresh_token = 1; // refresh token
+}
+
+message RefreshTokenResp {
+  int32 code = 1;
+  string msg = 2;
+  Token access_token = 3;
+}
+
+message Token {
+  // @inject_tag: json:"token"
+  string token = 1; // 用户token
+  // @inject_tag: json:"expire"
+  int64  expire = 2; // token过期时间戳（秒）
+}
+
+message SignOutReq {
+  int64  uid = 1; // uid
+  pb_enum.PLATFORM_TYPE  platform = 2; // 平台
+}
+
+message SignOutResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service Auth {
+  rpc SignUp(SignUpReq)  returns(SignUpResp);
+  rpc SignIn(SignInReq)  returns(SignInResp);
+  rpc RefreshToken(RefreshTokenReq) returns(RefreshTokenResp);
+  rpc SignOut(SignOutReq) returns(SignOutResp);
+}

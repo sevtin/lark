@@ -1,0 +1,19 @@
+filebeat.inputs:
+  - type: log # 输入filebeat的类型 这里设置为log(默认)，即具体路径的日志  另外属性值还有stdin(键盘输入)、kafka、redis，具体可参考官网
+    enabled: true # 开启filebeat采集
+    paths: # 配置采集全局路径，后期可根据不同模块去做区分
+      - /usr/share/filebeat/logs/*.log # 指定需要收集的日志文件的路径(容器内的文件路径，所以我们需要挂载)
+    fields: # 可想输出的日志添加额外的信息
+      log_type: lark
+    ## 设置符合同一个格式时多行合并输出
+#    multiline.pattern: '^\[[0-9]{4}-[0-9]{2}-[0-9]{2}' #正则表达式  用于匹配是否属于同一格式 这里是日期正则表达式，表示如果是以yyyy-MM-dd开头的，则这一行是一条日志的开头行，会以接下来不是这个格式的内容聚合成一条日志输出
+#    multiline.negate: true # 是否需要对pattern条件转置使用  不转置设为true，转置为false  理解：假如设置为false，那么[multiline.match: after]表示为匹配pattern后，与前面的内容合并成一条日志
+#    multiline.match: after # 匹配pattern后，与后面的内容合并成一条日志
+#    multiline.max_lines: 10000 #表示如果多行信息的行数超过该数字，则多余的都会被丢弃。默认值为500行
+#    multiline.timeout: 10s # 超时设置  超时会把已匹配收集到的日志发送出去
+    encoding: utf-8 # 用于读取包含国际字符的数据的文件编码
+#    tail_files: true # 从文件尾开始监控读取新增的内容而不是从文件开始重新读取发送 适用于未处理过的文件，已处理过的需要删除注册表文件
+output.logstash:
+  hosts: ["lark-logstash:5044"] #发 送输出到logstash；host的公网ip，也可以填写docker-compose.yml中logstash的容器名如 "logstash:5044"（前提是同属于一个docker network，且类型为bridge）
+#ssl.certificate_authorities:
+#  - /etc/filebeat/config/certs/client-ca.cer

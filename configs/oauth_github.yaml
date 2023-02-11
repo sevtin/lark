@@ -1,0 +1,3 @@
+client_id: bb9173e3168ad0891ddf
+client_secret: ac9cea168d381ff661d1ff477518405fec5120a4
+redirect_url: http://localhost:10080/open/oauth/github

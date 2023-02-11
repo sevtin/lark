@@ -1,0 +1,27 @@
+package service
+
+const (
+	ERROR_CODE_CONVO_PROTOCOL_UNMARSHAL_ERR        int32 = 16001
+	ERROR_CODE_CONVO_PROTOCOL_MARSHAL_ERR          int32 = 16002
+	ERROR_CODE_CONVO_QUERY_DB_FAILED               int32 = 16003
+	ERROR_CODE_CONVO_REDIS_GET_FAILED              int32 = 16004
+	ERROR_CODE_CONVO_REDIS_SET_FAILED              int32 = 16005
+	ERROR_CODE_CONVO_UPDATE_CHAT_CONVO_LIST_FAILED int32 = 16006
+	ERROR_CODE_CONVO_GET_SEQ_ID_FAILED             int32 = 16007
+	ERROR_CODE_CONVO_UN_GZIP_FAILED                int32 = 16008
+	ERROR_CODE_CONVO_PARAM_ERR                     int32 = 16009
+	ERROR_CODE_CONVO_DECODE_FAILED                 int32 = 16010
+)
+
+const (
+	ERROR_CONVO_PROTOCOL_UNMARSHAL_ERR        = "协议反序列化错误"
+	ERROR_CONVO_PROTOCOL_MARSHAL_ERR          = "协议序列化错误"
+	ERROR_CONVO_QUERY_DB_FAILED               = "查询失败"
+	ERROR_CONVO_REDIS_GET_FAILED              = "读取redis缓存失败"
+	ERROR_CONVO_REDIS_SET_FAILED              = "缓存数据失败"
+	ERROR_CONVO_UPDATE_CHAT_CONVO_LIST_FAILED = "更新聊天会话列表失败"
+	ERROR_CONVO_GET_SEQ_ID_FAILED             = "获取 Sequence ID 失败"
+	ERROR_CONVO_UN_GZIP_FAILED                = "解压内容失败"
+	ERROR_CONVO_PARAM_ERR                     = "请求参数错误"
+	ERROR_CONVO_DECODE_FAILED                 = "解码失败"
+)

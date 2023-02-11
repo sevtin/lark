@@ -1,0 +1,12 @@
+encoder: console
+path: /var/log/lark/
+directory: lark
+show_line: true
+encode_level: CapitalColor
+stacktrace_key: stacktrace
+log_stdout: true
+segment:
+  max_size: 1000
+  max_age: 7
+  max_backups: 500
+  compress: false

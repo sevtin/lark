@@ -1,0 +1,93 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_msg/msg.proto";
+package pb_chat_msg;
+option go_package = "./pb_chat_msg;pb_chat_msg";
+
+message GetChatMessagesReq {
+  pb_enum.CHAT_TYPE chat_type = 1;
+  int64 chat_id = 2;
+  int64 seq_id = 3;
+  int64 msg_ts = 4;
+  int32 limit = 5;
+  bool new = 6;
+}
+
+message GetChatMessagesResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated pb_msg.SrvChatMessage list = 3;
+}
+
+message GetChatMessageListReq {
+  int64 chat_id = 1;
+  repeated int64 seq_ids = 2;
+  int64 msg_ts = 3;
+  pb_enum.ORDER_TYPE order = 4;
+}
+
+message GetChatMessageListResp {
+  int32 code = 1;
+  string msg = 2;
+  ChatMessages msgs = 3;
+}
+
+message ChatMessages {
+  int64 last_seq_id = 1;
+  repeated pb_msg.SrvChatMessage list = 3;
+}
+
+message SearchMessageReq {
+  int64 uid = 1;
+  int64 chat_id = 2;
+  int64 last_msg_id = 3;
+  string query = 4;
+  int32 size = 5;
+}
+
+message SearchMessageResp {
+  int32 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated MessageSummary list = 4;
+}
+
+message MessageSummary {
+  int64 srv_msg_id = 1; // 服务端消息号
+  int64 cli_msg_id = 2; // 客户端消息号
+  int64 sender_id = 3; // 发送者uid
+  pb_enum.PLATFORM_TYPE sender_platform = 4; // 发送者平台
+  int64 chat_id = 5; // 会话ID
+  pb_enum.CHAT_TYPE chat_type = 6; // 会话类型
+  int64 seq_id = 7; // 消息唯一ID
+  pb_enum.MSG_FROM msg_from = 8; // 消息来源
+  pb_enum.MSG_TYPE msg_type = 9; // 消息类型
+  string rt = 10; // 高亮消息本体
+  int32 status = 11; // 消息状态
+  int64 sent_ts = 12; // 客户端本地发送时间
+  int64 srv_ts = 13; // 服务端接收消息的时间
+  int32 role_id = 14; // 成员角色id
+  string alias = 15; // 展示昵称
+  string member_avatar_key = 16; // 成员头像
+  string chat_avatar_key = 17; // 群头像
+}
+
+message MessageOperationReq {
+  int64 sender_id = 1;
+  pb_enum.PLATFORM_TYPE platform = 2;
+  int64 chat_id = 3;
+  int64 seq_id = 4;
+  pb_enum.MSG_OPERATION opn = 5;
+}
+
+message MessageOperationResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service ChatMessage {
+  rpc GetChatMessages(GetChatMessagesReq) returns(GetChatMessagesResp);
+  rpc GetChatMessageList(GetChatMessageListReq) returns(GetChatMessageListResp);
+  rpc SearchMessage(SearchMessageReq) returns(SearchMessageResp);
+  rpc MessageOperation(MessageOperationReq) returns(MessageOperationResp);
+}

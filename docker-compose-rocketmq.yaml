@@ -1,0 +1,59 @@
+# http://127.0.0.1:19876/#/
+
+version: "3"
+services:
+  lark-mqnamesrv:
+    image: apache/rocketmq:4.9.4
+    container_name: lark-mqnamesrv
+    ports:
+      - "9876:9876"
+    networks:
+      lark-mq-network:
+        ipv4_address: "192.168.8.10"
+    environment:
+      JAVA_OPT: -server -Xms512m -Xmx512m
+    command: sh mqnamesrv
+    volumes:
+      - /Volumes/data/lark/rocketmq/namesrv/logs:/home/rocketmq/logs/rocketmqlogs
+
+  lark-mqbroker:
+    image: apache/rocketmq:4.9.4
+    container_name: lark-mqbroker
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+      - "10912:10912"
+    networks:
+      lark-mq-network:
+        ipv4_address: "192.168.8.20"
+    environment:
+      JAVA_OPT_EXT: -server -Xms512M -Xmx512M -Xmn256m
+    command: sh mqbroker -c /home/rocketmq/rocketmq-4.9.4/conf/broker.conf
+    depends_on:
+      - lark-mqnamesrv
+    volumes:
+      - ./configs/docker/rocketmq/broker/broker.conf:/home/rocketmq/rocketmq-4.9.4/conf/broker.conf
+      - /Volumes/data/lark/rocketmq/broker/logs:/home/rocketmq/logs/rocketmqlogs
+      - /Volumes/data/lark/rocketmq/broker/store:/home/rocketmq/store
+
+  lark-mqconsole:
+    image: styletang/rocketmq-console-ng:1.0.0
+    container_name: lark-mqconsole
+    ports:
+      - "19876:19876"
+    networks:
+      lark-mq-network:
+        ipv4_address: "192.168.8.30"
+    environment:
+      JAVA_OPTS: -Dserver.port=19876 -Drocketmq.namesrv.addr=lark-mqnamesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
+    depends_on:
+      - lark-mqnamesrv
+
+networks:
+  lark-mq-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.8.0/24
+          ip_range: 192.168.8.0/24

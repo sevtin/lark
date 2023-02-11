@@ -1,0 +1,42 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_msg/msg.proto";
+import "pb_obj/obj.proto";
+package pb_gw;
+option go_package = "./pb_gw;pb_gw";
+
+message SendTopicMessageReq {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  repeated pb_obj.Int64Array members  = 3; // 接收消息成员
+  int64 sender_id = 4; // 发送者uid
+  pb_enum.PLATFORM_TYPE sender_platform = 5; // 发送者平台
+  bytes body = 6; // 消息体
+}
+
+message SendTopicMessageResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message SendMessage {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  int64 sender_id = 3; // 发送者uid
+  pb_enum.PLATFORM_TYPE sender_platform = 4; // 发送者平台
+  repeated pb_obj.Int64Array members  = 5; // 接收者信息
+  bytes body = 6; // 消息主体
+}
+
+message HealthCheckReq {
+}
+
+message HealthCheckResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service MessageGateway {
+  rpc SendTopicMessage(SendTopicMessageReq) returns(SendTopicMessageResp);
+  rpc HealthCheck(HealthCheckReq) returns(HealthCheckResp);
+}

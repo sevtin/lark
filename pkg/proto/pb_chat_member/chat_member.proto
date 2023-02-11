@@ -1,0 +1,120 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_chat_member;
+option go_package = "lark/pkg/proto/pb_chat_member;pb_chat_member";
+
+message DistMember {
+  int64 uid = 1;
+  int32 server_id = 2;
+  pb_enum.CHAT_STATUS status= 3; // NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言
+}
+
+message GetDistMemberListReq {
+  int64 chat_id = 1;
+}
+
+message GetDistMemberListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated string list = 3;
+}
+
+message GetChatMemberInfoReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+}
+
+message GetChatMemberInfoResp {
+  int32 code = 1;
+  string msg = 2;
+  ChatMemberInfo info = 3;
+}
+
+message GroupChatMemberInfo {
+  int64 uid = 1;
+  string alias = 2;
+  string member_avatar_key = 3;
+  int32 role_id = 4;
+  int32 status = 5;
+}
+
+message ChatMemberInfo {
+  int64 chat_id = 1;
+  pb_enum.CHAT_TYPE chat_type = 2;
+  int64 uid = 3;
+  string alias = 4;
+  string member_avatar_key = 5;
+  int32 role_id = 6;
+  int32 status = 7;
+}
+
+message ChatMemberOnOffLineReq {
+  int64 uid = 1;
+  int64 server_id = 2; // 分配的ws服务器
+  pb_enum.PLATFORM_TYPE platform = 3; // 上线终端平台
+}
+
+message ChatMemberOnOffLineResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message GetChatMemberListReq {
+  int64 chat_id = 1;
+  int32 limit = 2;
+  int32 last_uid = 3;
+}
+
+message GetChatMemberListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated GroupChatMemberInfo list = 3;
+}
+
+message ChatMemberBasicInfo {
+  int64 uid = 1;
+  string alias = 2;
+  string remark = 3;
+  string member_avatar_key = 4;
+  pb_enum.CHAT_STATUS status= 5;
+}
+
+message GetContactListReq {
+  int64 uid = 1;
+  int32 limit = 2;
+  int64 last_chat_id = 3;
+}
+
+message GetContactListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated ChatMemberBasicInfo list = 3;
+}
+
+message GetGroupChatListReq {
+  int64 uid = 1;
+  int32 limit = 2;
+  int64 last_chat_id = 3;
+}
+
+message GetGroupChatListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated GroupChatBasicInfo list = 3;
+}
+
+message GroupChatBasicInfo {
+  int64 chat_id = 1;
+  string chat_name = 2;
+  string remark = 3;
+  string chat_avatar_key = 4;
+}
+
+service ChatMember {
+  rpc GetDistMemberList(GetDistMemberListReq) returns (GetDistMemberListResp);
+  rpc GetChatMemberInfo(GetChatMemberInfoReq) returns (GetChatMemberInfoResp);
+  rpc ChatMemberOnOffLine(ChatMemberOnOffLineReq) returns (ChatMemberOnOffLineResp);
+  rpc GetChatMemberList(GetChatMemberListReq) returns (GetChatMemberListResp);
+  rpc GetContactList(GetContactListReq) returns (GetContactListResp);
+  rpc GetGroupChatList(GetGroupChatListReq) returns (GetGroupChatListResp);
+}

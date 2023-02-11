@@ -1,0 +1,123 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_wallet;
+option go_package = "./pb_wallet;pb_wallet";
+
+enum WALLET_TYPE
+{
+  UNKNOWN_WALLET_TYPE = 0;
+  CURRENCY = 1; // 货币 单位(分)
+  DIAMOND = 2; // 钻石
+  GOLD_COIN = 3; // 金币
+  SILVER_COIN = 4; // 银币
+  BRONZE_COIN = 5; // 铜币
+  POINT = 6; // 积分
+}
+
+enum PAY_CHANNEL
+{
+  UNKNOWN_PAY_CHANNEL = 0;
+  ALIPAY = 1; // 支付宝支付
+  WECHAT_PAY = 2; // 微信支付
+  GOOGLE_PAY = 3; // Google 支付
+}
+
+enum TRADER_IDENTITY
+{
+    PAYER = 0; // 付款者
+    PAYEE = 1; // 收款者
+}
+//查询余额
+message GetBalancesReq {
+  int64 uid = 1;
+}
+
+message GetBalancesResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated WalletBalance balances = 3;
+}
+
+message WalletBalance {
+  int64 account_id = 1;
+  WALLET_TYPE wallet_type = 2;
+  int64 balances = 3;
+}
+
+//兑换
+message ExchangeReq {
+  int64 uid = 1;
+  WALLET_TYPE from = 2;
+  WALLET_TYPE to = 3;
+  int64 amount = 4; // from的数量
+}
+
+message ExchangeResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+//转账
+message TransferReq {
+  int64 from_uid = 1; // 源交易者UID
+  int64 to_uid = 2; // 目标交易者UID
+  int64 from_wid = 3; // 源交钱包ID
+  int64 to_wid = 4; // 目标交钱包ID
+  string to_account = 5; // 目标账户
+  int32 account_type = 6; // 目标账户类型
+  int64 amount = 7; // 金额
+  int32 trans_type = 8; // 交易类型 1:转账支出 2:转账收入 3:兑换支出 4:兑换收入 5:交易支付 6:交易收款 7:提现
+}
+
+message TransferResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+//充值
+message RechargeReq {
+  int64 uid = 1;
+  WALLET_TYPE wallet_type = 2;
+  int64 amount = 3; // 金额
+  PAY_CHANNEL pay_channel = 4;
+}
+
+message RechargeResp {
+  int32 code = 1;
+  string msg = 2;
+  string order_str = 3;
+}
+
+message WithdrawReq {
+  int64 bank_card_id = 1; // 银行卡id
+  int64 amount = 2; // 金额
+}
+
+message WithdrawResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+//message PayOrder {
+//  string app_auth_token = 1;
+//  string subject = 2;
+//  string buyer_id = 3;
+//
+//  WALLET_TYPE wallet_type = 1;
+//  string trade_no = 2; // 订单id
+//  int64 amount = 3; // 金额
+//  string partnerid = 4; // 商家id
+//  string prepayid = 5; //
+//  string noncestr = 6; // 随机编码
+//  int64 timestamp = 7; // 后台生成的时间戳
+//  string sign = 8; // 签名
+//  string notify_url = 9;//回调URL
+//}
+
+service Wallet {
+  rpc GetBalances(GetBalancesReq) returns(GetBalancesResp);
+  rpc Exchange(ExchangeReq) returns(ExchangeResp);
+  rpc Transfer(TransferReq) returns(TransferResp);
+  rpc Recharge(RechargeReq) returns(RechargeResp);
+  rpc Withdraw(WithdrawReq) returns(WithdrawResp);
+}

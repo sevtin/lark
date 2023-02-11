@@ -1,0 +1,139 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_kv/kv.proto";
+package pb_chat;
+option go_package = "lark/pkg/proto/pb_chat;pb_chat";
+
+message CreateGroupChatReq {
+  string name = 1; // 标题
+  string about = 2; // About
+  int64 creator_uid = 3; // 群创建者uid
+  repeated int64 uid_list = 4; // 邀请人员uid列表
+}
+
+message CreateGroupChatResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message ChatInfo {
+  int64 chat_id = 1;
+  pb_enum.CHAT_TYPE chat_type = 2;
+  string avatar_key = 3;
+  string name = 4;
+  string about = 5;
+}
+
+message EditGroupChatReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+  pb_kv.KeyValues kvs = 3;
+}
+
+message EditGroupChatResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message QuitGroupChatReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+}
+
+message QuitGroupChatResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message RemoveGroupChatMemberReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+  repeated int64 member_list = 3;
+}
+
+message RemoveGroupChatMemberResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message DeleteContactReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+  int64 contact_id = 3;
+}
+
+message DeleteContactResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message UploadAvatarReq {
+  int64 owner_id = 1;
+  string avatar_small = 2;
+  string avatar_medium = 3;
+  string avatar_large = 4;
+}
+
+message UploadAvatarResp {
+  int32 code = 1;
+  string msg = 2;
+  AvatarInfo avatar = 3; // 头像
+}
+
+message AvatarInfo {
+  int64 owner_id = 1;
+  pb_enum.AVATAR_OWNER owner_type = 2;
+  string avatar_small = 3;
+  string avatar_medium = 4;
+  string avatar_large = 5;
+}
+
+message GetChatInfoReq {
+  int64 chat_id = 1;
+}
+
+message GetChatInfoResp {
+  int32 code = 1;
+  string msg = 2;
+  ChatInfo chat_info = 3;
+}
+
+message GroupChatDetailsReq {
+  int64 chat_id = 1;
+}
+
+message GroupChatDetailsResp {
+  int32 code = 1;
+  string msg = 2;
+  GroupChatDetails details = 3;
+}
+
+message GroupChatDetails {
+  int64 chat_id = 1;
+  pb_enum.CHAT_TYPE chat_type = 2;
+  string avatar_key = 3;
+  string name = 4;
+  string about = 5;
+  ChatCreator creator = 6;
+}
+
+message ChatCreator {
+  int64 uid = 1; // uid
+  string lark_id = 2; // 账户ID
+  string nickname = 3; // 昵称
+  int32 gender = 4; // 性别
+  int64 birth_ts = 5; // 生日
+  int64 city_id = 6; // 城市id
+  string avatar_key = 7; // 头像
+}
+
+service Chat {
+  rpc CreateGroupChat(CreateGroupChatReq) returns(CreateGroupChatResp);
+  rpc EditGroupChat(EditGroupChatReq) returns(EditGroupChatResp);
+  rpc GroupChatDetails(GroupChatDetailsReq) returns(GroupChatDetailsResp);
+  rpc RemoveGroupChatMember(RemoveGroupChatMemberReq) returns(RemoveGroupChatMemberResp);
+  rpc QuitGroupChat(QuitGroupChatReq) returns(QuitGroupChatResp);
+  rpc DeleteContact(DeleteContactReq) returns(DeleteContactResp);
+  rpc UploadAvatar(UploadAvatarReq) returns(UploadAvatarResp);
+  rpc GetChatInfo(GetChatInfoReq) returns(GetChatInfoResp);
+}

@@ -1,0 +1,24 @@
+syntax ="proto3";
+package pb_kv;
+option go_package = "lark/pkg/proto/pb_kv;pb_kv";
+
+message StrKeyValue {
+  string key = 2;
+  string value = 3;
+}
+
+message IntKeyValue {
+  string key = 2;
+  int64 value = 3;
+}
+
+message FloatKeyValue {
+  string key = 2;
+  double value = 3;
+}
+
+message KeyValues {
+  repeated StrKeyValue str_list = 1;
+  repeated IntKeyValue int_list = 2;
+  repeated FloatKeyValue float_list = 3;
+}

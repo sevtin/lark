@@ -1,0 +1,135 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_invite/invite.proto";
+import "pb_chat/chat.proto";
+import "pb_chat_member/chat_member.proto";
+package pb_msg;
+option go_package = "lark/pkg/proto/pb_msg;pb_msg";
+
+message Packet {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  pb_enum.MESSAGE_TYPE msg_type = 3; // 消消息类型(srv消息才有)
+  int64 msg_id = 4; // 消息ID(cli消息才有)
+  bytes data = 5;
+}
+
+message MessageResp {
+  int32 code = 1;
+  string msg = 2;
+  int64 msg_id = 3; // 消息ID
+  bool is_srv = 4; // true:sender_id false:cli_msg_id
+}
+
+message CliChatMessage {
+  int64 cli_msg_id = 1; // 客户端消息号
+  int64 sender_id = 2; // 发送者uid 【无需传】
+  pb_enum.PLATFORM_TYPE sender_platform = 3; // 发送者平台 【无需传】
+  int64 chat_id = 4; // 会话ID
+  pb_enum.MSG_TYPE msg_type = 5; // 消息类型
+  bytes body = 6; // 消息本体
+  int64 sent_ts = 7; // 客户端本地发送时间
+}
+
+message SrvChatMessage {
+  int64 srv_msg_id = 1; // 服务端消息号
+  int64 cli_msg_id = 2; // 客户端消息号
+  int64 sender_id = 3; // 发送者uid
+  pb_enum.PLATFORM_TYPE sender_platform = 4; // 发送者平台
+  string sender_name = 5; // 发送者姓名
+  string sender_avatar_key = 6; // 发送者头像
+  int64 chat_id = 7; // 会话ID
+  pb_enum.CHAT_TYPE chat_type = 8; // 会话类型
+  int64 seq_id = 9; // 消息唯一ID
+  pb_enum.MSG_FROM msg_from = 10; // 消息来源
+  pb_enum.MSG_TYPE msg_type = 11; // 消息类型
+  bytes body = 12; // 消息本体
+  int32 status = 13; // 消息状态
+  int64 sent_ts = 14; // 客户端本地发送时间
+  int64 srv_ts = 15; // 服务端接收消息的时间
+}
+
+message Image {
+  string image_key = 1;
+}
+
+message File {
+  string file_key = 1;
+  string file_name = 2;
+}
+
+message Audio {
+  string file_key = 1;
+  int32 duration = 2;
+}
+
+message Media {
+  string file_key = 1;
+  string image_key = 2;
+  string file_name = 3;
+  int32 duration = 4;
+}
+
+message Sticker {
+  string file_key = 1;
+}
+
+message SendChatMessageReq {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  CliChatMessage msg = 3;
+}
+
+message SendChatMessageResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message MessageOperationReq {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  MessageOperation operation = 3;
+}
+
+message MessageOperation {
+  int64 sender_id = 1; // 【无需传】
+  pb_enum.PLATFORM_TYPE platform = 2; // 无需传】
+  int64 chat_id = 3;
+  int64 seq_id = 4;
+  int64 srv_msg_id = 5;
+  pb_enum.MSG_OPERATION opn = 6;
+}
+
+message MessageOperationResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message ChatInvite {
+  int64 invite_id = 1; // 邀请ID
+  int64 created_ts = 2; // 邀请时间
+  int64 invitee_uid = 3; // 被邀请人 UID
+  pb_enum.CHAT_TYPE chat_type = 4; // ChatType
+  string invitation_msg = 5; // 邀请消息
+  pb_invite.InitiatorInfo initiator_info =6; // 发起人信息
+  pb_chat.ChatInfo chat_info = 7; // 群信息
+}
+
+message Contact {
+  int64 chat_id = 1;
+  pb_enum.CHAT_TYPE chat_type = 2;
+  int64 uid = 3;
+  string alias = 4;
+  string member_avatar_key = 5;
+  int32 role_id = 6;
+}
+
+message JoinedGroupChatMessage {
+  pb_chat_member.ChatMemberBasicInfo inviter = 1; // 邀请人
+  pb_chat_member.ChatMemberBasicInfo invitee = 2; // 被邀请人
+}
+
+service Message {
+  rpc SendChatMessage(SendChatMessageReq) returns(SendChatMessageResp);
+  rpc MessageOperation(MessageOperationReq) returns(MessageOperationResp);
+}

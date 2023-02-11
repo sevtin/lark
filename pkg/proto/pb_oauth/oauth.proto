@@ -1,0 +1,17 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_invite/invite.proto";
+import "pb_chat/chat.proto";
+import "pb_chat_member/chat_member.proto";
+package pb_oauth;
+option go_package = "lark/pkg/proto/pb_oauth;pb_oauth";
+
+message Token {
+  string access_token = 1;
+  string token_type = 2;
+  string scope = 3; // 申请的权限范围
+}
+
+service OAuth {
+
+}

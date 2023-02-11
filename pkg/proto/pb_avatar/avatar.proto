@@ -1,0 +1,30 @@
+syntax ="proto3";
+package pb_avatar;
+import "pb_enum/enum.proto";
+option go_package = "lark/pkg/proto/pb_avatar;pb_avatar";
+
+message SetAvatarReq {
+  int64 owner_id = 1;
+  pb_enum.AVATAR_OWNER owner_type = 2;
+  string avatar_small = 3;
+  string avatar_medium = 4;
+  string avatar_large = 5;
+}
+
+message SetAvatarResp {
+  int32 code = 1;
+  string msg = 2;
+  AvatarInfo avatar = 3; // 头像
+}
+
+message AvatarInfo {
+  int64 owner_id = 1;
+  pb_enum.AVATAR_OWNER owner_type = 2;
+  string avatar_small = 3;
+  string avatar_medium = 4;
+  string avatar_large = 5;
+}
+
+service Avatar {
+  rpc SetAvatar(SetAvatarReq) returns(SetAvatarResp);
+}

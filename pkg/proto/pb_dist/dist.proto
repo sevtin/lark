@@ -1,0 +1,41 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_msg/msg.proto";
+import "pb_chat/chat.proto";
+import "pb_invite/invite.proto";
+package pb_dist;
+option go_package = "./pb_dist;pb_dist";
+
+message DistMessageReq {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  pb_msg.SrvChatMessage msg = 3;
+}
+
+message DistMessageResp {
+  int32 code = 1;
+  string msg = 2;
+  bytes data = 3;
+}
+
+message ChatInviteNotificationReq {
+  int64 sender_id = 1; // 发送者uid
+  pb_enum.PLATFORM_TYPE sender_platform = 2; // 发送者平台
+  repeated ChatInviteNotification notifications = 3;
+}
+
+message ChatInviteNotification {
+  int64 receiver_id = 1;
+  int64 receiver_server_id = 2;
+  pb_msg.ChatInvite invite = 3;
+}
+
+message ChatInviteNotificationResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service Dist {
+  rpc DistMessage(DistMessageReq) returns(DistMessageResp);
+  rpc ChatInviteNotification(ChatInviteNotificationReq) returns(ChatInviteNotificationResp);
+}

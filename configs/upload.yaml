@@ -1,0 +1,39 @@
+name: lark_upload
+server_id: 1
+port: 7800
+log: "./configs/logger.yaml"
+etcd:
+  endpoints: ["lark-etcd:12379"]
+  username:
+  password:
+  schema: lark
+  read_timeout: 5000
+  write_timeout: 5000
+  dial_timeout: 5000
+redis:
+  address: ["lark-redis:63791"]
+  db: 0
+  password: lark2022
+  prefix: "LK:"
+user_server:
+  name: lark_user_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+chat_server:
+  name: lark_chat_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+minio:
+  photo_directory: "/private/tmp/lark/photos/"
+jaeger:
+  host_port: "lark-jaeger:6831"
+  sampler_type: "const"
+  param: 1
+  log_spans: true
+  buffer_flush_interval: 1
+  max_packet_size: 0
+  enabled: true

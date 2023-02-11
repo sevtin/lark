@@ -1,0 +1,75 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_invite;
+option go_package = "lark/pkg/proto/pb_invite;pb_invite";
+
+message InitiateChatInviteReq {
+  int64 chat_id = 1; // chat ID
+  pb_enum.CHAT_TYPE chat_type = 2; // 1:私聊/2:群聊
+  int64 initiator_uid = 3; // 发起人 UID
+  repeated int64 invitee_uids = 4; // 被邀请人 UID
+  string invitation_msg = 5; // 邀请消息
+  pb_enum.PLATFORM_TYPE platform = 6;
+}
+
+message InitiateChatInviteResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message ChatInviteListReq {
+  int64 uid = 1;
+  pb_enum.INVITE_ROLE role = 2; // 角色 1:发起人 2:审批人
+  int32 max_invite_id = 3;
+  pb_enum.INVITE_HANDLE_RESULT handle_result = 4; // 结果
+  int32 limit = 5;
+}
+
+message ChatInviteListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated ChatInviteInfo list = 3;
+}
+
+message ChatInviteInfo {
+  int64 invite_id = 1;
+  int64 created_ts = 2; // 邀请时间
+  int64 chat_id = 3; // chat ID
+  pb_enum.CHAT_TYPE chat_type = 4; // 1:私聊/2:群聊
+  int64 initiator_uid = 5; // 发起人 UID
+  int64 invitee_uid = 6; // 被邀请人 UID
+  string invitation_msg = 7; // 邀请消息
+  int64 handler_uid = 8; // 处理人 UID
+  pb_enum.INVITE_HANDLE_RESULT  handle_result = 9; // 结果
+  string handle_msg = 10; // 处理消息
+  int64 handled_ts = 11; // 处理时间
+  InitiatorInfo initiator_info = 12; // 发起人信息
+}
+
+message ChatInviteHandleReq {
+  int64 invite_id = 1;
+  int64 handler_uid = 2; // 处理人 UID
+  pb_enum.INVITE_HANDLE_RESULT  handle_result = 3; // 结果
+  string handle_msg = 4; // 处理消息
+}
+
+message ChatInviteHandleResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message InitiatorInfo {
+  int64 uid = 1; // uid
+  string lark_id = 2; // 账户ID
+  string nickname =3; // 昵称
+  int32 gender = 4; // 性别
+  int64 birth_ts = 5; // 生日
+  int64 city_id = 6; // 城市ID
+  string avatar_key = 7; // 头像
+}
+
+service Invite {
+  rpc InitiateChatInvite(InitiateChatInviteReq) returns(InitiateChatInviteResp);
+  rpc ChatInviteList(ChatInviteListReq) returns(ChatInviteListResp);
+  rpc ChatInviteHandle(ChatInviteHandleReq) returns(ChatInviteHandleResp);
+}

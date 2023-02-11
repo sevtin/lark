@@ -1,0 +1,51 @@
+name: lark_convo_server
+server_id: 1
+log: "./configs/logger.yaml"
+monitor:
+  port: 7701
+grpc_server:
+  name: lark_convo_server
+  server_id: 1
+  port: 7700
+  max_connection_idle: 0
+  max_connection_age: 0
+  max_connection_age_grace: 0
+  time: 7200000
+  timeout: 20000
+  connection_limit: 2000
+  streams_limit: 2000
+  max_recv_msg_size: 4096
+  credential:
+    cert_file: ./configs/tls/grpc/server.pem
+    key_file: ./configs/tls/grpc/server.key
+    enabled: true
+  jaeger:
+    host_port: "lark-jaeger:6831"
+    sampler_type: "const"
+    param: 1
+    log_spans: true
+    buffer_flush_interval: 1
+    max_packet_size: 0
+    enabled: false
+etcd:
+  endpoints: ["lark-etcd:12379"]
+  username:
+  password:
+  schema: lark
+  read_timeout: 5000
+  write_timeout: 5000
+  dial_timeout: 5000
+mysql:
+  address: "lark-mysql-user:13306"
+  username: root
+  password: lark2022
+  db: lark_user
+  max_open_conn: 20
+  max_idle_conn: 10
+  conn_lifetime: 120000
+  charset: utf8
+redis:
+  address: ["lark-redis:63791"]
+  db: 0
+  password: lark2022
+  prefix: "LK:"

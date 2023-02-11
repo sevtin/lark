@@ -1,0 +1,48 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_convo;
+option go_package = "./pb_convo;pb_convo";
+
+message ConvoListReq {
+  string chat_ids = 1; // chat_id 列表(base64(gzip(chat_id1,chat_id2)))
+}
+
+message ConvoListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated ConvoMessage list = 3;
+}
+
+message ConvoChatSeqListReq {
+  int64 uid = 1;
+  string chat_ids = 2; // chat_id 列表(base64(gzip(chat_id1,chat_id2)))
+}
+
+message ConvoChatSeqListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated ConvoChatSeq list = 3;
+}
+
+message ConvoChatSeq {
+  int64 chat_id = 1;
+  int64 seq_id = 2;
+}
+
+message ConvoMessage {
+  int64 chat_id = 1; // 会话ID
+  int64 seq_id = 2;  // 消息唯一ID
+  int64 sender_id = 3; // 发送者uid
+  string sender_name = 4; // 发送者姓名
+  pb_enum.CHAT_TYPE chat_type = 5; // 会话类型
+  pb_enum.MSG_FROM msg_from = 6; // 消息来源
+  pb_enum.MSG_TYPE msg_type = 7; // 消息类型
+  string body = 8; // 消息本体
+  int32 status = 9; // 消息状态
+  int64 srv_ts = 10; // 服务端接收消息的时间
+}
+
+service Convo {
+  rpc ConvoList(ConvoListReq) returns(ConvoListResp);
+  rpc ConvoChatSeqList(ConvoChatSeqListReq) returns(ConvoChatSeqListResp);
+}

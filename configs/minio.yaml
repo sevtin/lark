@@ -1,0 +1,14 @@
+endpoint: 'lark-minio:9000'
+options:
+  secure: false
+  credentials:
+    access_key: 'SEv0QKlwqQ36M1eV'
+    secret_key: 'sZVZR1RD8Pcy73NANvk6vbMmoDsGSSOk'
+    token: ''
+bucket:
+  bucket_names: ["documents","photos","videos"]
+  make_bucket_options:
+    region: 'cn-gz'
+    objectLocking: false
+  put_object_options:
+    encrypted: false

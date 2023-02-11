@@ -1,0 +1,160 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_avatar/avatar.proto";
+import "pb_kv/kv.proto";
+package pb_user;
+option go_package = "lark/pkg/proto/pb_user;pb_user";
+
+message UserInfoReq {
+  int64 uid = 1;
+}
+
+message UserInfoResp {
+  int32 code = 1;
+  string msg = 2;
+  UserInfo user_info = 3;
+}
+
+message UserInfo {
+  int64 uid = 1; // uid
+  string lark_id = 2; // 账户ID
+  int32 status = 3; // 用户状态
+  string nickname = 4; // 昵称
+  string firstname = 5; // firstname
+  string lastname = 6; // lastname
+  int32 gender = 7; // 性别
+  int64 birth_ts = 8; // 生日
+  int64 city_id = 9; // 城市ID
+  AvatarInfo avatar = 10; // 头像
+}
+
+message GetUserListReq {
+  repeated int64 uid_list = 1;
+}
+
+message GetUserListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated UserInfo list = 3;
+}
+
+message GetBasicUserInfoReq {
+  int64 uid = 1; // uid
+}
+
+message GetBasicUserInfoResp {
+  int32 code = 1;
+  string msg = 2;
+  BasicUserInfo user_info = 3;
+}
+
+//聊天中用到的用户信息
+message BasicUserInfo {
+  int64 uid = 1; // uid
+  string lark_id = 2; // 账户ID
+  string nickname = 3; // 昵称
+  int32 gender = 4; // 性别
+  int64 birth_ts = 5; // 生日
+  int64 city_id = 6; // 城市id
+  string avatar_key = 7; // 头像
+}
+
+message UserSrvInfo {
+  int64 uid = 1; // uid
+  string nickname = 2; // 昵称
+  string avatar_key = 3; // 头像
+  int64 server_id = 4; // ws服务器
+}
+
+message GetBasicUserInfoListReq {
+  repeated int64 uids = 1; // uid
+}
+
+message GetBasicUserInfoListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated BasicUserInfo list = 3;
+}
+
+message EditUserInfoReq {
+  int64 uid = 1;
+  pb_kv.KeyValues kvs = 2;
+}
+
+message EditUserInfoResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message SearchUserReq {
+  int64 uid = 1;
+  int64 last_uid = 2;
+  string query = 3;
+  int32 size = 4;
+}
+
+message SearchUserResp {
+  int32 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated UserSummary list = 4;
+}
+
+message UserSummary {
+  int64 uid = 1; // uid
+  string lark_id = 2; // 账户ID
+  int32 status = 3; // 用户状态
+  string nickname = 4; // 昵称
+  string avatar_key = 5; // 头像
+  int32 gender = 6; // 性别
+  int64 birth_ts = 7; // 生日
+  int64 city_id = 8; // 城市ID
+}
+
+message UploadAvatarReq {
+  int64 owner_id = 1;
+  pb_enum.AVATAR_OWNER owner_type = 2;
+  string avatar_small = 3;
+  string avatar_medium = 4;
+  string avatar_large = 5;
+}
+
+message UploadAvatarResp {
+  int32 code = 1;
+  string msg = 2;
+  AvatarInfo avatar = 3; // 头像
+}
+
+message AvatarInfo {
+  int64 owner_id = 1;
+  int32 owner_type = 2;
+  string avatar_small = 3;
+  string avatar_medium = 4;
+  string avatar_large = 5;
+}
+
+message GetServerIdListReq {
+  repeated int64 uids = 1;
+}
+
+message GetServerIdListResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated UserServerId list = 3;
+}
+
+message UserServerId {
+  int64 uid = 1;
+  int64 server_id = 2;
+}
+
+service User {
+  rpc EditUserInfo(EditUserInfoReq) returns(EditUserInfoResp);
+  rpc GetUserInfo(UserInfoReq) returns(UserInfoResp);
+  rpc GetBasicUserInfo(GetBasicUserInfoReq) returns(GetBasicUserInfoResp);
+  rpc GetUserList(GetUserListReq) returns(GetUserListResp);
+  rpc SearchUser(SearchUserReq) returns(SearchUserResp);
+  rpc UploadAvatar(UploadAvatarReq) returns(UploadAvatarResp);
+  rpc GetBasicUserInfoList(GetBasicUserInfoListReq) returns(GetBasicUserInfoListResp);
+  rpc GetServerIdList(GetServerIdListReq) returns(GetServerIdListResp);
+}

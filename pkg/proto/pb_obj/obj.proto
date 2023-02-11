@@ -1,0 +1,7 @@
+syntax ="proto3";
+package pb_obj;
+option go_package = "lark/pkg/proto/pb_obj;pb_obj";
+
+message Int64Array {
+  repeated int64 vals = 1;
+}

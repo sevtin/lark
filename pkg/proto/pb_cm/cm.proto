@@ -1,0 +1,25 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_cm;
+option go_package = "./pb_cm;pb_cm";
+
+message CloudMessageReq {
+  pb_enum.TOPIC topic = 1;
+  pb_enum.SUB_TOPIC sub_topic = 2;
+  repeated CloudMessageMember member = 3;
+  bytes body = 4;
+}
+
+message CloudMessageResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message CloudMessageMember {
+  int64 uid = 1;
+  pb_enum.PLATFORM_TYPE platform = 3;
+}
+
+service CloudMessage {
+  rpc CloudMessage(CloudMessageReq) returns(CloudMessageResp);
+}

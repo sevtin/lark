@@ -1,0 +1,11 @@
+# 服务端口
+server.port: 5601
+# 服务IP
+server.host: "0.0.0.0"
+# ES
+elasticsearch.hosts: ["http://lark-es:9200"]
+# 汉化
+i18n.locale: "zh-CN"
+
+elasticsearch.username: elastic
+elasticsearch.password: lark2022
