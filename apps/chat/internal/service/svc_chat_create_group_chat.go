@@ -22,7 +22,6 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	resp = &pb_chat.CreateGroupChatResp{}
 	var (
 		creator *po.User
-		tx      *gorm.DB
 		w       = entity.NewMysqlWhere()
 		chat    *po.Chat
 		err     error
@@ -53,55 +52,79 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		Name:       req.Name,
 		About:      req.About,
 	}
-	tx = xmysql.GetTX()
-	defer func() {
-		if err == nil {
-			tx.Commit()
-		} else {
-			tx.Rollback()
+
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		// 3 chat入库
+		err = s.chatRepo.TxCreate(tx, chat)
+		if err != nil {
+			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
+			xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
+			return
 		}
-	}()
 
-	// 3 chat入库
-	err = s.chatRepo.TxCreate(tx, chat)
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
+		// 4 creator入群/入库
+		member = &po.ChatMember{
+			ChatId:          chat.ChatId,
+			ChatType:        chat.ChatType,
+			ChatName:        chat.Name,
+			Uid:             creator.Uid,
+			RoleId:          int(pb_enum.CHAT_GROUP_ROLE_MASTER),
+			Alias:           creator.Nickname,
+			MemberAvatarKey: creator.AvatarKey,
+			ChatAvatarKey:   chat.AvatarKey,
+			Sync:            constant.SYNCHRONIZE_USER_INFO,
+			ServerId:        creator.ServerId,
+		}
+		err = s.chatMemberRepo.TxCreate(tx, member)
+		if err != nil {
+			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
+			xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
+			return
+		}
+
+		// 5 设置群头像
+		avatar = &po.Avatar{
+			OwnerId:      chat.ChatId,
+			OwnerType:    int(pb_enum.AVATAR_OWNER_CHAT_AVATAR),
+			AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
+			AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
+			AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
+		}
+		err = s.avatarRepo.TxCreate(tx, avatar)
+		if err != nil {
+			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
+			xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
+			return
+		}
+		// 7 构建邀请信息
+		invitationMsg = creator.Nickname + CONST_CHAT_INVITE_TITLE_CONJUNCTION + chat.Name
+		for _, uid = range req.UidList {
+			if uid == req.CreatorUid {
+				continue
+			}
+			invite = &po.ChatInvite{
+				InviteId:      xsnowflake.NewSnowflakeID(),
+				ChatId:        chat.ChatId,
+				ChatType:      chat.ChatType,
+				InitiatorUid:  req.CreatorUid,
+				InviteeUid:    uid,
+				InvitationMsg: invitationMsg,
+			}
+			inviteList = append(inviteList, invite)
+		}
+		if len(inviteList) == 0 {
+			return
+		}
+		// 8 邀请信息入库
+		err = s.chatInviteRepo.TxNewChatInviteList(tx, inviteList)
+		if err != nil {
+			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
+			xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
+			return
+		}
 		return
-	}
-
-	// 4 creator入群/入库
-	member = &po.ChatMember{
-		ChatId:          chat.ChatId,
-		ChatType:        chat.ChatType,
-		ChatName:        chat.Name,
-		Uid:             creator.Uid,
-		RoleId:          int(pb_enum.CHAT_GROUP_ROLE_MASTER),
-		Alias:           creator.Nickname,
-		MemberAvatarKey: creator.AvatarKey,
-		ChatAvatarKey:   chat.AvatarKey,
-		Sync:            constant.SYNCHRONIZE_USER_INFO,
-		ServerId:        creator.ServerId,
-	}
-	err = s.chatMemberRepo.TxCreate(tx, member)
+	})
 	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
-		return
-	}
-
-	// 5 设置群头像
-	avatar = &po.Avatar{
-		OwnerId:      chat.ChatId,
-		OwnerType:    int(pb_enum.AVATAR_OWNER_CHAT_AVATAR),
-		AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
-		AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
-		AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
-	}
-	err = s.avatarRepo.TxCreate(tx, avatar)
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 		return
 	}
 
@@ -110,34 +133,6 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_CACHE_CHAT_MEMBER_FAILED)
 		xlog.Warn(ERROR_CODE_CHAT_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_CACHE_CHAT_MEMBER_FAILED, err.Error())
-		return
-	}
-
-	// 7 构建邀请信息
-	invitationMsg = creator.Nickname + CONST_CHAT_INVITE_TITLE_CONJUNCTION + chat.Name
-	for _, uid = range req.UidList {
-		if uid == req.CreatorUid {
-			continue
-		}
-		invite = &po.ChatInvite{
-			InviteId:      xsnowflake.NewSnowflakeID(),
-			ChatId:        chat.ChatId,
-			ChatType:      chat.ChatType,
-			InitiatorUid:  req.CreatorUid,
-			InviteeUid:    uid,
-			InvitationMsg: invitationMsg,
-		}
-		inviteList = append(inviteList, invite)
-	}
-	if len(inviteList) == 0 {
-		return
-	}
-
-	// 8 邀请信息入库
-	err = s.chatInviteRepo.TxNewChatInviteList(tx, inviteList)
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 		return
 	}
 

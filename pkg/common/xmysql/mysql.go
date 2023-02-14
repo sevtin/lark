@@ -2,12 +2,17 @@ package xmysql
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
 	"time"
+)
+
+var (
+	ERR_DB_INSTANCE_IS_EMPTY = errors.New("database instance is empty")
 )
 
 var (
@@ -42,12 +47,14 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 		db *gorm.DB
 	)
 	db = GetDB()
-	if err != nil {
+	if db == nil {
+		err = ERR_DB_INSTANCE_IS_EMPTY
 		return
 	}
 	tx := db.Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
 	err = handle(tx)
 	if err != nil {
+		err = tx.Rollback().Error
 		return
 	}
 	err = tx.Commit().Error

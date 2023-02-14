@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/constant"
@@ -25,28 +26,43 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 	u.SetFilter("owner_id=?", req.OwnerId)
 	u.SetFilter("owner_type=?", pb_enum.AVATAR_OWNER_USER_AVATAR)
 
-	tx := xmysql.GetTX()
-	defer func() {
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
+			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
+			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			return
 		}
-	}()
-	err = s.avatarRepo.TxUpdateAvatar(tx, u)
-	if err != nil {
-		resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-		xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
-		return
-	}
 
-	u.Reset()
-	u.SetFilter("uid=?", req.OwnerId)
-	u.Set("avatar_key", req.AvatarSmall)
-	err = s.userRepo.UpdateUser(u)
+		u.Reset()
+		u.SetFilter("uid=?", req.OwnerId)
+		u.Set("avatar_key", req.AvatarSmall)
+		err = s.userRepo.TxUpdateUser(tx, u)
+		if err != nil {
+			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
+			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			return
+		}
+
+		u.Reset()
+		u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
+		u.SetFilter("uid=?", req.OwnerId)
+		u.Set("member_avatar_key", req.AvatarSmall)
+		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
+		if err != nil {
+			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
+			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			return
+		}
+
+		result, err = s.updateChatMemberCacheInfo(tx, req.OwnerId)
+		if err != nil {
+			resp.Set(result.Code, result.Msg)
+			return
+		}
+		return
+	})
 	if err != nil {
-		resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-		xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
 		return
 	}
 
@@ -55,23 +71,6 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED)
 		xlog.Warn(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED, err.Error())
-		return
-	}
-
-	u.Reset()
-	u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
-	u.SetFilter("uid=?", req.OwnerId)
-	u.Set("member_avatar_key", req.AvatarSmall)
-	err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
-	if err != nil {
-		resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-		xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
-		return
-	}
-
-	result, err = s.updateChatMemberCacheInfo(tx, req.OwnerId)
-	if err != nil {
-		resp.Set(result.Code, result.Msg)
 		return
 	}
 	copier.Copy(resp.Avatar, req)

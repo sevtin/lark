@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/constant"
@@ -23,55 +24,53 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 	u.SetFilter("owner_id=?", req.OwnerId)
 	u.SetFilter("owner_type=?", int32(req.OwnerType))
 
-	tx := xmysql.GetTX()
-	defer func() {
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
+			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
+			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+			return
 		}
-	}()
-	err = s.avatarRepo.TxUpdateAvatar(tx, u)
-	if err != nil {
-		resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-		xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+		u.Reset()
+		switch req.OwnerType {
+		case pb_enum.AVATAR_OWNER_USER_AVATAR:
+			u.SetFilter("uid=?", req.OwnerId)
+			u.Set("avatar_key", req.AvatarSmall)
+			s.userRepo.TxUpdateUser(tx, u)
+			if err != nil {
+				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
+				xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+				return
+			}
+
+			u.Reset()
+			u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
+			u.SetFilter("uid=?", req.OwnerId)
+			u.Set("member_avatar_key", req.AvatarSmall)
+		case pb_enum.AVATAR_OWNER_CHAT_AVATAR:
+			u.SetFilter("chat_id=?", req.OwnerId)
+			u.Set("avatar_key", req.AvatarSmall)
+			err = s.chatRepo.TxUpdateChat(tx, u)
+			if err != nil {
+				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
+				xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+				return
+			}
+
+			u.Reset()
+			u.SetFilter("chat_id=?", req.OwnerId)
+			u.Set("chat_avatar_key", req.AvatarSmall)
+		}
+
+		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
+		if err != nil {
+			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
+			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+			return
+		}
 		return
-	}
-	u.Reset()
-	switch req.OwnerType {
-	case pb_enum.AVATAR_OWNER_USER_AVATAR:
-		u.SetFilter("uid=?", req.OwnerId)
-		u.Set("avatar_key", req.AvatarSmall)
-		s.userRepo.UpdateUser(u)
-		if err != nil {
-			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
-			return
-		}
-
-		u.Reset()
-		u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
-		u.SetFilter("uid=?", req.OwnerId)
-		u.Set("member_avatar_key", req.AvatarSmall)
-	case pb_enum.AVATAR_OWNER_CHAT_AVATAR:
-		u.SetFilter("chat_id=?", req.OwnerId)
-		u.Set("avatar_key", req.AvatarSmall)
-		err = s.chatRepo.TxUpdateChat(tx, u)
-		if err != nil {
-			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
-			return
-		}
-
-		u.Reset()
-		u.SetFilter("chat_id=?", req.OwnerId)
-		u.Set("chat_avatar_key", req.AvatarSmall)
-	}
-
-	err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
+	})
 	if err != nil {
-		resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-		xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 		return
 	}
 	copier.Copy(resp.Avatar, req)

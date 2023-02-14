@@ -13,6 +13,7 @@ import (
 )
 
 func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.ChatInviteNotificationReq) (resp *pb_dist.ChatInviteNotificationResp, err error) {
+	resp = new(pb_dist.ChatInviteNotificationResp)
 	var (
 		index        int
 		notification *pb_dist.ChatInviteNotification

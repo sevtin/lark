@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"lark/domain/po"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
@@ -52,39 +53,37 @@ func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupC
 	u.SetFilter("chat_id=?", req.ChatId)
 	req.Kvs.StrFieldValidation(chatUpdateFields, u.Values)
 	var (
-		tx       = xmysql.GetTX()
 		name     interface{}
 		about    interface{}
 		ok       bool
 		isUpdate bool
 	)
-	defer func() {
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		err = s.chatRepo.TxUpdateChat(tx, u)
 		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
+			resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
+			xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+			return
 		}
-	}()
-	err = s.chatRepo.TxUpdateChat(tx, u)
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
-		return
-	}
 
-	if name, ok = u.Values["name"]; ok {
-		if name.(string) != chat.Name {
-			isUpdate = true
-			u.Reset()
-			u.SetFilter("chat_id=?", req.ChatId)
-			u.Set("chat_name", name)
-			err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
-			if err != nil {
-				resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-				xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
-				return
+		if name, ok = u.Values["name"]; ok {
+			if name.(string) != chat.Name {
+				isUpdate = true
+				u.Reset()
+				u.SetFilter("chat_id=?", req.ChatId)
+				u.Set("chat_name", name)
+				err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
+				if err != nil {
+					resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
+					xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+					return
+				}
 			}
 		}
+		return
+	})
+	if err != nil {
+		return
 	}
 	if about, ok = u.Values["about"]; ok {
 		if about.(string) != chat.About {

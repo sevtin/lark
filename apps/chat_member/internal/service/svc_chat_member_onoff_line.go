@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"gorm.io/gorm"
 	"lark/domain/do"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
@@ -109,9 +110,6 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 	if err != nil {
 		return
 	}
-	if len(allStatus) == 0 {
-		return
-	}
 
 	// 2 更新hash
 	var (
@@ -127,30 +125,32 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		keys[index] = keyPrefix + utils.Int64ToStr(chat.ChatId)
 		vals[index+1] = valPrefix + utils.IntToStr(int(chat.Status))
 	}
-
-	tx := xmysql.GetTX()
-	// 3 更新users
-	u.SetFilter("uid = ?", uid)
-	u.Set("server_id", serverId)
-	err = s.userRepo.TxUpdateUser(tx, u)
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		// 3 更新users
+		u.SetFilter("uid = ?", uid)
+		u.Set("server_id", serverId)
+		err = s.userRepo.TxUpdateUser(tx, u)
+		if err != nil {
+			xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
+			return
+		}
+		if len(allStatus) == 0 {
+			return
+		}
+		// 4 更新chat_members
+		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
+		if err != nil {
+			xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
+			return
+		}
+		return
+	})
 	if err != nil {
-		// 回滚
-		tx.Rollback()
-		xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
 		return
 	}
-
-	// 4 更新chat_members
-	err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
-	if err != nil {
-		// 回滚
-		tx.Rollback()
-		xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
+	if len(keys) == 0 {
 		return
 	}
-	// 提交
-	tx.Commit()
-
 	// 5 更新hash
 	err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
 	if err != nil {
