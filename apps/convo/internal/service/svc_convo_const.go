@@ -25,3 +25,8 @@ const (
 	ERROR_CONVO_PARAM_ERR                     = "请求参数错误"
 	ERROR_CONVO_DECODE_FAILED                 = "解码失败"
 )
+
+const (
+	MAXIMUM_NUMBER_OF_CHATS         = 200
+	MAXIMUM_NUMBER_OF_CONVERSATIONS = 100
+)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
 	"lark/pkg/common/xlog"
 	"lark/pkg/proto/pb_convo"
 	"lark/pkg/utils"
@@ -23,7 +22,7 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 		seq         *pb_convo.ConvoChatSeq
 		err         error
 	)
-	buf, err = base64.StdEncoding.DecodeString(req.ChatIds)
+	buf, err = utils.DecodeString(req.ChatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED)
 		xlog.Warn(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED, err.Error())
@@ -37,6 +36,13 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 	}
 	val = string(buf)
 	chatIds = strings.Split(val, ",")
+	if len(chatIds) == 0 {
+		return
+	}
+	if len(chatIds) > MAXIMUM_NUMBER_OF_CHATS {
+		resp.Set(ERROR_CODE_CONVO_PARAM_ERR, ERROR_CONVO_PARAM_ERR)
+		return
+	}
 	seqIdTsList, err = s.convoCache.MGetSeqIdTsList(s.cfg.Redis.Prefix, chatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED)

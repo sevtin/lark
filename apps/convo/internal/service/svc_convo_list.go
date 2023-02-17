@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
 	"lark/pkg/proto/pb_convo"
@@ -25,7 +24,7 @@ func (s *convoService) ConvoList(ctx context.Context, req *pb_convo.ConvoListReq
 		msg    *pb_convo.ConvoMessage
 		err    error
 	)
-	buf, err = base64.StdEncoding.DecodeString(req.ChatIds)
+	buf, err = utils.DecodeString(req.ChatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED)
 		xlog.Warn(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED, err.Error())
@@ -40,6 +39,10 @@ func (s *convoService) ConvoList(ctx context.Context, req *pb_convo.ConvoListReq
 	cidStr = string(buf)
 	cids = strings.Split(cidStr, ",")
 	if len(cids) == 0 {
+		return
+	}
+	if len(cids) > MAXIMUM_NUMBER_OF_CONVERSATIONS {
+		resp.Set(ERROR_CODE_CONVO_PARAM_ERR, ERROR_CONVO_PARAM_ERR)
 		return
 	}
 	keys = make([]string, len(cids))
