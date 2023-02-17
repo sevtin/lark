@@ -31,6 +31,7 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 		cont   bool
 		err    error
 	)
+
 	// 1 校验邀请
 	invite, cont = s.chatInviteExists(req, resp)
 	if cont == false {
@@ -54,13 +55,14 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 			tx.Commit()
 		} else {
 			tx.Rollback()
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
 		}
 	}()
 
 	err = s.chatInviteRepo.TxUpdateChatInvite(tx, u)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED, err.Error())
 		return
 	}
 	if req.HandleResult == pb_enum.INVITE_HANDLE_RESULT_REFUSE {
@@ -152,7 +154,7 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		}
 		err = s.chatRepo.TxCreate(tx, chat)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
 			switch err.(type) {
 			case *mysql.MySQLError:
 				if err.(*mysql.MySQLError).Number == constant.ERROR_CODE_MYSQL_DUPLICATE_ENTRY {
@@ -170,7 +172,7 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		chat, err = s.chatRepo.TxChat(tx, w)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
 			return
 		}
 		uidList = []int64{invite.InviteeUid}
@@ -182,13 +184,13 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	list, err = s.userRepo.TxUserSrvList(tx, w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
 		return
 	}
 	if len(list) != memberCount {
 		err = ERR_CHAT_INVITE_QUERY_DB_FAILED
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
+		//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
 		return
 	}
 	members = make([]*po.ChatMember, memberCount)
@@ -232,7 +234,7 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	err = s.chatMemberRepo.TxCreateMultiple(tx, members)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
 		return
 	}
 	distMaps = make(map[string]interface{})
@@ -243,7 +245,7 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, err.Error())
 		return
 	}
 	// 9 邀请成功推送
