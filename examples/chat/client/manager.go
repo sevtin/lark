@@ -129,7 +129,7 @@ func (m *Manager) runLoop() {
 func (m *Manager) batchCreate(count int64) {
 	var (
 		i      int64
-		server = "10.0.117.113"
+		server = "127.0.0.1"
 		port   = 7301
 		sid    int64
 	)

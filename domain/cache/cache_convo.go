@@ -10,6 +10,7 @@ type ConvoCache interface {
 	ZAdd(keys []string, vals []interface{}) (err error)
 	ZRevRange(uid int64, start int64, stop int64) (list []string)
 	MGetSeqIdList(prefix string, chatIdList []string) (seqIdList []interface{}, err error)
+	MGetSeqIdTsList(prefix string, chatIdList []string) (seqIdTsList []interface{}, err error)
 	ZMScore(uid int64, members ...string) (scores []float64)
 }
 
@@ -43,5 +44,18 @@ func (c *convoCache) MGetSeqIdList(prefix string, chatIdList []string) (seqIdLis
 		keys[index] = prefix + xredis.MSG_SEQ_ID + chatId
 	}
 	seqIdList, err = xredis.MGet(keys...)
+	return
+}
+
+func (c *convoCache) MGetSeqIdTsList(prefix string, chatIdList []string) (seqIdTsList []interface{}, err error) {
+	var (
+		index  int
+		chatId string
+		keys   = make([]string, len(chatIdList))
+	)
+	for index, chatId = range chatIdList {
+		keys[index] = prefix + constant.RK_MSG_SEQ_TS + chatId
+	}
+	seqIdTsList, err = xredis.MGet(keys...)
 	return
 }

@@ -12,14 +12,16 @@ import (
 func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.ConvoChatSeqListReq) (resp *pb_convo.ConvoChatSeqListResp, _ error) {
 	resp = &pb_convo.ConvoChatSeqListResp{List: make([]*pb_convo.ConvoChatSeq, 0)}
 	var (
-		buf       []byte
-		val       string
-		chatIds   []string
-		seqIdList []interface{}
-		chatId    string
-		index     int
-		seq       *pb_convo.ConvoChatSeq
-		err       error
+		buf         []byte
+		val         string
+		chatIds     []string
+		seqIdTsList []interface{}
+		index       int
+		value       interface{}
+		arr         []string
+		timestamp   int64
+		seq         *pb_convo.ConvoChatSeq
+		err         error
 	)
 	buf, err = base64.StdEncoding.DecodeString(req.ChatIds)
 	if err != nil {
@@ -35,26 +37,34 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 	}
 	val = string(buf)
 	chatIds = strings.Split(val, ",")
-	seqIdList, err = s.convoCache.MGetSeqIdList(s.cfg.Redis.Prefix, chatIds)
+	seqIdTsList, err = s.convoCache.MGetSeqIdTsList(s.cfg.Redis.Prefix, chatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED)
 		xlog.Warn(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED, err.Error())
 		return
 	}
-	if len(seqIdList) == 0 {
+	if len(chatIds) != len(seqIdTsList) {
 		return
 	}
-	if len(chatIds) != len(seqIdList) {
-		return
-	}
-	resp.List = make([]*pb_convo.ConvoChatSeq, len(chatIds))
-	for index, chatId = range chatIds {
-		seq = new(pb_convo.ConvoChatSeq)
-		seq.ChatId, _ = utils.ToInt64(chatId)
-		if seqIdList[index] != nil {
-			seq.SeqId, _ = utils.ToInt64(seqIdList[index])
+	resp.List = make([]*pb_convo.ConvoChatSeq, 0)
+	for index, value = range seqIdTsList {
+		if value == nil {
+			continue
 		}
-		resp.List[index] = seq
+		switch value.(type) {
+		case string:
+			arr = strings.Split(value.(string), ",")
+			if len(arr) == 2 {
+				timestamp, _ = utils.ToInt64(arr[1])
+				if timestamp > req.Timestamp {
+					seq = new(pb_convo.ConvoChatSeq)
+					seq.ChatId, _ = utils.ToInt64(chatIds[index])
+					seq.SeqId, _ = utils.ToInt64(arr[0])
+					seq.SrvTs = timestamp
+					resp.List = append(resp.List, seq)
+				}
+			}
+		}
 	}
 	return
 }

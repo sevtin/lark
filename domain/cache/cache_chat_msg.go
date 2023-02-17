@@ -55,9 +55,11 @@ func (c *chatMessageCache) SetConvoMessage(prefix string, message *po.Message) (
 	var (
 		key1 = prefix + constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(message.ChatId) + ":" + utils.Int64ToStr(message.SeqId)
 		key2 = prefix + constant.RK_MSG_CONVO_MSG + utils.Int64ToStr(message.ChatId)
+		key3 = prefix + constant.RK_MSG_SEQ_TS + utils.Int64ToStr(message.ChatId)
 		cm   = new(pb_convo.ConvoMessage)
 		val1 string
 		val2 string
+		val3 = utils.Int64ToStr(message.SeqId) + "," + utils.Int64ToStr(message.SrvTs)
 	)
 	copier.Copy(cm, message)
 	val1, err = utils.Marshal(message)
@@ -70,7 +72,7 @@ func (c *chatMessageCache) SetConvoMessage(prefix string, message *po.Message) (
 		xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
 		return
 	}
-	err = xredis.EvalSha(xredis.SHA_MSET_CONVO_MESSAGE, []string{key1, key2}, []interface{}{constant.CONST_DURATION_SHA_CONVO_MESSAGE_SECOND, val1, val2})
+	err = xredis.EvalSha(xredis.SHA_MSET_CONVO_MESSAGE, []string{key1, key2, key3}, []interface{}{constant.CONST_DURATION_SHA_CONVO_MESSAGE_SECOND, val1, val2, val3})
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
 	}

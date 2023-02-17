@@ -4,6 +4,7 @@ package constant
 const (
 	RK_MSG_CLI_MSG_ID = "MSG:CLI_MSG_ID:" // 缓存客户端消息ID + ChatId + CliMsgId
 	RK_MSG_CONVO_MSG  = "MSG:CONVO:"      // 最新一条会话消息
+	RK_MSG_SEQ_TS     = "MSG:SEQ_TS:"     // 最新一条会话消息 SEQ + TIMESTAMP
 )
 
 //有状态
