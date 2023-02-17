@@ -17,6 +17,12 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		u   = entity.NewMysqlUpdate()
 		err error
 	)
+	defer func() {
+		if err != nil {
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
+		}
+	}()
+
 	u.Set("avatar_small", req.AvatarSmall)
 	u.Set("avatar_medium", req.AvatarMedium)
 	u.Set("avatar_large", req.AvatarLarge)
@@ -27,7 +33,7 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -37,7 +43,7 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.chatRepo.TxUpdateChat(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -47,7 +53,7 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		return

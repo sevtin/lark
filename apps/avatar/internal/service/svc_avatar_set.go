@@ -18,6 +18,11 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		u   = entity.NewMysqlUpdate()
 		err error
 	)
+	defer func() {
+		if err != nil {
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
+		}
+	}()
 	u.Set("avatar_small", req.AvatarSmall)
 	u.Set("avatar_medium", req.AvatarMedium)
 	u.Set("avatar_large", req.AvatarLarge)
@@ -28,7 +33,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		u.Reset()
@@ -39,7 +44,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 			s.userRepo.TxUpdateUser(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-				xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+				//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 				return
 			}
 
@@ -53,7 +58,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 			err = s.chatRepo.TxUpdateChat(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-				xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+				//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 				return
 			}
 
@@ -65,7 +70,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		return

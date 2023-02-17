@@ -12,14 +12,14 @@ do
   nohup ./../bin/lark_msg_gateway -gp=${gp} -wp=${wp} -mp=${mp} -sid=${sid} > /var/log/lark/lark_msg_gateway_${sid}.log 2>&1 &
 done
 
-for ((i=1; i<2; i++))
-do
-  gp=$[7400+($i * 10)]
-  mp=$[gp+1]
-  sid=$[$i+1]
-  echo "run dist" ${gp} ${mp} ${sid}
-  nohup ./../bin/lark_dist -gp=${gp} -mp=${mp} -sid=${sid} > /var/log/lark/lark_dist_${sid}.log 2>&1 &
-done
+#for ((i=1; i<2; i++))
+#do
+#  gp=$[7400+($i * 10)]
+#  mp=$[gp+1]
+#  sid=$[$i+1]
+#  echo "run dist" ${gp} ${mp} ${sid}
+#  nohup ./../bin/lark_dist -gp=${gp} -mp=${mp} -sid=${sid} > /var/log/lark/lark_dist_${sid}.log 2>&1 &
+#done
 
 length=${#service_names}
 for (( i=0; i <= $length; i++ )); do

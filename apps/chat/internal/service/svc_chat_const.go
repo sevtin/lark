@@ -52,4 +52,5 @@ const (
 
 var (
 	ERR_CHAT_UPDATE_VALUE_FAILED = errors.New("更新Value失败")
+	ERR_CHAT_REQ_PARAM_ERR       = errors.New("请求参数错误")
 )

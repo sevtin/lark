@@ -20,6 +20,13 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		result *protocol.Result
 		err    error
 	)
+
+	defer func() {
+		if err != nil {
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
+		}
+	}()
+
 	u.Set("avatar_small", req.AvatarSmall)
 	u.Set("avatar_medium", req.AvatarMedium)
 	u.Set("avatar_large", req.AvatarLarge)
@@ -30,7 +37,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -40,7 +47,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		err = s.userRepo.TxUpdateUser(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -51,7 +58,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
-			xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -70,7 +77,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 	err = s.userCache.DelUserInfo(s.cfg.Redis.Prefix, req.OwnerId)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED)
-		xlog.Warn(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED, err.Error())
 		return
 	}
 	copier.Copy(resp.Avatar, req)

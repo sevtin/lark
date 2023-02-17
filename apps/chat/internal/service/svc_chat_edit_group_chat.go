@@ -21,23 +21,28 @@ func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupC
 		chat   *po.Chat
 		err    error
 	)
+	defer func() {
+		if err != nil {
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
+		}
+	}()
 	w.SetFilter("chat_id=?", req.ChatId)
 	w.SetFilter("uid=?", req.Uid)
 	w.SetFilter("role_id>=?", int32(pb_enum.CHAT_GROUP_ROLE_ADMINISTRATOR))
 	member, err = s.chatMemberRepo.ChatMember(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
 		return
 	}
 	if member.ChatId == 0 {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
+		//xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
 		return
 	}
 	if member.RoleId == 0 {
 		resp.Set(ERROR_CODE_CHAT_NO_RIGHT_TO_MODIFY, ERROR_CHAT_NO_RIGHT_TO_MODIFY)
-		xlog.Warn(ERROR_CODE_CHAT_NO_RIGHT_TO_MODIFY, ERROR_CHAT_NO_RIGHT_TO_MODIFY)
+		//xlog.Warn(ERROR_CODE_CHAT_NO_RIGHT_TO_MODIFY, ERROR_CHAT_NO_RIGHT_TO_MODIFY)
 		return
 	}
 
@@ -46,7 +51,7 @@ func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupC
 	chat, err = s.chatRepo.Chat(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
+		//xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
 		return
 	}
 
@@ -62,7 +67,7 @@ func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupC
 		err = s.chatRepo.TxUpdateChat(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 
@@ -75,7 +80,7 @@ func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupC
 				err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 				if err != nil {
 					resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-					xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+					//xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
 					return
 				}
 			}

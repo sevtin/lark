@@ -2,6 +2,7 @@ package service
 
 import (
 	"gorm.io/gorm"
+	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
@@ -19,6 +20,12 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 		uid      int64
 		index    int
 	)
+	defer func() {
+		if err != nil {
+			xlog.Warn(err.Error())
+		}
+	}()
+
 	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
 		rowsAffected, err = s.chatMemberRepo.TxQuitChatMember(tx, u)
 		if err != nil {
@@ -31,6 +38,7 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 				return
 			}
 			if uidCount != 2 {
+				err = ERR_CHAT_REQ_PARAM_ERR
 				return
 			}
 			u.Reset()
@@ -54,6 +62,9 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 		}
 		return
 	})
+	if err != nil {
+		return
+	}
 
 	keys = make([]string, uidCount*2)
 	fields = make([]interface{}, uidCount*2)

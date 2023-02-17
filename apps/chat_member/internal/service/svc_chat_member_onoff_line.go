@@ -83,6 +83,13 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		limit     = 2000
 		maxChatId int64
 	)
+
+	defer func() {
+		if err != nil {
+			xlog.Warn(err.Error())
+		}
+	}()
+
 	// 1 获取Chat成员
 	for {
 		w.Reset()
@@ -92,7 +99,7 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		w.SetSort("chat_id ASC")
 		list, err = s.chatMemberRepo.ChatMemberStatusList(w)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED, err.Error())
 			break
 		}
 		if len(list) > 0 {
@@ -131,7 +138,7 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		u.Set("server_id", serverId)
 		err = s.userRepo.TxUpdateUser(tx, u)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 		if len(allStatus) == 0 {
@@ -140,7 +147,7 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		// 4 更新chat_members
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
+			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 		return
