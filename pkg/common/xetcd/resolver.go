@@ -120,7 +120,7 @@ func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts re
 		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%s", target)
 	}
 	r.cc = cc
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), CONST_DURATION_GRPC_TIMEOUT_SECOND)
 	prefix := GetPrefix(r.schema, r.serviceName)
 	resp, err := r.cli.Get(ctx, prefix, clientv3.WithPrefix())
 	if err == nil {

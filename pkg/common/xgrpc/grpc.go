@@ -1,6 +1,7 @@
 package xgrpc
 
 import (
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/opentracing-contrib/go-grpc"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
@@ -22,6 +23,9 @@ func NewServer(c *conf.Grpc) (srv *grpc.Server, closer io.Closer) {
 		opts       []grpc.ServerOption
 		err        error
 	)
+	//opts = append(opts, grpc.UnaryInterceptor(grpc_recovery.UnaryServerInterceptor(middleware.RecoveryInterceptor())))
+	opts = append(opts, grpc.UnaryInterceptor(grpc_recovery.UnaryServerInterceptor()))
+
 	keepParams = grpc.KeepaliveParams(keepalive.ServerParameters{
 		MaxConnectionIdle:     time.Duration(c.MaxConnectionIdle) * time.Millisecond,
 		MaxConnectionAge:      time.Duration(c.MaxConnectionAge) * time.Millisecond,
@@ -49,13 +53,14 @@ func NewServer(c *conf.Grpc) (srv *grpc.Server, closer io.Closer) {
 		}
 	}
 	if c.StreamsLimit > 0 {
-		// 设置最大并发流
+		// 一个连接中最大并发Stream数
 		opts = append(opts, grpc.MaxConcurrentStreams(c.StreamsLimit))
 	}
 	if c.MaxRecvMsgSize > 0 {
-		// 设置服务器端可接收的最大请求体长度为4KB
+		// 允许接收的最大消息长度
 		opts = append(opts, grpc.MaxRecvMsgSize(c.MaxRecvMsgSize))
 	}
+
 	srv = grpc.NewServer(opts...)
 	return
 }

@@ -37,6 +37,7 @@ func (s *GrpcServer) RunServer(server *grpc.Server) {
 		return
 	}
 	if s.grpc.ConnectionLimit > 0 {
+		// 最大并发连接数
 		listener = netutil.LimitListener(listener, s.grpc.ConnectionLimit)
 	}
 	err = xetcd.RegisterEtcd(s.etcd.Schema, s.etcd.Endpoints, utils.GetServerIP(), s.grpc.Port, s.grpc.Name, 10)

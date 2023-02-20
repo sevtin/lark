@@ -30,7 +30,7 @@ func (s *authService) RefreshToken(ctx context.Context, req *pb_auth.RefreshToke
 	}
 	if sessionId != refreshToken.SessionId {
 		resp.Set(ERROR_CODE_AUTH_JWT_SESSION_ID_ERR, ERROR_AUTH_JWT_SESSION_ID_ERR)
-		xlog.Warn(ERROR_CODE_AUTH_JWT_SESSION_ID_ERR, ERROR_AUTH_JWT_SESSION_ID_ERR)
+		//xlog.Warn(ERROR_CODE_AUTH_JWT_SESSION_ID_ERR, ERROR_AUTH_JWT_SESSION_ID_ERR)
 		return
 	}
 	accessToken, err = xjwt.CreateToken(refreshToken.Uid, refreshToken.Platform, true, constant.CONST_DURATION_SHA_JWT_ACCESS_TOKEN_EXPIRE_IN_SECOND)

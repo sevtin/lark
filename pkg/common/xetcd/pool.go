@@ -22,7 +22,7 @@ var (
 )
 
 // Factory is a function type creating a grpc client
-type Factory func(schema string, endpoints []string, servicename string) (*grpc.ClientConn, error)
+type Factory func() (*grpc.ClientConn, error)
 
 // FactoryWithContext is a function type creating a grpc client
 // that accepts the context parameter that could be passed from
@@ -50,9 +50,9 @@ type ClientConn struct {
 // New creates a new clients pool with the given initial and maximum capacity,
 // and the timeout for the idle clients. Returns an error if the initial
 // clients could not be created
-func New(factory Factory, schema string, endpoints []string, servicename string, init, capacity int, idleTimeout time.Duration,
+func New(factory Factory, init, capacity int, idleTimeout time.Duration,
 	maxLifeDuration ...time.Duration) (*Pool, error) {
-	return NewWithContext(context.Background(), func(ctx context.Context) (*grpc.ClientConn, error) { return factory(schema, endpoints, servicename) },
+	return NewWithContext(context.Background(), func(ctx context.Context) (*grpc.ClientConn, error) { return factory() },
 		init, capacity, idleTimeout, maxLifeDuration...)
 }
 

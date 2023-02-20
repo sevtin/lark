@@ -39,22 +39,6 @@ func GetPrefix(schema, serviceName string) string {
 	return fmt.Sprintf("%s:///%s/", schema, serviceName)
 }
 
-// "%s:///%s"
-func GetPrefix4Unique(schema, serviceName string) string {
-	return fmt.Sprintf("%s:///%s", schema, serviceName)
-}
-
-// "%s:///%s/" ->  "%s:///%s:ip:port"
-func RegisterEtcd4Unique(schema string, endpoints []string, myHost string, myPort int, serviceName string, ttl int) error {
-	serviceName = serviceName + ":" + net.JoinHostPort(myHost, strconv.Itoa(myPort))
-	return RegisterEtcd(schema, endpoints, myHost, myPort, serviceName, ttl)
-}
-
-func GetTarget(schema, myHost string, myPort int, serviceName string) string {
-	serviceName = serviceName + ":" + net.JoinHostPort(myHost, strconv.Itoa(myPort))
-	return serviceName
-}
-
 func RegisterEtcd(schema string, endpoints []string, myHost string, myPort int, serviceName string, ttl int) (err error) {
 	serviceValue := net.JoinHostPort(myHost, strconv.Itoa(myPort))
 	serviceKey := GetPrefix(schema, serviceName) + serviceValue
