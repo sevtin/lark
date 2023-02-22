@@ -84,6 +84,14 @@ func (m *MysqlWhere) Reset() {
 	m.Offset = 0
 }
 
+func (m *MysqlWhere) Normal() {
+	m.Query = "1=1"
+	m.Args = make([]interface{}, 0)
+	m.Sort = ""
+	m.Limit = 0
+	m.Offset = 0
+}
+
 type MysqlUpdate struct {
 	Query  string
 	Args   []interface{}

@@ -10,7 +10,6 @@ https://www.h5w3.com/235615.html
 http://www.zzvips.com/article/222569.html
 */
 type SignUpReq struct {
-	AccountType int32                 `json:"account_type" validate:"required,oneof=1 2"`       // 登录类型 1:手机号 2:lark账户
 	RegPlatform pb_enum.PLATFORM_TYPE `json:"reg_platform" validate:"required,oneof=1 2 3 4 5"` // 注册平台 1:iOS 2:安卓
 	Nickname    string                `json:"nickname" validate:"required,min=1,max=20"`        // 昵称
 	Password    string                `json:"password" validate:"required,len=32"`              // 密码

@@ -12,7 +12,6 @@ CREATE TABLE `chat_members` (
   `chat_avatar_key` varchar(50) NOT NULL DEFAULT '' COMMENT 'chat头像 72*72',
   `sync` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否同步用户信息 0:同步 1:不同步',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言',
-  `server_id` int NOT NULL DEFAULT '0' COMMENT '服务器ID',
   `join_source` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '加入源',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',

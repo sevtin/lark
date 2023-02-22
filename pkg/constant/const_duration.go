@@ -39,11 +39,12 @@ const (
 )
 
 const (
-	CONST_DURATION_SHA_CONVO_MESSAGE_SECOND               = 60 * 60 * 24      // 会话消息缓存时间
+	CONST_DURATION_SHA_CONVO_MESSAGE_SECOND               = 60 * 60 * 24      //会话消息缓存时间
 	CONST_DURATION_SHA_BASIC_USER_INFO_SECOND             = 60 * 60 * 24 * 7  //用户基础信息缓存时间
 	CONST_DURATION_SHA_USER_INFO_SECOND                   = 60 * 60 * 24 * 7  //用户信息缓存时间
 	CONST_DURATION_SHA_MSG_ID_SECOND                      = 60 * 60 * 12      //消息ID缓存时间,用于判断是否是重复消息
 	CONST_DURATION_SHA_USER_SERVER_ID_SECOND              = 60 * 60 * 24 * 7  //用户 server id 缓存时间
 	CONST_DURATION_SHA_JWT_ACCESS_TOKEN_EXPIRE_IN_SECOND  = 60 * 60 * 24 * 7  //ACCESS_TOKEN有效期
 	CONST_DURATION_SHA_JWT_REFRESH_TOKEN_EXPIRE_IN_SECOND = 60 * 60 * 24 * 30 //REFRESH_TOKEN有效期
+	CONST_DURATION_SHA_CHAT_MEMBER_INFO_HASH_SECOND       = 60 * 60 * 24 * 7  //chat成员缓存hash
 )

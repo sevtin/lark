@@ -66,10 +66,10 @@ func (c *chatMemberCache) HMSetChatMembers(chatId int64, maps map[string]interfa
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
 		return
 	}
-	err = xredis.Expire(key, constant.CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND)
-	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_SET_EXPIRE_FAILED, ERROR_CACHE_SET_EXPIRE_FAILED, err.Error())
-	}
+	//err = xredis.Expire(key, constant.CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND)
+	//if err != nil {
+	//	xlog.Warn(ERROR_CODE_CACHE_SET_EXPIRE_FAILED, ERROR_CACHE_SET_EXPIRE_FAILED, err.Error())
+	//}
 	return
 }
 
@@ -82,11 +82,11 @@ func (c *chatMemberCache) HSetNXChatMember(chatId int64, uid int64, value string
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
 		return
 	}
-	err = xredis.Expire(key, constant.CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND)
-	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_SET_EXPIRE_FAILED, ERROR_CACHE_SET_EXPIRE_FAILED, err.Error())
-		return
-	}
+	//err = xredis.Expire(key, constant.CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND)
+	//if err != nil {
+	//	xlog.Warn(ERROR_CODE_CACHE_SET_EXPIRE_FAILED, ERROR_CACHE_SET_EXPIRE_FAILED, err.Error())
+	//	return
+	//}
 	return
 }
 

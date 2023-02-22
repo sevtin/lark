@@ -45,7 +45,6 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	creator, err = s.userRepo.UserInfo(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
 		return
 	}
 
@@ -63,7 +62,6 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		err = s.chatRepo.TxCreate(tx, chat)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 			return
 		}
 
@@ -78,12 +76,10 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			MemberAvatarKey: creator.AvatarKey,
 			ChatAvatarKey:   chat.AvatarKey,
 			Sync:            constant.SYNCHRONIZE_USER_INFO,
-			ServerId:        creator.ServerId,
 		}
 		err = s.chatMemberRepo.TxCreate(tx, member)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 			return
 		}
 
@@ -98,7 +94,6 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		err = s.avatarRepo.TxCreate(tx, avatar)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 			return
 		}
 		// 7 构建邀请信息
@@ -121,10 +116,9 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			return
 		}
 		// 8 邀请信息入库
-		err = s.chatInviteRepo.TxNewChatInviteList(tx, inviteList)
+		err = s.chatInviteRepo.TxCreateChatInvites(tx, inviteList)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED, err.Error())
 			return
 		}
 		return
@@ -134,10 +128,9 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	}
 
 	// 6 缓存成员信息
-	err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", member.ServerId, member.Uid, member.Status))
+	err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status))
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_CACHE_CHAT_MEMBER_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_CACHE_CHAT_MEMBER_FAILED, err.Error())
 		return
 	}
 

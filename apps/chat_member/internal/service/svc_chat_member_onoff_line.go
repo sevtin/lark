@@ -95,11 +95,11 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		w.Reset()
 		w.SetFilter("uid = ?", uid)
 		w.SetFilter("chat_id>?", maxChatId)
+		w.SetFilter("status IN(?)", []pb_enum.CHAT_STATUS{pb_enum.CHAT_STATUS_NORMAL, pb_enum.CHAT_STATUS_MUTE, pb_enum.CHAT_STATUS_BANNED})
 		w.SetLimit(int32(limit))
 		w.SetSort("chat_id ASC")
 		list, err = s.chatMemberRepo.ChatMemberStatusList(w)
 		if err != nil {
-			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED, err.Error())
 			break
 		}
 		if len(list) > 0 {
@@ -138,16 +138,6 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		u.Set("server_id", serverId)
 		err = s.userRepo.TxUpdateUser(tx, u)
 		if err != nil {
-			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
-			return
-		}
-		if len(allStatus) == 0 {
-			return
-		}
-		// 4 更新chat_members
-		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
-		if err != nil {
-			//xlog.Warn(ERROR_CODE_CHAT_MEMBER_UPDATE_VALUE_FAILED, ERROR_CHAT_MEMBER_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 		return
@@ -158,7 +148,7 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 	if len(keys) == 0 {
 		return
 	}
-	// 5 更新hash
+	// 4 更新hash
 	err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
 	if err != nil {
 		return

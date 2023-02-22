@@ -84,4 +84,4 @@ jaeger:
   log_spans: true
   buffer_flush_interval: 1
   max_packet_size: 0
-  enabled: true
+  enabled: false

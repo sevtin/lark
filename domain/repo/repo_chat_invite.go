@@ -10,7 +10,7 @@ import (
 
 type ChatInviteRepository interface {
 	CreateChatInvites(invites []*po.ChatInvite) (err error)
-	TxNewChatInviteList(tx *gorm.DB, list []*po.ChatInvite) (err error)
+	TxCreateChatInvites(tx *gorm.DB, list []*po.ChatInvite) (err error)
 	TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (err error)
 	TxChatInvite(tx *gorm.DB, w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
 	ChatInvite(w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
@@ -30,7 +30,7 @@ func (r *chatInviteRepository) CreateChatInvites(invites []*po.ChatInvite) (err 
 	return
 }
 
-func (r *chatInviteRepository) TxNewChatInviteList(tx *gorm.DB, list []*po.ChatInvite) (err error) {
+func (r *chatInviteRepository) TxCreateChatInvites(tx *gorm.DB, list []*po.ChatInvite) (err error) {
 	err = tx.Create(list).Error
 	return
 }

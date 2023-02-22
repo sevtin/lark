@@ -4,7 +4,7 @@ const (
 	// hdel_chat_member.lua
 	SHA_HDEL_CHAT_MEMBER = "fffb39ae0256756cf33e4ed2b314099ec421eb34"
 
-	// hmset_chat_member.lua
+	// hmset_chat_member.lua 弃用
 	SHA_HMSET_CHAT_MEMBER = "db83841ecc4948c9d2d3abab3f534035b8c881d9"
 
 	// hmset_dist_chat_member.lua

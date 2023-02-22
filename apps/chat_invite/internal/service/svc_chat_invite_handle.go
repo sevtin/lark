@@ -135,6 +135,8 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		w           = entity.NewMysqlWhere()
 		chat        *po.Chat
 		members     []*po.ChatMember
+		servers     []int64
+		serverId    int64
 		member      *po.ChatMember
 		memberCount int
 		list        []*pb_user.UserSrvInfo
@@ -154,7 +156,6 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		}
 		err = s.chatRepo.TxCreate(tx, chat)
 		if err != nil {
-			//xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
 			switch err.(type) {
 			case *mysql.MySQLError:
 				if err.(*mysql.MySQLError).Number == constant.ERROR_CODE_MYSQL_DUPLICATE_ENTRY {
@@ -172,7 +173,6 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		chat, err = s.chatRepo.TxChat(tx, w)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
 			return
 		}
 		uidList = []int64{invite.InviteeUid}
@@ -184,16 +184,15 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	list, err = s.userRepo.TxUserSrvList(tx, w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
 		return
 	}
 	if len(list) != memberCount {
 		err = ERR_CHAT_INVITE_QUERY_DB_FAILED
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
 		return
 	}
 	members = make([]*po.ChatMember, memberCount)
+	servers = make([]int64, memberCount)
 	for index, user = range list {
 		switch pb_enum.CHAT_TYPE(invite.ChatType) {
 		case pb_enum.CHAT_TYPE_PRIVATE:
@@ -213,8 +212,8 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 				Alias:           info.Nickname,
 				MemberAvatarKey: info.AvatarKey,
 				Sync:            constant.SYNCHRONIZE_USER_INFO,
-				ServerId:        info.ServerId,
 			}
+			serverId = info.ServerId
 		case pb_enum.CHAT_TYPE_GROUP:
 			member = &po.ChatMember{
 				ChatId:          invite.ChatId,
@@ -223,29 +222,28 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 				Alias:           user.Nickname,
 				MemberAvatarKey: user.AvatarKey,
 				Sync:            constant.SYNCHRONIZE_USER_INFO,
-				ServerId:        user.ServerId,
 				ChatAvatarKey:   chat.AvatarKey,
 				ChatName:        chat.Name,
 			}
+			serverId = user.ServerId
 		}
 		members[index] = member
+		servers[index] = serverId
 	}
 	// 7 成为 chat member
 	err = s.chatMemberRepo.TxCreateMultiple(tx, members)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err.Error())
 		return
 	}
 	distMaps = make(map[string]interface{})
-	for _, member = range members {
-		distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d,%d", member.ServerId, member.Uid, member.Status)
+	for index, member = range members {
+		distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d,%d", servers[index], member.Uid, member.Status)
 	}
 	// 8 缓存 chat member
 	err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, err.Error())
 		return
 	}
 	// 9 邀请成功推送

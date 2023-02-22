@@ -12,10 +12,8 @@ import (
 type ChatMemberRepository interface {
 	TxCreate(tx *gorm.DB, chatMember *po.ChatMember) (err error)
 	TxCreateMultiple(tx *gorm.DB, users []*po.ChatMember) (err error)
-	ChatIdList(w *entity.MysqlWhere) (list []int64, err error)
 	ChatMemberStatusList(w *entity.MysqlWhere) (list []*do.ChatMemberStatus, err error)
 	DistMemberList(w *entity.MysqlWhere) (list []*pb_chat_member.DistMember, err error)
-	DistMember(w *entity.MysqlWhere) (conf *pb_chat_member.DistMember, err error)
 	ChatMember(w *entity.MysqlWhere) (member *pb_chat_member.ChatMemberInfo, err error)
 	ChatMemberCount(w *entity.MysqlWhere) (count int64, err error)
 	TxChatMemberList(tx *gorm.DB, w *entity.MysqlWhere) (members []*pb_chat_member.ChatMemberInfo, err error)
@@ -44,13 +42,6 @@ func (r *chatMemberRepository) TxCreateMultiple(tx *gorm.DB, users []*po.ChatMem
 	return
 }
 
-func (r *chatMemberRepository) ChatIdList(w *entity.MysqlWhere) (list []int64, err error) {
-	list = make([]int64, 0)
-	db := xmysql.GetDB()
-	err = db.Model(po.ChatMember{}).Where(w.Query, w.Args...).Limit(w.Limit).Pluck("chat_id", &list).Error
-	return
-}
-
 func (r *chatMemberRepository) ChatMemberStatusList(w *entity.MysqlWhere) (list []*do.ChatMemberStatus, err error) {
 	list = make([]*do.ChatMemberStatus, 0)
 	db := xmysql.GetDB()
@@ -63,28 +54,14 @@ func (r *chatMemberRepository) ChatMemberStatusList(w *entity.MysqlWhere) (list 
 	return
 }
 
-//func (r *chatMemberRepository) ChatMemberList(w *entity.MysqlWhere) (list []*do.ChatMemberInfo, err error) {
-//	list = make([]*do.ChatMemberInfo, 0)
-//	db := xmysql.GetDB()
-//	err = db.Model(po.ChatMember{}).
-//		Select("chat_id,uid,status,server_id").
-//		Where(w.Query, w.Args...).
-//		Order(w.Sort).
-//		Limit(w.Limit).Find(&list).Error
-//	return
-//}
-
 func (r *chatMemberRepository) DistMemberList(w *entity.MysqlWhere) (list []*pb_chat_member.DistMember, err error) {
 	list = make([]*pb_chat_member.DistMember, 0)
 	db := xmysql.GetDB()
-	err = db.Model(po.ChatMember{}).Select("uid,status,server_id").Where(w.Query, w.Args...).Find(&list).Error
-	return
-}
-
-func (r *chatMemberRepository) DistMember(w *entity.MysqlWhere) (conf *pb_chat_member.DistMember, err error) {
-	conf = new(pb_chat_member.DistMember)
-	db := xmysql.GetDB()
-	err = db.Model(po.ChatMember{}).Select("chat_id,uid,status,server_id").Where(w.Query, w.Args...).Find(&conf).Error
+	err = db.Table("chat_members m").
+		Select("u.server_id,m.uid,m.status").
+		Joins("LEFT JOIN users u ON u.uid=m.uid").
+		Where(w.Query, w.Args...).
+		Find(&list).Error
 	return
 }
 

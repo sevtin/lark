@@ -6,6 +6,7 @@ import (
 	"lark/pkg/common/xlog"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_member"
+	"lark/pkg/proto/pb_enum"
 	"lark/pkg/utils"
 )
 
@@ -27,10 +28,12 @@ func (s *chatMemberService) GetDistMemberList(ctx context.Context, req *pb_chat_
 			index  int
 			value  string
 		)
-		w.Reset()
-		w.SetFilter("chat_id = ?", req.ChatId)
-		w.SetFilter("uid > ?", lastUid)
-		w.SetSort("uid ASC")
+		w.Normal()
+		w.SetFilter("m.chat_id = ?", req.ChatId)
+		w.SetFilter("m.deleted_ts = ?", 0)
+		w.SetFilter("m.status IN(?)", []pb_enum.CHAT_STATUS{pb_enum.CHAT_STATUS_NORMAL, pb_enum.CHAT_STATUS_MUTE, pb_enum.CHAT_STATUS_BANNED})
+		w.SetFilter("m.uid > ?", lastUid)
+		w.SetSort("m.uid ASC")
 		w.SetLimit(1000)
 
 		members, err = s.chatMemberRepo.DistMemberList(w)

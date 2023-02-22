@@ -23,12 +23,12 @@ const (
 )
 
 type Resolver struct {
+	opt                *conf.GrpcDialOption
 	cc                 resolver.ClientConn
+	schema             string
 	serviceName        string
 	grpcClientConn     *grpc.ClientConn
 	cli                *clientv3.Client
-	schema             string
-	endpoints          []string
 	watchStartRevision int64
 }
 
@@ -39,12 +39,10 @@ var (
 
 func NewResolver(opt *conf.GrpcDialOption) (r *Resolver, err error) {
 	var (
-		etcdCli *clientv3.Client
-		opts    []grpc.DialOption
-		conn    *grpc.ClientConn
+		cli *clientv3.Client
 	)
 
-	etcdCli, err = clientv3.New(clientv3.Config{
+	cli, err = clientv3.New(clientv3.Config{
 		Endpoints: opt.Etcd.Endpoints,
 		Username:  opt.Etcd.Username,
 		Password:  opt.Etcd.Password,
@@ -55,31 +53,40 @@ func NewResolver(opt *conf.GrpcDialOption) (r *Resolver, err error) {
 	}
 
 	r = new(Resolver)
-	r.serviceName = opt.ServiceName
-	r.cli = etcdCli
+	r.opt = opt
 	r.schema = opt.Etcd.Schema
-	r.endpoints = opt.Etcd.Endpoints
+	r.serviceName = opt.ServiceName
+	r.cli = cli
 	resolver.Register(r)
+	r.grpcClientConn, _ = r.newGrpcClientConn()
+	return
+}
 
+func (r *Resolver) newGrpcClientConn() (conn *grpc.ClientConn, err error) {
+	var (
+		opts []grpc.DialOption
+		ctx  context.Context
+	)
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)))
-	if opt.Tracing.Enabled == true && opt.Tracing.Tracer != nil {
+	if r.opt.Tracing.Enabled == true && r.opt.Tracing.Tracer != nil {
 		opts = append(opts, grpc.WithBlock())
-		opts = append(opts, grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opt.Tracing.Tracer)))
+		opts = append(opts, grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(r.opt.Tracing.Tracer)))
 	}
-	if opt.Cert.Enabled == true {
+	if r.opt.Cert.Enabled == true {
 		var creds credentials.TransportCredentials
-		creds, err = credentials.NewClientTLSFromFile(opt.Cert.CertFile, opt.Cert.ServerNameOverride)
+		creds, err = credentials.NewClientTLSFromFile(r.opt.Cert.CertFile, r.opt.Cert.ServerNameOverride)
 		if err != nil {
 			xlog.Error(err.Error())
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(creds))
 		}
 	}
-	ctx, _ := context.WithTimeout(context.Background(), CONST_DURATION_GRPC_TIMEOUT_SECOND)
-	conn, err = grpc.DialContext(ctx, GetPrefix(opt.Etcd.Schema, opt.ServiceName), opts...)
-	if err == nil {
-		r.grpcClientConn = conn
+	ctx, _ = context.WithTimeout(context.Background(), CONST_DURATION_GRPC_TIMEOUT_SECOND)
+	conn, err = grpc.DialContext(ctx, GetPrefix(r.opt.Etcd.Schema, r.opt.ServiceName), opts...)
+	if err != nil {
+		xlog.Error(err.Error())
+		return
 	}
 	return
 }
@@ -163,12 +170,12 @@ func remove(s []resolver.Address, addr string) ([]resolver.Address, bool) {
 func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 	rch := r.cli.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrefix())
 	for n := range rch {
-		flag := 0
+		update := false
 		for _, ev := range n.Events {
 			switch ev.Type {
 			case mvccpb.PUT:
 				if !exists(addrList, string(ev.Kv.Value)) {
-					flag = 1
+					update = true
 					addrList = append(addrList, resolver.Address{Addr: string(ev.Kv.Value)})
 				}
 			case mvccpb.DELETE:
@@ -178,13 +185,13 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 				}
 				t := string(ev.Kv.Key)[i+1:]
 				if s, ok := remove(addrList, t); ok {
-					flag = 1
+					update = true
 					addrList = s
 				}
 			}
 		}
 
-		if flag == 1 {
+		if update == true {
 			r.cc.UpdateState(resolver.State{Addresses: addrList})
 		}
 	}

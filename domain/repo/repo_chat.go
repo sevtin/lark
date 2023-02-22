@@ -25,7 +25,9 @@ func NewChatRepository() ChatRepository {
 }
 
 func (r *chatRepository) Create(chat *po.Chat) (err error) {
-	chat.ChatId = xsnowflake.NewSnowflakeID()
+	if chat.ChatId == 0 {
+		chat.ChatId = xsnowflake.NewSnowflakeID()
+	}
 	db := xmysql.GetDB()
 	err = db.Create(chat).Error
 	return
