@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lark/business/biz_chat_invite"
+	"lark/domain/do"
 	"lark/domain/po"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
@@ -127,14 +128,22 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		return
 	}
 
-	// 6 缓存成员信息
-	err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status))
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_CACHE_CHAT_MEMBER_FAILED)
-		return
-	}
-
 	xants.Submit(func() {
+		var (
+			err error
+		)
+		// 6 缓存成员hash
+		err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status))
+		if err != nil {
+			xlog.Warn(err.Error())
+			var (
+				kfv = do.KeyFieldValue{member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status)}
+			)
+			_, _, err = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT)
+			if err != nil {
+				xlog.Warn(err.Error())
+			}
+		}
 		// 9 缓存
 		s.cacheChatInfo(chat)
 		// 10 邀请推送

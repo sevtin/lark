@@ -4,6 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 	"lark/pkg/common/xlog"
+	"lark/pkg/utils"
 	"runtime/debug"
 )
 
@@ -45,6 +46,25 @@ func (p *Producer) EnQueue(m proto.Message, key ...string) (int32, int64, error)
 		msg.Key = sarama.StringEncoder(key[0])
 	}
 	buf, err := proto.Marshal(m)
+	if err != nil {
+		return -1, -1, err
+	}
+	msg.Value = sarama.ByteEncoder(buf)
+	return p.producer.SendMessage(msg)
+}
+
+func (p *Producer) Push(m interface{}, key ...string) (int32, int64, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			xlog.Warn(r, string(debug.Stack()))
+		}
+	}()
+	msg := &sarama.ProducerMessage{}
+	msg.Topic = p.topic
+	if len(key) == 1 {
+		msg.Key = sarama.StringEncoder(key[0])
+	}
+	buf, err := utils.ObjToByte(m)
 	if err != nil {
 		return -1, -1, err
 	}

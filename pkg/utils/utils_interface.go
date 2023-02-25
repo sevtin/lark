@@ -1,7 +1,9 @@
 package utils
 
 import (
+	json2 "encoding/json"
 	"errors"
+	jsoniter "github.com/json-iterator/go"
 	"strconv"
 )
 
@@ -87,6 +89,10 @@ func ToInt64(value interface{}) (int64, error) {
 		return int64(value.(float32)), nil
 	case string:
 		return StrToInt64(value.(string)), nil
+	case jsoniter.Number:
+		return value.(jsoniter.Number).Int64()
+	case json2.Number:
+		return value.(json2.Number).Int64()
 	}
 	return 0, errors.New("value error")
 }

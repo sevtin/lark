@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/Shopify/sarama"
 	"lark/apps/dist/internal/logic"
 	gw_client "lark/apps/msg_gateway/client"
 	"lark/pkg/common/xkafka"
@@ -9,6 +10,33 @@ import (
 	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_obj"
 )
+
+func (s *distService) Setup(_ sarama.ConsumerGroupSession) error {
+	close(s.consumerGroup.Ready)
+	return nil
+}
+func (s *distService) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (s *distService) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	var (
+		msg *sarama.ConsumerMessage
+		err error
+	)
+	for {
+		select {
+		case msg = <-claim.Messages():
+			if msg == nil {
+				continue
+			}
+			if err = s.msgHandle[msg.Topic](msg.Value, string(msg.Key)); err != nil {
+				continue
+			}
+			session.MarkMessage(msg, "")
+		case <-session.Context().Done():
+			return nil
+		}
+	}
+	return nil
+}
 
 func (s *distService) MessageHandler(msg []byte, msgKey string) (err error) {
 	switch msgKey {

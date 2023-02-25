@@ -38,6 +38,7 @@ type chatService struct {
 	userClient       user_client.UserClient
 	distClient       dist_client.DistClient
 	producer         *xkafka.Producer
+	cacheProducer    *xkafka.Producer
 }
 
 func NewChatService(conf *config.Config,
@@ -65,5 +66,6 @@ func NewChatService(conf *config.Config,
 	svc.userClient = user_client.NewUserClient(conf.Etcd, conf.UserServer, conf.Jaeger, conf.Name)
 	svc.distClient = dist_client.NewDistClient(conf.Etcd, conf.DistServer, conf.Jaeger, conf.Name)
 	svc.producer = xkafka.NewKafkaProducer(conf.MsgProducer.Address, conf.MsgProducer.Topic)
+	svc.cacheProducer = xkafka.NewKafkaProducer(conf.CacheProducer.Address, conf.CacheProducer.Topic)
 	return svc
 }

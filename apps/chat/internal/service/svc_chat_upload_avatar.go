@@ -33,7 +33,6 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -43,7 +42,6 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.chatRepo.TxUpdateChat(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 
@@ -53,7 +51,6 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
-			//xlog.Warn(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		return

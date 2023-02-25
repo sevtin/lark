@@ -2,6 +2,8 @@ package service
 
 import (
 	"gorm.io/gorm"
+	"lark/domain/do"
+	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/constant"
@@ -15,10 +17,9 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 		key1     = s.cfg.Redis.Prefix + constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.Int64ToStr(chatId)
 		key2     = s.cfg.Redis.Prefix + constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.Int64ToStr(chatId)
 		uidCount = len(uidList)
-		keys     []string
-		fields   []interface{}
-		uid      int64
-		index    int
+
+		uid   int64
+		index int
 	)
 	defer func() {
 		if err != nil {
@@ -65,19 +66,37 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 	if err != nil {
 		return
 	}
+	xants.Submit(func() {
+		var (
+			keys   []string
+			fields []interface{}
+			kv     *do.KeysValues
+			err    error
+		)
+		keys = make([]string, uidCount*2)
+		fields = make([]interface{}, uidCount*2)
+		for index, uid = range uidList {
+			keys[index] = key1
+			fields[index] = uid
 
-	keys = make([]string, uidCount*2)
-	fields = make([]interface{}, uidCount*2)
-	for index, uid = range uidList {
-		keys[index] = key1
-		fields[index] = uid
-
-		keys[index+uidCount] = key2
-		fields[index+uidCount] = uid
-	}
-	if len(keys) == 0 {
-		return
-	}
-	err = s.chatMemberCache.HDelChatMembers(keys, fields)
+			keys[index+uidCount] = key2
+			fields[index+uidCount] = uid
+		}
+		if len(keys) == 0 {
+			return
+		}
+		err = s.chatMemberCache.HDelChatMembers(keys, fields)
+		if err != nil {
+			xlog.Warn(err.Error())
+			kv = &do.KeysValues{
+				Keys:   keys,
+				Values: fields,
+			}
+			_, _, err = s.cacheProducer.Push(kv, constant.CONST_MSG_KEY_CACHE_REMOVE_CHAT_MEMBER)
+			if err != nil {
+				xlog.Warn(err.Error())
+			}
+		}
+	})
 	return
 }

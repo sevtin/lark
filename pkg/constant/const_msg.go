@@ -19,5 +19,12 @@ const (
 )
 
 const (
+	CONST_MSG_KEY_CACHE_ON_OFF_LINE        = "msg_key_cache_on_off_line"        // 上线下更新缓存
+	CONST_MSG_KEY_CACHE_AGREE_INVITATION   = "msg_key_cache_agree_invitation"   // 接受邀请缓存成员
+	CONST_MSG_KEY_CACHE_REMOVE_CHAT_MEMBER = "msg_key_cache_remove_chat_member" // 删除成员
+	CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT  = "msg_key_cache_create_group_chat"  // 创建群后缓存第一个成员
+)
+
+const (
 	CONST_MSG_PAGINATION_MAXIMUM_NUMBER_OF_ROWS = 100
 )

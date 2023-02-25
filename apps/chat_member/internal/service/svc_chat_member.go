@@ -6,6 +6,7 @@ import (
 	user_client "lark/apps/user/client"
 	"lark/domain/cache"
 	"lark/domain/repo"
+	"lark/pkg/common/xkafka"
 	"lark/pkg/proto/pb_chat_member"
 )
 
@@ -25,6 +26,7 @@ type chatMemberService struct {
 	userClient      user_client.UserClient
 	chatMemberCache cache.ChatMemberCache
 	userCache       cache.UserCache
+	producer        *xkafka.Producer
 }
 
 func NewChatMemberService(
@@ -33,13 +35,14 @@ func NewChatMemberService(
 	userRepo repo.UserRepository,
 	chatMemberCache cache.ChatMemberCache,
 	userCache cache.UserCache) ChatMemberService {
-	userClient := user_client.NewUserClient(cfg.Etcd, cfg.UserServer, cfg.GrpcServer.Jaeger, cfg.Name)
+
 	svc := &chatMemberService{
 		cfg:             cfg,
 		chatMemberRepo:  chatMemberRepo,
 		userRepo:        userRepo,
-		userClient:      userClient,
 		chatMemberCache: chatMemberCache,
 		userCache:       userCache}
+	svc.userClient = user_client.NewUserClient(cfg.Etcd, cfg.UserServer, cfg.GrpcServer.Jaeger, cfg.Name)
+	svc.producer = xkafka.NewKafkaProducer(cfg.MsgProducer.Address, cfg.MsgProducer.Topic)
 	return svc
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
+	"lark/domain/do"
 	"lark/domain/po"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
@@ -62,7 +63,6 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 	err = s.chatInviteRepo.TxUpdateChatInvite(tx, u)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED)
-		//xlog.Warn(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED, err.Error())
 		return
 	}
 	if req.HandleResult == pb_enum.INVITE_HANDLE_RESULT_REFUSE {
@@ -143,7 +143,6 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		user        *pb_user.UserSrvInfo
 		index       int
 		uidList     []int64
-		distMaps    map[string]interface{}
 	)
 
 	switch pb_enum.CHAT_TYPE(invite.ChatType) {
@@ -236,18 +235,28 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		resp.Set(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED)
 		return
 	}
-	distMaps = make(map[string]interface{})
-	for index, member = range members {
-		distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d,%d", servers[index], member.Uid, member.Status)
-	}
-	// 8 缓存 chat member
-	err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
-	if err != nil {
-		resp.Set(ERROR_CODE_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED, ERROR_CHAT_INVITE_CACHE_CHAT_MEMBER_FAILED)
-		return
-	}
-	// 9 邀请成功推送
 	xants.Submit(func() {
+		var (
+			distMaps = make(map[string]interface{})
+			km       *do.KeyMaps
+			err      error
+		)
+		for index, member = range members {
+			distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d,%d", servers[index], member.Uid, member.Status)
+		}
+		// 8 缓存 chat member
+		err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
+		if err != nil {
+			xlog.Warn(err.Error())
+			km = &do.KeyMaps{
+				Key:  member.ChatId,
+				Maps: distMaps}
+			_, _, err = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION)
+			if err != nil {
+				xlog.Warn(err.Error())
+			}
+		}
+		// 9 邀请成功推送
 		s.chatInviteHandleMessage(chat, invite, members)
 	})
 	return

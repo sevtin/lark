@@ -1,0 +1,20 @@
+name: lark_cache_server
+server_id: 1
+log: "./configs/logger.yaml"
+etcd:
+  endpoints: ["lark-etcd:12379"]
+  username:
+  password:
+  schema: lark
+  read_timeout: 5000
+  write_timeout: 5000
+  dial_timeout: 5000
+redis:
+  address: ["lark-redis:63791"]
+  db: 0
+  password: lark2022
+  prefix: "LK:"
+msg_consumer:
+  address: ["lark-kafka:9092"]
+  topic: ["to_cache"]
+  group_id: cache

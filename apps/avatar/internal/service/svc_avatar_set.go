@@ -33,7 +33,6 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		err = s.avatarRepo.TxUpdateAvatar(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		u.Reset()
@@ -44,7 +43,6 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 			s.userRepo.TxUpdateUser(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-				//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 				return
 			}
 
@@ -58,7 +56,6 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 			err = s.chatRepo.TxUpdateChat(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-				//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 				return
 			}
 
@@ -70,7 +67,6 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
-			//xlog.Warn(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED, err.Error())
 			return
 		}
 		return

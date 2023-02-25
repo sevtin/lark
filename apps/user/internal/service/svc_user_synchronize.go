@@ -28,7 +28,6 @@ func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *prot
 	members, err = s.chatMemberRepo.TxChatMemberList(tx, w)
 	if err != nil {
 		r.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		//xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
 		return
 	}
 
@@ -39,7 +38,6 @@ func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *prot
 		jsonStr, err = utils.Marshal(member)
 		if err != nil {
 			r.Set(ERROR_CODE_USER_MARSHAL_FAILED, ERROR_USER_MARSHAL_FAILED)
-			//xlog.Warn(ERROR_CODE_USER_MARSHAL_FAILED, ERROR_USER_MARSHAL_FAILED, err.Error())
 			return
 		}
 		key = prefix + utils.Int64ToStr(member.ChatId)
@@ -52,7 +50,6 @@ func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *prot
 	err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
 	if err != nil {
 		r.Set(ERROR_CODE_USER_CACHE_CHAT_MEMBER_INFO_FAILED, ERROR_USER_CACHE_CHAT_MEMBER_INFO_FAILED)
-		//xlog.Warn(ERROR_CODE_USER_CACHE_CHAT_MEMBER_INFO_FAILED, ERROR_USER_CACHE_CHAT_MEMBER_INFO_FAILED, err.Error())
 	}
 	return
 }

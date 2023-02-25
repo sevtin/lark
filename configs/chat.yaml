@@ -76,3 +76,6 @@ jaeger:
 msg_producer:
   address: ["lark-kafka:9092"]
   topic: "to_inbox"
+cache_producer:
+  address: ["lark-kafka:9092"]
+  topic: "to_cache"

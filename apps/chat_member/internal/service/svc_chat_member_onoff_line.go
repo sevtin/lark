@@ -3,10 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"gorm.io/gorm"
 	"lark/domain/do"
+	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
-	"lark/pkg/common/xmysql"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_member"
@@ -100,7 +99,7 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		w.SetSort("chat_id ASC")
 		list, err = s.chatMemberRepo.ChatMemberStatusList(w)
 		if err != nil {
-			break
+			return
 		}
 		if len(list) > 0 {
 			if allStatus == nil {
@@ -114,45 +113,45 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		}
 		maxChatId = list[len(list)-1].ChatId
 	}
+
+	// 2 更新users
+	u.SetFilter("uid = ?", uid)
+	u.Set("server_id", serverId)
+	err = s.userRepo.UpdateUser(u)
 	if err != nil {
+		return
+	}
+	if len(allStatus) == 0 {
 		return
 	}
 
-	// 2 更新hash
-	var (
-		keys      = make([]string, len(allStatus))
-		vals      = make([]interface{}, len(allStatus)+1)
-		index     int
-		chat      *do.ChatMemberStatus
-		keyPrefix = s.cfg.Redis.Prefix + constant.RK_SYNC_DIST_CHAT_MEMBER_HASH
-		valPrefix = fmt.Sprintf("%d,%d,", serverId, uid)
-	)
-	vals[0] = utils.Int64ToStr(uid)
-	for index, chat = range allStatus {
-		keys[index] = keyPrefix + utils.Int64ToStr(chat.ChatId)
-		vals[index+1] = valPrefix + utils.IntToStr(int(chat.Status))
-	}
-	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
-		// 3 更新users
-		u.SetFilter("uid = ?", uid)
-		u.Set("server_id", serverId)
-		err = s.userRepo.TxUpdateUser(tx, u)
-		if err != nil {
-			return
+	xants.Submit(func() {
+		// 3 更新hash
+		var (
+			keys      = make([]string, len(allStatus))
+			vals      = make([]interface{}, len(allStatus)+1)
+			index     int
+			chat      *do.ChatMemberStatus
+			keyPrefix = s.cfg.Redis.Prefix + constant.RK_SYNC_DIST_CHAT_MEMBER_HASH
+			valPrefix = fmt.Sprintf("%d,%d,", serverId, uid)
+			err       error
+		)
+		vals[0] = utils.Int64ToStr(uid)
+		for index, chat = range allStatus {
+			keys[index] = keyPrefix + utils.Int64ToStr(chat.ChatId)
+			vals[index+1] = valPrefix + utils.IntToStr(int(chat.Status))
 		}
-		return
+		err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
+		if err != nil {
+			xlog.Warn(err.Error())
+			// 消息队列
+			msg := &do.KeysValues{keys, vals}
+			_, _, err = s.producer.Push(msg, constant.CONST_MSG_KEY_CACHE_ON_OFF_LINE)
+			if err != nil {
+				xlog.Warn(err.Error())
+			}
+		}
 	})
-	if err != nil {
-		return
-	}
-	if len(keys) == 0 {
-		return
-	}
-	// 4 更新hash
-	err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
-	if err != nil {
-		return
-	}
 	return
 }
 

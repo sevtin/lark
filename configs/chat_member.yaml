@@ -53,3 +53,6 @@ redis:
   db: 0
   password: lark2022
   prefix: "LK:"
+msg_producer:
+  address: ["lark-kafka:9092"]
+  topic: "to_cache"

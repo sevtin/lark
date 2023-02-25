@@ -30,30 +30,3 @@ func NewCloudMessageService(cfg *config.Config) CloudMessageService {
 
 	return svc
 }
-
-func (s *cloudMessageService) Setup(_ sarama.ConsumerGroupSession) error {
-	close(s.consumerGroup.Ready)
-	return nil
-}
-func (s *cloudMessageService) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (s *cloudMessageService) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	var (
-		msg *sarama.ConsumerMessage
-		err error
-	)
-	for {
-		select {
-		case msg = <-claim.Messages():
-			if msg == nil {
-				continue
-			}
-			if err = s.msgHandle[msg.Topic](msg.Value, string(msg.Key)); err != nil {
-				continue
-			}
-			session.MarkMessage(msg, "")
-		case <-session.Context().Done():
-			return nil
-		}
-	}
-	return nil
-}

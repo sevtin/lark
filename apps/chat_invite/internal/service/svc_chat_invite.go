@@ -33,6 +33,7 @@ type chatInviteService struct {
 	userClient       user_client.UserClient
 	distClient       dist_client.DistClient
 	producer         *xkafka.Producer
+	cacheProducer    *xkafka.Producer
 }
 
 func NewChatInviteService(
@@ -62,5 +63,6 @@ func NewChatInviteService(
 	svc.userClient = user_client.NewUserClient(cfg.Etcd, cfg.UserServer, cfg.Jaeger, cfg.Name)
 	svc.distClient = dist_client.NewDistClient(cfg.Etcd, cfg.DistServer, cfg.Jaeger, cfg.Name)
 	svc.producer = xkafka.NewKafkaProducer(cfg.MsgProducer.Address, cfg.MsgProducer.Topic)
+	svc.cacheProducer = xkafka.NewKafkaProducer(cfg.CacheProducer.Address, cfg.CacheProducer.Topic)
 	return svc
 }

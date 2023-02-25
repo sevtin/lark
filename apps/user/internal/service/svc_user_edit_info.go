@@ -41,18 +41,15 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 				if err.(*mysql.MySQLError).Number == constant.ERROR_CODE_MYSQL_DUPLICATE_ENTRY {
 					if strings.HasSuffix(err.(*mysql.MySQLError).Message, constant.DUPLICATE_ENTRY_KV_USERS_MOBILE) {
 						resp.Set(ERROR_CODE_USER_MOBILE_HAS_BEEN_OCCUPIED, ERROR_USER_MOBILE_HAS_BEEN_OCCUPIED)
-						//xlog.Warn(ERROR_CODE_USER_MOBILE_HAS_BEEN_OCCUPIED, ERROR_USER_MOBILE_HAS_BEEN_OCCUPIED, err.Error())
 						return
 					}
 					if strings.HasSuffix(err.(*mysql.MySQLError).Message, constant.DUPLICATE_ENTRY_KV_USERS_LARK_ID) {
 						resp.Set(ERROR_CODE_USER_LARK_ID_HAS_BEEN_OCCUPIED, ERROR_USER_LARK_ID_HAS_BEEN_OCCUPIED)
-						//xlog.Warn(ERROR_CODE_USER_LARK_ID_HAS_BEEN_OCCUPIED, ERROR_USER_LARK_ID_HAS_BEEN_OCCUPIED, err.Error())
 						return
 					}
 				}
 			}
 			resp.Set(ERROR_CODE_USER_UPDATE_VALUE_FAILED, ERROR_USER_UPDATE_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_USER_UPDATE_VALUE_FAILED, ERROR_USER_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 
@@ -66,7 +63,6 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_UPDATE_VALUE_FAILED, ERROR_USER_UPDATE_VALUE_FAILED)
-			//xlog.Warn(ERROR_CODE_USER_UPDATE_VALUE_FAILED, ERROR_USER_UPDATE_VALUE_FAILED, err.Error())
 			return
 		}
 		result, err = s.updateChatMemberCacheInfo(tx, req.Uid)
@@ -83,7 +79,6 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 	err = s.userCache.DelUserInfo(s.cfg.Redis.Prefix, req.Uid)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED)
-		//xlog.Warn(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED, err.Error())
 		return
 	}
 	return

@@ -29,7 +29,6 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 	default:
 		// 登录类型错误
 		resp.Set(ERROR_CODE_AUTH_ACCOUNT_TYPE_ERR, ERROR_AUTH_ACCOUNT_TYPE_ERR)
-		//xlog.Warn(ERROR_CODE_AUTH_ACCOUNT_TYPE_ERR, ERROR_AUTH_ACCOUNT_TYPE_ERR)
 		return
 	}
 	w.SetFilter("password = ?", utils.MD5(req.Password))
@@ -41,7 +40,6 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 	}
 	if user.Uid == 0 {
 		resp.Set(ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR, ERROR_AUTH_ACCOUNT_OR_PASSWORD_ERR)
-		//xlog.Warn(ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR, ERROR_AUTH_ACCOUNT_OR_PASSWORD_ERR, req.String())
 		return
 	}
 	w.Reset()
