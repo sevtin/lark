@@ -61,8 +61,8 @@ func NewResolver(opt *conf.GrpcDialOption) (r *Resolver, err error) {
 	// concurrent map writes
 	// Everything throw does should be recursively nosplit so it can be called even when it's unsafe to grow the stack.
 	resolver.Register(r)
-	resolverMutex.Unlock()
 	r.grpcClientConn, _ = r.newGrpcClientConn()
+	resolverMutex.Unlock()
 	return
 }
 
