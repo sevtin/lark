@@ -179,13 +179,19 @@ type CliChatMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CliMsgId       int64                 `protobuf:"varint,1,opt,name=cli_msg_id,json=cliMsgId,proto3" json:"cli_msg_id,omitempty"`                                            // 客户端消息号
-	SenderId       int64                 `protobuf:"varint,2,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`                                              // 发送者uid 【无需传】
-	SenderPlatform pb_enum.PLATFORM_TYPE `protobuf:"varint,3,opt,name=sender_platform,json=senderPlatform,proto3,enum=pb_enum.PLATFORM_TYPE" json:"sender_platform,omitempty"` // 发送者平台 【无需传】
-	ChatId         int64                 `protobuf:"varint,4,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`                                                    // 会话ID
-	MsgType        pb_enum.MSG_TYPE      `protobuf:"varint,5,opt,name=msg_type,json=msgType,proto3,enum=pb_enum.MSG_TYPE" json:"msg_type,omitempty"`                           // 消息类型
-	Body           []byte                `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`                                                                       // 消息本体
-	SentTs         int64                 `protobuf:"varint,7,opt,name=sent_ts,json=sentTs,proto3" json:"sent_ts,omitempty"`                                                    // 客户端本地发送时间
+	// @inject_tag: validate:"required,gt=0"
+	CliMsgId int64 `protobuf:"varint,1,opt,name=cli_msg_id,json=cliMsgId,proto3" json:"cli_msg_id,omitempty" validate:"required,gt=0"` // 客户端消息号
+	// @inject_tag: validate:"required,gt=0"
+	SenderId int64 `protobuf:"varint,2,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty" validate:"required,gt=0"` // 发送者uid 【无需传】
+	// @inject_tag: validate:"required,gte=0"
+	SenderPlatform pb_enum.PLATFORM_TYPE `protobuf:"varint,3,opt,name=sender_platform,json=senderPlatform,proto3,enum=pb_enum.PLATFORM_TYPE" json:"sender_platform,omitempty" validate:"required,gte=0"` // 发送者平台 【无需传】
+	// @inject_tag: validate:"required,gt=0"
+	ChatId int64 `protobuf:"varint,4,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty" validate:"required,gt=0"` // 会话ID
+	// @inject_tag: validate:"required,gt=0"
+	MsgType pb_enum.MSG_TYPE `protobuf:"varint,5,opt,name=msg_type,json=msgType,proto3,enum=pb_enum.MSG_TYPE" json:"msg_type,omitempty" validate:"required,gt=0"` // 消息类型
+	Body    []byte           `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`                                             // 消息本体
+	// @inject_tag: validate:"required,gt=0"
+	SentTs int64 `protobuf:"varint,7,opt,name=sent_ts,json=sentTs,proto3" json:"sent_ts,omitempty" validate:"required,gt=0"` // 客户端本地发送时间
 }
 
 func (x *CliChatMessage) Reset() {
@@ -433,7 +439,8 @@ type Image struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ImageKey string `protobuf:"bytes,1,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	ImageKey string `protobuf:"bytes,1,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty" validate:"required,min=32,max=50"`
 }
 
 func (x *Image) Reset() {
@@ -480,8 +487,10 @@ type File struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileKey  string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`
-	FileName string `protobuf:"bytes,2,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	FileKey string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty" validate:"required,min=32,max=50"`
+	// @inject_tag: validate:"required"
+	FileName string `protobuf:"bytes,2,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty" validate:"required"`
 }
 
 func (x *File) Reset() {
@@ -535,8 +544,10 @@ type Audio struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileKey  string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`
-	Duration int32  `protobuf:"varint,2,opt,name=duration,proto3" json:"duration,omitempty"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	FileKey string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty" validate:"required,min=32,max=50"`
+	// @inject_tag: validate:"gt=500"
+	Duration int32 `protobuf:"varint,2,opt,name=duration,proto3" json:"duration,omitempty" validate:"gt=500"`
 }
 
 func (x *Audio) Reset() {
@@ -590,10 +601,14 @@ type Media struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileKey  string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`
-	ImageKey string `protobuf:"bytes,2,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"`
-	FileName string `protobuf:"bytes,3,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
-	Duration int32  `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	FileKey string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty" validate:"required,min=32,max=50"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	ImageKey string `protobuf:"bytes,2,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty" validate:"required,min=32,max=50"`
+	// @inject_tag: validate:"required"
+	FileName string `protobuf:"bytes,3,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty" validate:"required"`
+	// @inject_tag: validate:"gt=500"
+	Duration int32 `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty" validate:"gt=500"`
 }
 
 func (x *Media) Reset() {
@@ -661,7 +676,8 @@ type Sticker struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FileKey string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty"`
+	// @inject_tag: validate:"required,min=32,max=50"
+	FileKey string `protobuf:"bytes,1,opt,name=file_key,json=fileKey,proto3" json:"file_key,omitempty" validate:"required,min=32,max=50"`
 }
 
 func (x *Sticker) Reset() {

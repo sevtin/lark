@@ -44,6 +44,11 @@ const (
 
 var (
 	ERROR_MESSAGE_BODY_TEXT_EMPTY_ERR = errors.New("消息为空")
+	ERROR_MESSAGE_OUT_MAX_RANGE       = errors.New("消息超出规定长度")
 	ERROR_MESSAGE_NON_CONTACT_ERR     = errors.New("非联系人")
 	ERROR_MESSAGE_NON_CHAT_MEMBER_ERR = errors.New("非联 Chat 成员")
+)
+
+const (
+	MAX_MESSAGE_LENGTH = 1500
 )

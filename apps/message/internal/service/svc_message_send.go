@@ -10,14 +10,12 @@ import (
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_mq"
 	"lark/pkg/proto/pb_msg"
-	"lark/pkg/protocol"
 	"lark/pkg/utils"
 )
 
 func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendChatMessageReq) (resp *pb_msg.SendChatMessageResp, _ error) {
 	resp = new(pb_msg.SendChatMessageResp)
 	var (
-		msg   = new(protocol.ChatMessage)
 		inbox = &pb_mq.InboxMessage{
 			Topic:    req.Topic,
 			SubTopic: req.SubTopic,
@@ -29,14 +27,27 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		ok         bool
 		err        error
 	)
-	// 1、重复消息校验
+	// 1、参数校验
+	if err = s.validate.Struct(req.Msg); err != nil {
+		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
+		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
+		return
+	}
+	if err = s.verifyMessage(req); err != nil {
+		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
+		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
+		return
+	}
+
+	// 2、重复消息校验
 	result, ok = s.chatMessageCache.RepeatMessageVerify(s.cfg.Redis.Prefix, req.Msg.ChatId, req.Msg.CliMsgId)
 	if ok == false {
 		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, result)
 		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, result)
 		return
 	}
-	// 2、获取发送者信息
+
+	// 3、获取发送者信息
 	senderInfo, err = s.getSenderInfo(req.Msg.ChatId, req.Msg.SenderId, resp)
 	if err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_GET_SENDER_INFO_FAILED, err.Error())
@@ -49,19 +60,6 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		} else {
 			xlog.Warn(ERROR_CODE_MESSAGE_GET_SENDER_INFO_FAILED, ERROR_MESSAGE_GET_SENDER_INFO_FAILED)
 		}
-		return
-	}
-
-	// 3、参数校验
-	copier.Copy(msg, req.Msg)
-	if err = s.validate.Struct(msg); err != nil {
-		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
-		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
-		return
-	}
-	if err = s.verifyMessage(req); err != nil {
-		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
-		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
 		return
 	}
 

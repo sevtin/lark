@@ -22,12 +22,18 @@ message MessageResp {
 }
 
 message CliChatMessage {
+  // @inject_tag: validate:"required,gt=0"
   int64 cli_msg_id = 1; // 客户端消息号
+  // @inject_tag: validate:"required,gt=0"
   int64 sender_id = 2; // 发送者uid 【无需传】
+  // @inject_tag: validate:"required,gte=0"
   pb_enum.PLATFORM_TYPE sender_platform = 3; // 发送者平台 【无需传】
+  // @inject_tag: validate:"required,gt=0"
   int64 chat_id = 4; // 会话ID
+  // @inject_tag: validate:"required,gt=0"
   pb_enum.MSG_TYPE msg_type = 5; // 消息类型
   bytes body = 6; // 消息本体
+  // @inject_tag: validate:"required,gt=0"
   int64 sent_ts = 7; // 客户端本地发送时间
 }
 
@@ -50,27 +56,37 @@ message SrvChatMessage {
 }
 
 message Image {
+  // @inject_tag: validate:"required,min=32,max=50"
   string image_key = 1;
 }
 
 message File {
+  // @inject_tag: validate:"required,min=32,max=50"
   string file_key = 1;
+  // @inject_tag: validate:"required"
   string file_name = 2;
 }
 
 message Audio {
+  // @inject_tag: validate:"required,min=32,max=50"
   string file_key = 1;
+  // @inject_tag: validate:"gt=500"
   int32 duration = 2;
 }
 
 message Media {
+  // @inject_tag: validate:"required,min=32,max=50"
   string file_key = 1;
+  // @inject_tag: validate:"required,min=32,max=50"
   string image_key = 2;
+  // @inject_tag: validate:"required"
   string file_name = 3;
+  // @inject_tag: validate:"gt=500"
   int32 duration = 4;
 }
 
 message Sticker {
+  // @inject_tag: validate:"required,min=32,max=50"
   string file_key = 1;
 }
 

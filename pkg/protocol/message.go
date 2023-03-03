@@ -1,5 +1,17 @@
 package protocol
 
+type Result struct {
+	Code int32  `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+func (r *Result) Set(code int32, msg string) {
+	r.Code = code
+	r.Msg = msg
+}
+
+/*
+
 type ChatMessage struct {
 	SrvMsgId        int64  `json:"srv_msg_id"`                                // 服务端消息号
 	CliMsgId        int64  `json:"cli_msg_id" validate:"required,gt=0"`       // 客户端消息号
@@ -47,13 +59,4 @@ type Media struct {
 type Sticker struct {
 	FileKey string `json:"file_key" validate:"required,min=32,max=50"` // 文件key
 }
-
-type Result struct {
-	Code int32  `json:"code"`
-	Msg  string `json:"msg"`
-}
-
-func (r *Result) Set(code int32, msg string) {
-	r.Code = code
-	r.Msg = msg
-}
+*/
