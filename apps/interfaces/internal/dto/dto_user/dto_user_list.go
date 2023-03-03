@@ -5,7 +5,7 @@ import (
 )
 
 type UserListReq struct {
-	Uids string `form:"uids" json:"uids" validate:"required"` // Uid List
+	Uids string `form:"uids" json:"uids" binding:"required"` // Uid List
 }
 
 type UserListResp struct {

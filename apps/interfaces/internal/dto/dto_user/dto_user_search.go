@@ -1,10 +1,10 @@
 package dto_user
 
 type SearchUserReq struct {
-	Uid     int64  `form:"uid" json:"uid" validate:"required,gt=0"`
-	LastUid int64  `form:"last_uid" json:"last_uid" validate:"omitempty,gte=0"`
-	Query   string `form:"query" json:"query" validate:"required,min=1,max=128"`
-	Size    int32  `form:"size" json:"size" validate:"required,gte=10,lte=50"`
+	Uid     int64  `form:"uid" json:"uid" binding:"required,gt=0"`
+	LastUid int64  `form:"last_uid" json:"last_uid" binding:"omitempty,gte=0"`
+	Query   string `form:"query" json:"query" binding:"required,min=1,max=128"`
+	Size    int32  `form:"size" json:"size" binding:"required,gte=10,lte=50"`
 }
 
 type SearchUserReqResp struct {

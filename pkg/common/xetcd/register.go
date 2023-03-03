@@ -16,8 +16,6 @@ const (
 
 type RegEtcd struct {
 	cli          *clientv3.Client
-	ctx          context.Context
-	cancel       context.CancelFunc
 	endpoints    []string
 	serviceValue string
 	serviceKey   string
@@ -98,8 +96,6 @@ func (r *RegEtcd) Register() (err error) {
 		return
 	}
 	rEtcd.cli = cli
-	rEtcd.ctx = ctx
-	rEtcd.cancel = cancel
 
 	go func() {
 		for {
@@ -110,7 +106,7 @@ func (r *RegEtcd) Register() (err error) {
 					//xlog.Info("续约成功")
 				} else {
 					xlog.Error("租约失效")
-					r.UnRegisterEtcd()
+					cancel()
 					r.reChan <- struct{}{}
 					return
 				}
@@ -136,9 +132,4 @@ func (r *RegEtcd) ReRegister() {
 			}
 		}
 	}()
-}
-
-func (r *RegEtcd) UnRegisterEtcd() {
-	r.cancel()
-	r.cli.Delete(rEtcd.ctx, rEtcd.serviceKey)
 }

@@ -5,10 +5,10 @@ import (
 )
 
 type GetChatMessageListReq struct {
-	ChatId int64  `form:"chat_id" json:"chat_id" validate:"required,gt=0"`
-	SeqIds string `form:"seq_ids" json:"seq_ids" validate:"required"`
-	MsgTs  int64  `form:"msg_ts" json:"msg_ts" validate:"omitempty,gte=0"`
-	Order  int32  `form:"order" json:"order" validate:"omitempty,gte=0,lte=1"`
+	ChatId int64  `form:"chat_id" json:"chat_id" binding:"required,gt=0"`
+	SeqIds string `form:"seq_ids" json:"seq_ids" binding:"required"`
+	MsgTs  int64  `form:"msg_ts" json:"msg_ts" binding:"omitempty,gte=0"`
+	Order  int32  `form:"order" json:"order" binding:"omitempty,gte=0,lte=1"`
 }
 
 type ChatMessages struct {
@@ -17,12 +17,12 @@ type ChatMessages struct {
 }
 
 type GetChatMessagesReq struct {
-	ChatType int32 `form:"chat_type" json:"chat_type" validate:"required,gte=0,lte=127"`
-	ChatId   int64 `form:"chat_id" json:"chat_id" validate:"required,gt=0"`
-	SeqId    int64 `form:"seq_id" json:"seq_id" validate:"omitempty,gte=0"`
-	Limit    int32 `form:"limit" json:"limit" validate:"required,gte=10,lte=50"`
+	ChatType int32 `form:"chat_type" json:"chat_type" binding:"required,gte=0,lte=127"`
+	ChatId   int64 `form:"chat_id" json:"chat_id" binding:"required,gt=0"`
+	SeqId    int64 `form:"seq_id" json:"seq_id" binding:"omitempty,gte=0"`
+	Limit    int32 `form:"limit" json:"limit" binding:"required,gte=10,lte=50"`
 	New      bool  `form:"new" json:"new"`
-	MsgTs    int64 `form:"msg_ts" json:"msg_ts" validate:"omitempty,gte=0"`
+	MsgTs    int64 `form:"msg_ts" json:"msg_ts" binding:"omitempty,gte=0"`
 }
 
 type SrvChatMessage struct {

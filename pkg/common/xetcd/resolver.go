@@ -57,7 +57,11 @@ func NewResolver(opt *conf.GrpcDialOption) (r *Resolver, err error) {
 	r.schema = opt.Etcd.Schema
 	r.serviceName = opt.ServiceName
 	r.cli = cli
+	resolverMutex.Lock()
+	// concurrent map writes
+	// Everything throw does should be recursively nosplit so it can be called even when it's unsafe to grow the stack.
 	resolver.Register(r)
+	resolverMutex.Unlock()
 	r.grpcClientConn, _ = r.newGrpcClientConn()
 	return
 }
@@ -111,12 +115,11 @@ func GetConn(opt *conf.GrpcDialOption) *grpc.ClientConn {
 		return r.grpcClientConn
 	}
 
-	resolverMutex.Lock()
 	r, err = NewResolver(opt)
 	if err != nil {
-		resolverMutex.Unlock()
 		return nil
 	}
+	resolverMutex.Lock()
 	resolvers[key] = r
 	resolverMutex.Unlock()
 	return r.grpcClientConn
@@ -168,7 +171,7 @@ func remove(s []resolver.Address, addr string) ([]resolver.Address, bool) {
 }
 
 func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
-	rch := r.cli.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrefix())
+	rch := r.cli.Watch(context.Background(), prefix, clientv3.WithPrefix())
 	for n := range rch {
 		update := false
 		for _, ev := range n.Events {

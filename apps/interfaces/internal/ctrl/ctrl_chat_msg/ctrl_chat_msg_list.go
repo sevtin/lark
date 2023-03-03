@@ -5,7 +5,6 @@ import (
 	"lark/apps/interfaces/internal/dto/dto_chat_msg"
 	"lark/pkg/common/xgin"
 	"lark/pkg/common/xlog"
-	"lark/pkg/utils"
 	"lark/pkg/xhttp"
 )
 
@@ -37,11 +36,6 @@ func (ctrl *ChatMessageCtrl) GetChatMessages(ctx *gin.Context) {
 	if err = ctx.ShouldBindQuery(params); err != nil {
 		xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_REQ_DESERIALIZE_FAILED, xhttp.ERROR_HTTP_REQ_DESERIALIZE_FAILED)
 		xlog.Warn(xhttp.ERROR_CODE_HTTP_REQ_DESERIALIZE_FAILED, xhttp.ERROR_HTTP_REQ_DESERIALIZE_FAILED, err.Error())
-		return
-	}
-	if err = utils.Struct(params); err != nil {
-		xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_REQ_PARAM_ERR, err.Error())
-		xlog.Warn(xhttp.ERROR_CODE_HTTP_REQ_PARAM_ERR, xhttp.ERROR_HTTP_REQ_PARAM_ERR, err.Error())
 		return
 	}
 	resp = ctrl.chatMessageService.GetChatMessages(params)

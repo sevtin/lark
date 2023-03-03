@@ -15,7 +15,7 @@ CREATE TABLE `users` (
   `reg_platform` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '注册平台',
   `server_id` int NOT NULL DEFAULT '0' COMMENT '分配的ws服务器',
   `city_id` int NOT NULL DEFAULT '0' COMMENT '城市ID',
-  `avatar_key` varchar(64) DEFAULT '' COMMENT '小图 72*72',
+  `avatar_key` varchar(64) NOT NULL DEFAULT '' COMMENT '小图 72*72',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',

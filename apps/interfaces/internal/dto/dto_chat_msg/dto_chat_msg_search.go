@@ -5,11 +5,11 @@ import (
 )
 
 type SearchMessageReq struct {
-	Uid       int64  `form:"uid" json:"uid" validate:"required,gt=0"`
-	ChatId    int64  `form:"chat_id" json:"chat_id" validate:"required,gt=0"`
-	LastMsgId int64  `form:"last_msg_id" json:"last_msg_id" validate:"omitempty,gte=0"`
-	Query     string `form:"query" json:"query" validate:"required,min=1,max=128"`
-	Size      int32  `form:"size" json:"size" validate:"required,gte=10,lte=50"`
+	Uid       int64  `form:"uid" json:"uid" binding:"required,gt=0"`
+	ChatId    int64  `form:"chat_id" json:"chat_id" binding:"required,gt=0"`
+	LastMsgId int64  `form:"last_msg_id" json:"last_msg_id" binding:"omitempty,gte=0"`
+	Query     string `form:"query" json:"query" binding:"required,min=1,max=128"`
+	Size      int32  `form:"size" json:"size" binding:"required,gte=10,lte=50"`
 }
 
 type SearchMessageResp struct {

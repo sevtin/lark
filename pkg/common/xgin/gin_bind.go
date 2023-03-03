@@ -3,16 +3,11 @@ package xgin
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"lark/pkg/utils"
 	"lark/pkg/xhttp"
 )
 
 func BindJSON(ctx *gin.Context, params interface{}) (err error) {
 	if err = ctx.BindJSON(params); err != nil {
-		xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_REQ_DESERIALIZE_FAILED, xhttp.ERROR_HTTP_REQ_DESERIALIZE_FAILED)
-		return
-	}
-	if err = utils.Struct(params); err != nil {
 		switch err.(type) {
 		case validator.ValidationErrors:
 			if len(err.(validator.ValidationErrors)) > 0 {
@@ -28,10 +23,6 @@ func BindJSON(ctx *gin.Context, params interface{}) (err error) {
 
 func ShouldBindQuery(ctx *gin.Context, params interface{}) (err error) {
 	if err = ctx.ShouldBindQuery(params); err != nil {
-		xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_REQ_DESERIALIZE_FAILED, xhttp.ERROR_HTTP_REQ_DESERIALIZE_FAILED)
-		return
-	}
-	if err = utils.Struct(params); err != nil {
 		switch err.(type) {
 		case validator.ValidationErrors:
 			if len(err.(validator.ValidationErrors)) > 0 {

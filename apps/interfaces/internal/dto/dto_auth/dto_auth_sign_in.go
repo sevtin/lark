@@ -6,12 +6,12 @@ import (
 )
 
 type SignInReq struct {
-	AccountType      int32                 `json:"account_type" validate:"required,oneof=1 2"`   // 登录类型 1:手机号 2:lark账户
-	Platform         pb_enum.PLATFORM_TYPE `json:"platform" validate:"required,oneof=1 2 3 4 5"` // 平台 1:iOS 2:安卓
-	Account          string                `json:"account" validate:"required,min=5,max=20"`     // 手机号/lark账户
-	Udid             string                `json:"udid" validate:"required,len=40"`              // UDID
-	VerificationCode string                `json:"verification_code" validate:"omitempty"`       // 验证码
-	Password         string                `json:"password" validate:"required,len=32"`          // 密码
+	AccountType      int32                 `json:"account_type" binding:"required,oneof=1 2"`   // 登录类型 1:手机号 2:lark账户
+	Platform         pb_enum.PLATFORM_TYPE `json:"platform" binding:"required,oneof=1 2 3 4 5"` // 平台 1:iOS 2:安卓
+	Account          string                `json:"account" binding:"required,min=5,max=20"`     // 手机号/lark账户
+	Udid             string                `json:"udid" binding:"required,len=40"`              // UDID
+	VerificationCode string                `json:"verification_code" binding:"omitempty"`       // 验证码
+	Password         string                `json:"password" binding:"required,len=32"`          // 密码
 }
 
 type AuthResp struct {

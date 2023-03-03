@@ -1,7 +1,7 @@
 package dto_auth
 
 type RefreshTokenReq struct {
-	RefreshToken string `json:"refresh_token"  validate:"required"` // 刷新token
+	RefreshToken string `json:"refresh_token" binding:"required"` // 刷新token
 }
 
 //type RefreshTokenResp struct {
