@@ -53,6 +53,6 @@ func (r *chatMessageRepository) TxUpdateMessage(tx *gorm.DB, u *entity.MysqlUpda
 func (r *chatMessageRepository) HistoryMessages(w *entity.MysqlWhere) (list []*po.Message, err error) {
 	list = make([]*po.Message, 0)
 	db := xmysql.GetDB()
-	err = db.Where(w.Query, w.Args...).Limit(w.Limit).Order(w.Sort).Find(&list).Error
+	err = db.Where(w.Query, w.Args...).Order(w.Sort).Find(&list).Error
 	return
 }
