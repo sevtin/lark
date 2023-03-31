@@ -25,6 +25,8 @@ CPU: 3.2 GHz 六核Intel Core i7
 平均每1条消息发送/转发在线人员/在线人员接收总耗时: 42ms
 */
 var (
+	// 起始uid
+	uid = flag.Int64("uid", 1639998887770000000, "First user id")
 	// 在线成员数量
 	on = flag.Int64("on", 1000, "Online users")
 	// 每次发送消息数量
@@ -32,7 +34,7 @@ var (
 	// 群成员数量
 	gn = flag.Int64("gn", 10000, "Number of group members")
 	// 发送消息次数
-	tn = flag.Int64("tn", 400, "Number of tests")
+	tn = flag.Int64("tn", 1, "Number of tests")
 	// chat id
 	cid = flag.Int64("cid", 3333336666669999990, "Test Chat ID")
 	// 是否集群
@@ -52,7 +54,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	manager := client.NewManager(*on, *sn, *gn, *tn, *cid, *cl, *sc)
+	manager := client.NewManager(*uid, *on, *sn, *gn, *tn, *cid, *cl, *sc)
 	manager.Run()
 
 	wg.Wait()

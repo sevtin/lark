@@ -11,22 +11,20 @@ import (
 )
 
 func (s *chatMemberService) GetDistMemberList(ctx context.Context, req *pb_chat_member.GetDistMemberListReq) (resp *pb_chat_member.GetDistMemberListResp, _ error) {
-	resp = &pb_chat_member.GetDistMemberListResp{List: make([]string, 0)}
+	resp = &pb_chat_member.GetDistMemberListResp{}
 	var (
 		w       = entity.NewMysqlWhere()
 		count   int
 		lastUid int64
 		members []*pb_chat_member.DistMember
 		member  *pb_chat_member.DistMember
-		maps    = make(map[string]interface{})
+		maps    = make(map[string]string)
 		err     error
 	)
 
 	for {
 		var (
-			values []string
-			index  int
-			value  string
+			value string
 		)
 		w.Normal()
 		w.SetFilter("m.chat_id = ?", req.ChatId)
@@ -46,19 +44,17 @@ func (s *chatMemberService) GetDistMemberList(ctx context.Context, req *pb_chat_
 		if count == 0 {
 			break
 		}
-		values = make([]string, count)
-		for index, member = range members {
+		for _, member = range members {
 			// 0:ServerId, 1:Platform, 2:Uid, 3:Status
-			value = fmt.Sprintf("%d,%d,%d", member.ServerId, member.Uid, member.Status)
-			values[index] = value
+			value = fmt.Sprintf("%d,%d", member.ServerId, member.Status)
 			maps[utils.Int64ToStr(member.Uid)] = value
 		}
-		resp.List = append(resp.List, values...)
 		if count < w.Limit {
 			break
 		}
 		lastUid = members[count-1].Uid
 	}
+	resp.Members = maps
 	if len(maps) == 0 {
 		return
 	}

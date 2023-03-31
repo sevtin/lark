@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
+	"lark/pkg/common/xlog"
 	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
 	"lark/pkg/utils"
@@ -45,8 +46,11 @@ func CreateToken(uid int64, platform int32, access bool, expiresIn int) (t *JwtT
 	if access == true {
 		tokenStr = constant.JWT_PREFIX + tokenStr
 		// TODO: 开发调试用!!!
-		key := constant.RK_SYNC_USER_ACCESS_TOKEN + utils.Int64ToStr(uid) + ":" + utils.Int32ToStr(platform)
-		xredis.Set(key, tokenStr, constant.CONST_DURATION_JWT_ACCESS_TOKEN_EXPIRE_IN_SECOND)
+		key := constant.RK_SYNC_USER_ACCESS_TOKEN + utils.GetHashTagKey(uid) + ":" + utils.Int32ToStr(platform)
+		terr := xredis.Set(key, tokenStr, constant.CONST_DURATION_JWT_ACCESS_TOKEN_EXPIRE_IN_SECOND)
+		if terr != nil {
+			xlog.Warn(key, terr.Error())
+		}
 	}
 	t.SessionId = sessionId
 	t.Expire = expire

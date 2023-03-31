@@ -19,6 +19,7 @@ func JwtAuth() gin.HandlerFunc {
 			token        *jwt.Token
 			ok           bool
 			uid          interface{}
+			uidVal       int64
 			platform     interface{}
 			sessionId    interface{}
 			sessionIdVal string
@@ -54,7 +55,13 @@ func JwtAuth() gin.HandlerFunc {
 			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_JWT_TOKEN_UUID_DOESNOT_EXIST, xhttp.ERROR_HTTP_JWT_TOKEN_UUID_DOESNOT_EXIST)
 			return
 		}
-		sessionIdKey = constant.RK_SYNC_USER_ACCESS_TOKEN_SESSION_ID + utils.ToString(uid) + ":" + utils.ToString(platform)
+		uidVal, err = utils.ToInt64(uid)
+		if err != nil {
+			ctx.Abort()
+			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_USER_ID_DOESNOT_EXIST, xhttp.ERROR_HTTP_USER_ID_DOESNOT_EXIST)
+			return
+		}
+		sessionIdKey = constant.RK_SYNC_USER_ACCESS_TOKEN_SESSION_ID + utils.GetHashTagKey(uidVal) + ":" + utils.ToString(platform)
 		if sessionIdVal, err = xredis.Get(sessionIdKey); err != nil {
 			ctx.Abort()
 			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_TOKEN_AUTHENTICATION_FAILED, xhttp.ERROR_HTTP_TOKEN_AUTHENTICATION_FAILED)

@@ -46,7 +46,7 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 
 	// 1、消息缓存
 	xants.Submit(func() {
-		s.chatMessageCache.SetConvoMessage(s.cfg.Redis.Prefix, message)
+		s.chatMessageCache.SetConvoMessage(message)
 	})
 
 	// 2、消息入库

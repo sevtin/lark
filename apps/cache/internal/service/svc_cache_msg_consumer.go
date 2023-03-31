@@ -41,10 +41,10 @@ func (s *cacheService) MessageHandler(msg []byte, key string) (err error) {
 	switch key {
 	case constant.CONST_MSG_KEY_CACHE_ON_OFF_LINE:
 		var (
-			obj = new(do.KeysValues)
+			obj = new(do.KeysFieldValues)
 		)
 		utils.ByteToObj(msg, obj)
-		err = s.chatMemberCache.HMSetDistChatMembers(obj.Keys, obj.Values)
+		err = s.chatMemberCache.HSetDistChatMembers(obj.Keys, obj.Field, obj.Values)
 	case constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION:
 		var (
 			obj    = new(do.KeyMaps)

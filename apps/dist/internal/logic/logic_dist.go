@@ -8,56 +8,25 @@ import (
 )
 
 func GetMembersFromHash(hashmap map[string]string) (distMembers map[int64][]*pb_obj.Int64Array) {
-	return getMembersHandler(true, hashmap, nil)
-}
-
-func GetMembersFromList(members []string) (distMembers map[int64][]*pb_obj.Int64Array) {
-	return getMembersHandler(false, nil, members)
-}
-
-func getMembersHandler(isHash bool, hashmap map[string]string, members []string) (distMembers map[int64][]*pb_obj.Int64Array) {
 	var (
-		length int
-	)
-	if isHash == true {
 		length = len(hashmap)
-	} else {
-		length = len(members)
-	}
+	)
 	if length == 0 {
 		return
 	}
-
-	if isHash {
-		return groupFromHashmap(hashmap)
-	} else {
-		return groupFromMembers(members)
-	}
+	return groupFromHashmap(hashmap)
 }
 
 func groupFromHashmap(hashmap map[string]string) (distMembers map[int64][]*pb_obj.Int64Array) {
 	var (
+		uid      string
 		str      string
 		array    *pb_obj.Int64Array
 		serverId int64
 	)
 	distMembers = make(map[int64][]*pb_obj.Int64Array)
-	for _, str = range hashmap {
-		array, serverId = pb_obj.MemberInt64Array(str)
-		setDistMembers(distMembers, serverId, array)
-	}
-	return
-}
-
-func groupFromMembers(members []string) (distMembers map[int64][]*pb_obj.Int64Array) {
-	var (
-		str      string
-		array    *pb_obj.Int64Array
-		serverId int64
-	)
-	distMembers = make(map[int64][]*pb_obj.Int64Array)
-	for _, str = range members {
-		array, serverId = pb_obj.MemberInt64Array(str)
+	for uid, str = range hashmap {
+		array, serverId = pb_obj.MemberInt64Array(str, uid)
 		setDistMembers(distMembers, serverId, array)
 	}
 	return
@@ -103,9 +72,8 @@ func GetDistMembers(serverId int64, uid int64, status int64) (distMembers map[in
 		array *pb_obj.Int64Array
 	)
 	distMembers = make(map[int64][]*pb_obj.Int64Array)
-	// member.ServerId, member.Uid, member.Status
-	str = fmt.Sprintf("%d,%d,%d", serverId, uid, status)
-	array, serverId = pb_obj.MemberInt64Array(str)
+	str = fmt.Sprintf("%d,%d", serverId, status)
+	array, serverId = pb_obj.MemberInt64Array(str, uid)
 	setDistMembers(distMembers, serverId, array)
 	return
 }

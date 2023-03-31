@@ -18,7 +18,6 @@ import (
 func ConstructChatInviteNotificationMessage(
 	inviteReq *pb_invite.InitiateChatInviteReq,
 	invitees []*po.ChatInvite,
-	redisPrefix string,
 	chatCache cache.ChatCache,
 	userCache cache.UserCache,
 	chatClient chat_client.ChatClient,
@@ -35,7 +34,7 @@ func ConstructChatInviteNotificationMessage(
 		return
 	}
 	// 2、获取被邀请人serverId
-	userSrvMaps, err = GetServerIdList(inviteReq.InviteeUids, redisPrefix, userCache, userClient)
+	userSrvMaps, err = GetServerIdList(inviteReq.InviteeUids, userCache, userClient)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_INVITEE_INFO_FAILED, ERROR_CHAT_INVITE_GET_INVITEE_INFO_FAILED, err.Error())
 		return
@@ -91,13 +90,13 @@ func ConstructChatInviteNotificationMessage(
 	return
 }
 
-func GetServerIdList(inviteIds []int64, redisPrefix string, userCache cache.UserCache, userClient user_client.UserClient) (userSrvMaps map[int64]int64, err error) {
+func GetServerIdList(inviteIds []int64, userCache cache.UserCache, userClient user_client.UserClient) (userSrvMaps map[int64]int64, err error) {
 	var (
 		notUids []int64
 		resp    *pb_user.GetServerIdListResp
 		server  *pb_user.UserServerId
 	)
-	userSrvMaps, notUids, _ = userCache.GetUserServerList(redisPrefix, inviteIds)
+	userSrvMaps, notUids, _ = userCache.GetUserServerList(inviteIds)
 	if len(notUids) == 0 {
 		return
 	}

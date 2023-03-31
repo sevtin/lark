@@ -16,11 +16,10 @@ func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *prot
 		members []*pb_chat_member.ChatMemberInfo
 		member  *pb_chat_member.ChatMemberInfo
 		uidStr  = utils.Int64ToStr(uid)
-		prefix  = s.cfg.Redis.Prefix + constant.RK_SYNC_CHAT_MEMBER_INFO_HASH
 		jsonStr string
 		key     string
 		keys    []string
-		vals    []interface{}
+		vals    []string
 		index   int
 	)
 	w.SetFilter("uid=?", uid)
@@ -32,22 +31,21 @@ func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *prot
 	}
 
 	keys = make([]string, len(members))
-	vals = make([]interface{}, len(members)+1)
-	vals[0] = uidStr
+	vals = make([]string, len(members))
 	for index, member = range members {
 		jsonStr, err = utils.Marshal(member)
 		if err != nil {
 			r.Set(ERROR_CODE_USER_MARSHAL_FAILED, ERROR_USER_MARSHAL_FAILED)
 			return
 		}
-		key = prefix + utils.Int64ToStr(member.ChatId)
+		key = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.GetHashTagKey(member.ChatId)
 		keys[index] = key
-		vals[index+1] = jsonStr
+		vals[index] = jsonStr
 	}
 	if len(keys) == 0 {
 		return
 	}
-	err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
+	err = s.chatMemberCache.HSetDistChatMembers(keys, uidStr, vals)
 	if err != nil {
 		r.Set(ERROR_CODE_USER_CACHE_CHAT_MEMBER_INFO_FAILED, ERROR_USER_CACHE_CHAT_MEMBER_INFO_FAILED)
 	}

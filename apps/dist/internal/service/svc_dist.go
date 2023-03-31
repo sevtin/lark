@@ -11,6 +11,7 @@ import (
 	"lark/pkg/common/xkafka"
 	"lark/pkg/obj"
 	"lark/pkg/proto/pb_dist"
+	"runtime"
 	"sync"
 )
 
@@ -42,7 +43,7 @@ func NewDistService(cfg *config.Config, serverMgrCache cache.ServerMgrCache, cha
 		chatMemberClient: chatMemberClient,
 		serverMgrCache:   serverMgrCache,
 		chatMemberCache:  chatMemberCache,
-		queues:           make(chan struct{}, 8),
+		queues:           make(chan struct{}, runtime.NumCPU()),
 	}
 
 	svc.msgHandle[cfg.MsgConsumer.Topic[0]] = svc.MessageHandler

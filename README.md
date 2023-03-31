@@ -3,6 +3,9 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 
 <img src="assets/images/lark_logo.png" height="263" width="452"/>
 
+
+
+
 ### 技术选型及开发环境
 | 序号 | 技术                   | 版本              | 说明            | 官网                                         |
 |----|----------------------|-----------------|---------------|--------------------------------------------|
@@ -36,25 +39,31 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 
 ![](assets/images/lark-architecture-diagram.png)
 
+
 ### 单机版运行步骤
+
 ```
 Step 1
+下载单机版分支代码（注:该分支代码已停止维护）
+git clone -b standalone git@github.com:sevtin/lark.git
+
+Step 2
 创建日志文件目录
 /var/log/lark
 
-Step 2
+Step 3
 创建docker容器数据卷目录
 /Volumes/data/lark
 
-Step 3
+Step 4
 修改host文件
 lark/configs/docker/host.txt
 
-Step 4
+Step 5
 执行容器启动脚本
 ./lark/build/run/docker-up.sh
 
-Step 5
+Step 6
 http://127.0.0.1:9001/identity/account/new-account
 Minio Create Service Account
 Access Key: SEv0QKlwqQ36M1eV
@@ -71,14 +80,14 @@ upload files to photos
 
 mkdir -p /private/tmp/lark/photos
 
-Step 6
+Step 7
 通过Apache Flink同步数据到Elasticsearch
 
-Step 7
+Step 8
 执行build脚本
 ./lark/scripts/build.sh
 
-Step 8
+Step 9
 执行项目启动脚本
 ./lark/build/run/run_all.sh
 

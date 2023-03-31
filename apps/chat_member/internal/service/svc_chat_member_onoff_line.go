@@ -129,23 +129,22 @@ func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int6
 		// 3 更新hash
 		var (
 			keys      = make([]string, len(allStatus))
-			vals      = make([]interface{}, len(allStatus)+1)
+			vals      = make([]string, len(allStatus))
 			index     int
 			chat      *do.ChatMemberStatus
-			keyPrefix = s.cfg.Redis.Prefix + constant.RK_SYNC_DIST_CHAT_MEMBER_HASH
-			valPrefix = fmt.Sprintf("%d,%d,", serverId, uid)
+			valPrefix = fmt.Sprintf("%d,", serverId)
+			uidStr    = utils.ToString(uid)
 			err       error
 		)
-		vals[0] = utils.Int64ToStr(uid)
 		for index, chat = range allStatus {
-			keys[index] = keyPrefix + utils.Int64ToStr(chat.ChatId)
-			vals[index+1] = valPrefix + utils.IntToStr(int(chat.Status))
+			keys[index] = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.GetHashTagKey(chat.ChatId)
+			vals[index] = valPrefix + utils.IntToStr(int(chat.Status))
 		}
-		err = s.chatMemberCache.HMSetDistChatMembers(keys, vals)
+		err = s.chatMemberCache.HSetDistChatMembers(keys, uidStr, vals)
 		if err != nil {
 			xlog.Warn(err.Error())
 			// 消息队列
-			msg := &do.KeysValues{keys, vals}
+			msg := &do.KeysFieldValues{keys, uidStr, vals}
 			_, _, err = s.producer.Push(msg, constant.CONST_MSG_KEY_CACHE_ON_OFF_LINE)
 			if err != nil {
 				xlog.Warn(err.Error())
@@ -226,7 +225,7 @@ func (s *chatMemberService) consumerMessage(ctx context.Context, cancel context.
 					}
 					key = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.Int64ToStr(member.ChatId)
 					// 0:ServerId, 1:Platform, 2:Uid, 3:Status
-					val = fmt.Sprintf("%d,%d,%d", member.ServerId, member.Uid, member.Status)
+					val = fmt.Sprintf("%d,%d", member.ServerId, member.Status)
 					err = xredis.HMSet(key, map[string]interface{}{utils.Int64ToStr(member.Uid): val})
 					if err != nil {
 						cancel()

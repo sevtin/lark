@@ -24,8 +24,9 @@ message UserInfo {
   string lastname = 6; // lastname
   int32 gender = 7; // 性别
   int64 birth_ts = 8; // 生日
-  int64 city_id = 9; // 城市ID
-  AvatarInfo avatar = 10; // 头像
+  string mobile = 9; // 手机号
+  int64 city_id = 10; // 城市ID
+  AvatarInfo avatar = 11; // 头像
 }
 
 message GetUserListReq {

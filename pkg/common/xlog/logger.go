@@ -21,11 +21,12 @@ const (
 )
 
 const (
-	FileDebug = "/debug.log"
-	FileInfo  = "/info.log"
-	FileWarn  = "/warn.log"
-	FileError = "/error.log"
-	FilePanic = "/panic.log"
+	FileDebug  = "/debug.log"
+	FileInfo   = "/info.log"
+	FileWarn   = "/warn.log"
+	FileError  = "/error.log"
+	FilePanic  = "/panic.log"
+	FileStderr = "/stderr.log"
 )
 
 const (
@@ -149,6 +150,8 @@ func newLogger(cfg *Zap) (sl *zap.SugaredLogger) {
 	}
 	sl = logger.Sugar()
 	sl.Sync()
+
+	panicRedirect(path + FileStderr)
 	return
 }
 

@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"lark/pkg/common/xlog"
+	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
 	"lark/pkg/proto/pb_convo"
 	"lark/pkg/utils"
+	"sort"
 	"strings"
 )
 
@@ -15,9 +17,10 @@ func (s *convoService) ConvoList(ctx context.Context, req *pb_convo.ConvoListReq
 		buf    []byte
 		cidStr string
 		cids   []string
-		keys   []string
-		index  int
+		maps   = map[uint16][]string{}
+		crc16  uint16
 		cid    string
+		cidVal int64
 		key    string
 		list   []interface{}
 		val    interface{}
@@ -45,18 +48,19 @@ func (s *convoService) ConvoList(ctx context.Context, req *pb_convo.ConvoListReq
 		resp.Set(ERROR_CODE_CONVO_PARAM_ERR, ERROR_CONVO_PARAM_ERR)
 		return
 	}
-	keys = make([]string, len(cids))
-	for index, cid = range cids {
-		key = s.cfg.Redis.Prefix + constant.RK_MSG_CONVO_MSG + cid
-		keys[index] = key
+	for _, cid = range cids {
+		cidVal, _ = utils.ToInt64(cid)
+		key = xredis.GetPrefix() + constant.RK_MSG_CONVO_MSG + utils.GetHashTagKey(cidVal)
+		crc16 = utils.GetCrc16(cidVal)
+		maps[crc16] = append(maps[crc16], key)
 	}
-	list, err = s.chatMessageCache.MGetMessages(keys...)
+	list, err = s.chatMessageCache.SlotMGetMessages(maps)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED)
 		xlog.Warn(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED, err.Error())
 		return
 	}
-	for index, val = range list {
+	for _, val = range list {
 		if val == nil {
 			continue
 		}
@@ -64,5 +68,8 @@ func (s *convoService) ConvoList(ctx context.Context, req *pb_convo.ConvoListReq
 		utils.Unmarshal(val.(string), msg)
 		resp.List = append(resp.List, msg)
 	}
+	sort.Slice(resp.List, func(i, j int) bool {
+		return resp.List[i].SrvTs < resp.List[j].SrvTs
+	})
 	return
 }

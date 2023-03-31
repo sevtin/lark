@@ -20,11 +20,12 @@ const (
 type ChatMessageCache interface {
 	GetChatMessage(chatId int64, seqId int64) (message *po.Message, err error)
 	SetChatMessage(message *po.Message) (err error)
-	SetConvoMessage(prefix string, message *po.Message) (err error)
+	SetConvoMessage(message *po.Message) (err error)
 	RepeatMessageVerify(prefix string, chatId int64, msgId int64) (r string, ok bool)
 	IncrSeqID(chatId int64) (seqId int64, err error)
 	GetMaxSeqID(chatId int64) (seqId uint64, err error)
-	MGetMessages(keys ...string) ([]interface{}, error)
+	MGetMessages(keys []string) ([]interface{}, error)
+	SlotMGetMessages(maps map[uint16][]string) ([]interface{}, error)
 }
 
 type chatMessageCache struct {
@@ -36,7 +37,7 @@ func NewChatMessageCache() ChatMessageCache {
 
 func (c *chatMessageCache) GetChatMessage(chatId int64, seqId int64) (message *po.Message, err error) {
 	var (
-		key = constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(chatId) + ":" + utils.Int64ToStr(seqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(chatId) + ":" + utils.Int64ToStr(seqId)
 	)
 	message = new(po.Message)
 	err = Get(key, message)
@@ -45,17 +46,18 @@ func (c *chatMessageCache) GetChatMessage(chatId int64, seqId int64) (message *p
 
 func (c *chatMessageCache) SetChatMessage(message *po.Message) (err error) {
 	var (
-		key = constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(message.ChatId) + ":" + utils.Int64ToStr(message.SeqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(message.ChatId) + ":" + utils.Int64ToStr(message.SeqId)
 	)
 	err = Set(key, message, constant.CONST_DURATION_MSG_CACHE_SECOND)
 	return
 }
 
-func (c *chatMessageCache) SetConvoMessage(prefix string, message *po.Message) (err error) {
+func (c *chatMessageCache) SetConvoMessage(message *po.Message) (err error) {
 	var (
-		key1 = prefix + constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(message.ChatId) + ":" + utils.Int64ToStr(message.SeqId)
-		key2 = prefix + constant.RK_MSG_CONVO_MSG + utils.Int64ToStr(message.ChatId)
-		key3 = prefix + constant.RK_MSG_SEQ_TS + utils.Int64ToStr(message.ChatId)
+		htk  = utils.GetHashTagKey(message.ChatId)
+		key1 = constant.RK_SYNC_MSG_CACHE + htk + ":" + utils.Int64ToStr(message.SeqId)
+		key2 = constant.RK_MSG_CONVO_MSG + htk
+		key3 = constant.RK_MSG_SEQ_TS + htk
 		cm   = new(pb_convo.ConvoMessage)
 		val1 string
 		val2 string
@@ -72,7 +74,7 @@ func (c *chatMessageCache) SetConvoMessage(prefix string, message *po.Message) (
 		xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
 		return
 	}
-	err = xredis.EvalSha(xredis.SHA_MSET_CONVO_MESSAGE, []string{key1, key2, key3}, []interface{}{constant.CONST_DURATION_SHA_CONVO_MESSAGE_SECOND, val1, val2, val3})
+	err = xredis.CSet([]string{key1, key2, key3}, []interface{}{val1, val2, val3}, constant.CONST_DURATION_MSG_CACHE_SECOND)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
 	}
@@ -81,7 +83,7 @@ func (c *chatMessageCache) SetConvoMessage(prefix string, message *po.Message) (
 
 func (c *chatMessageCache) RepeatMessageVerify(prefix string, chatId int64, msgId int64) (r string, ok bool) {
 	var (
-		key    = prefix + constant.RK_MSG_CLI_MSG_ID + utils.Int64ToStr(chatId) + ":" + utils.Int64ToStr(msgId)
+		key    = prefix + constant.RK_MSG_CLI_MSG_ID + utils.Int64ToStr(chatId) + ":" + utils.GetHashTagKey(msgId)
 		result interface{}
 		err    error
 	)
@@ -129,6 +131,10 @@ func (c *chatMessageCache) GetMaxSeqID(chatId int64) (seqId uint64, err error) {
 	return
 }
 
-func (c *chatMessageCache) MGetMessages(keys ...string) ([]interface{}, error) {
-	return xredis.MGet(keys...)
+func (c *chatMessageCache) MGetMessages(keys []string) ([]interface{}, error) {
+	return xredis.MGet(keys)
+}
+
+func (c *chatMessageCache) SlotMGetMessages(maps map[uint16][]string) ([]interface{}, error) {
+	return xredis.SlotMGet(maps)
 }

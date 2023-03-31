@@ -11,7 +11,7 @@ import (
 type ChatInviteRepository interface {
 	CreateChatInvites(invites []*po.ChatInvite) (err error)
 	TxCreateChatInvites(tx *gorm.DB, list []*po.ChatInvite) (err error)
-	TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (err error)
+	TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64)
 	TxChatInvite(tx *gorm.DB, w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
 	ChatInvite(w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
 	ChatInviteList(w *entity.MysqlWhere) (list []*do.ChatInvite, err error)
@@ -35,8 +35,8 @@ func (r *chatInviteRepository) TxCreateChatInvites(tx *gorm.DB, list []*po.ChatI
 	return
 }
 
-func (r *chatInviteRepository) TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (err error) {
-	err = tx.Model(po.ChatInvite{}).Where(u.Query, u.Args...).Updates(u.Values).Error
+func (r *chatInviteRepository) TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64) {
+	rowsAffected = tx.Model(po.ChatInvite{}).Where(u.Query, u.Args...).Updates(u.Values).RowsAffected
 	return
 }
 

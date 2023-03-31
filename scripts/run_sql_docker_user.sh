@@ -13,21 +13,21 @@ do
 done
 
 # 测试数据
-for i in {1..10};
-do
-  INSERT="INSERT INTO users ( uid, lark_id, mobile ) VALUES ( ${i}, ${i}, ${i} );"
-  mysql -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USERNAME} -p${MYSQL_PASSWORD} -D${MYSQL_DB} -e "$INSERT"
-done
-
-# 测试数据
-for i in {1..10};
-do
-  INSERT="INSERT INTO chat_members
-          ( chat_id,chat_type, uid, alias, member_avatar_key,server_id)
-          VALUES
-          ( 3333336666669999990,2, ${i},CONCAT('name:',${i}),CONCAT('avatar_key',${i}),10000);"
-  mysql -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USERNAME} -p${MYSQL_PASSWORD} -D${MYSQL_DB} -e "$INSERT"
-done
+#for i in {1..10};
+#do
+#  INSERT="INSERT INTO users ( uid, lark_id, mobile ) VALUES ( ${i}, ${i}, ${i} );"
+#  mysql -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USERNAME} -p${MYSQL_PASSWORD} -D${MYSQL_DB} -e "$INSERT"
+#done
+#
+## 测试数据
+#for i in {1..10};
+#do
+#  INSERT="INSERT INTO chat_members
+#          ( chat_id,chat_type, uid, alias, member_avatar_key,server_id)
+#          VALUES
+#          ( 3333336666669999990,2, ${i},CONCAT('name:',${i}),CONCAT('avatar_key',${i}),10000);"
+#  mysql -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USERNAME} -p${MYSQL_PASSWORD} -D${MYSQL_DB} -e "$INSERT"
+#done
 
 <<xxxx
 

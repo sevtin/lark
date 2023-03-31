@@ -12,8 +12,6 @@ type ChatCache interface {
 	GetGroupChatInfo(chatId int64) (info *pb_chat.ChatInfo, err error)
 	SetGroupChatInfo(info *pb_chat.ChatInfo) (err error)
 	DelChatInfo(chatId int64) (err error)
-	// GetGroupChatDetails(chatId int64) (details *pb_chat.GroupChatDetails, err error)
-	// SetGroupChatDetails(details *pb_chat.GroupChatDetails) (err error)
 }
 
 type chatCache struct {
@@ -25,7 +23,7 @@ func NewChatCache() ChatCache {
 
 func (c *chatCache) GetGroupChatInfo(chatId int64) (info *pb_chat.ChatInfo, err error) {
 	var (
-		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.Int64ToStr(chatId)
+		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(chatId)
 	)
 	info = new(pb_chat.ChatInfo)
 	err = Get(key, info)
@@ -34,7 +32,7 @@ func (c *chatCache) GetGroupChatInfo(chatId int64) (info *pb_chat.ChatInfo, err 
 
 func (c *chatCache) SetGroupChatInfo(info *pb_chat.ChatInfo) (err error) {
 	var (
-		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.Int64ToStr(info.ChatId)
+		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(info.ChatId)
 	)
 	err = Set(key, info, constant.CONST_DURATION_GROUP_CHAT_INFO_SECOND)
 	return
@@ -42,7 +40,7 @@ func (c *chatCache) SetGroupChatInfo(info *pb_chat.ChatInfo) (err error) {
 
 func (c *chatCache) DelGroupChatInfo(chatId int64) (err error) {
 	var (
-		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.Int64ToStr(chatId)
+		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(chatId)
 	)
 	err = xredis.Del(key)
 	return
@@ -50,7 +48,7 @@ func (c *chatCache) DelGroupChatInfo(chatId int64) (err error) {
 
 func (c *chatCache) DelChatInfo(chatId int64) (err error) {
 	var (
-		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.Int64ToStr(chatId)
+		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(chatId)
 	)
 	err = xredis.Del(key)
 	if err != nil {
@@ -58,20 +56,3 @@ func (c *chatCache) DelChatInfo(chatId int64) (err error) {
 	}
 	return
 }
-
-//func (c *chatCache) GetGroupChatDetails(chatId int64) (details *pb_chat.GroupChatDetails, err error) {
-//	var (
-//		key = constant.RK_SYNC_GROUP_CHAT_DETAILS + utils.Int64ToStr(chatId)
-//	)
-//	details = new(pb_chat.GroupChatDetails)
-//	err = Get(key, details)
-//	return
-//}
-//
-//func (c *chatCache) SetGroupChatDetails(details *pb_chat.GroupChatDetails) (err error) {
-//	var (
-//		key = constant.RK_SYNC_GROUP_CHAT_DETAILS + utils.Int64ToStr(details.ChatId)
-//	)
-//	err = Set(key, details, constant.CONST_DURATION_GROUP_CHAT_INFO_SECOND)
-//	return
-//}

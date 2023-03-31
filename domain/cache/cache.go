@@ -33,7 +33,7 @@ func Get(key string, out interface{}) (err error) {
 	)
 	jsonStr, err = xredis.Get(key)
 	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, key, err.Error())
 		return
 	}
 	if jsonStr == "" {
@@ -50,21 +50,21 @@ func Get(key string, out interface{}) (err error) {
 func Gets(keys []string, tp interface{}) (list []interface{}, err error) {
 	list = make([]interface{}, 0)
 	var (
-		vals []interface{}
-		val  interface{}
+		vals []string
+		val  string
 	)
-	vals, err = xredis.MGet(keys...)
+	vals, err = xredis.CMGet(keys)
 	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, keys, err.Error())
 		return
 	}
 	for _, val = range vals {
-		if val == nil {
+		if val == "" {
 			return
 		}
-		err = utils.Unmarshal(val.(string), &tp)
+		err = utils.Unmarshal(val, &tp)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_UNMARSHAL_ERR, ERROR_CACHE_PROTOCOL_UNMARSHAL_ERR, err.Error())
+			xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_UNMARSHAL_ERR, ERROR_CACHE_PROTOCOL_UNMARSHAL_ERR, val, err.Error())
 		}
 		list = append(list, tp)
 	}
@@ -81,7 +81,7 @@ func Set(key string, in interface{}, expire time.Duration) (err error) {
 	default:
 		val, err = utils.Marshal(in)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
+			xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, val, err.Error())
 			return
 		}
 	}
@@ -90,31 +90,7 @@ func Set(key string, in interface{}, expire time.Duration) (err error) {
 	}
 	err = xredis.Set(key, val, expire)
 	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
-	}
-	return
-}
-
-func HMSet(key string, field string, in interface{}) (err error) {
-	var (
-		val interface{}
-	)
-	switch in.(type) {
-	case string, int64, int, int32:
-		val = in
-	default:
-		val, err = utils.Marshal(in)
-		if err != nil {
-			xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
-			return
-		}
-	}
-	if val == nil {
-		return
-	}
-	err = xredis.HMSet(key, map[string]interface{}{field: val})
-	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, val, err.Error())
 	}
 	return
 }

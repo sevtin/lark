@@ -14,9 +14,9 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 		buf         []byte
 		val         string
 		chatIds     []string
-		seqIdTsList []interface{}
+		seqIdTsList []string
 		index       int
-		value       interface{}
+		value       string
 		arr         []string
 		timestamp   int64
 		seq         *pb_convo.ConvoChatSeq
@@ -43,7 +43,7 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 		resp.Set(ERROR_CODE_CONVO_PARAM_ERR, ERROR_CONVO_PARAM_ERR)
 		return
 	}
-	seqIdTsList, err = s.convoCache.MGetSeqIdTsList(s.cfg.Redis.Prefix, chatIds)
+	seqIdTsList, err = s.convoCache.MGetSeqIdTsList(chatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED)
 		xlog.Warn(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED, err.Error())
@@ -54,21 +54,18 @@ func (s *convoService) ConvoChatSeqList(ctx context.Context, req *pb_convo.Convo
 	}
 	resp.List = make([]*pb_convo.ConvoChatSeq, 0)
 	for index, value = range seqIdTsList {
-		if value == nil {
+		if value == "" {
 			continue
 		}
-		switch value.(type) {
-		case string:
-			arr = strings.Split(value.(string), ",")
-			if len(arr) == 2 {
-				timestamp, _ = utils.ToInt64(arr[1])
-				if timestamp > req.Timestamp {
-					seq = new(pb_convo.ConvoChatSeq)
-					seq.ChatId, _ = utils.ToInt64(chatIds[index])
-					seq.SeqId, _ = utils.ToInt64(arr[0])
-					seq.SrvTs = timestamp
-					resp.List = append(resp.List, seq)
-				}
+		arr = strings.Split(value, ",")
+		if len(arr) == 2 {
+			timestamp, _ = utils.ToInt64(arr[1])
+			if timestamp > req.Timestamp {
+				seq = new(pb_convo.ConvoChatSeq)
+				seq.ChatId, _ = utils.ToInt64(chatIds[index])
+				seq.SeqId, _ = utils.ToInt64(arr[0])
+				seq.SrvTs = timestamp
+				resp.List = append(resp.List, seq)
 			}
 		}
 	}

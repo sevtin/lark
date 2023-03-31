@@ -119,7 +119,7 @@ services:
     ]
 
   lark-redis:
-    image: redis:6.2.7
+    image: redis:7.0.2
     container_name: lark-redis
     restart: always
     ports:

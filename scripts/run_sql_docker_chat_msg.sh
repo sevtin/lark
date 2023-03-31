@@ -2,8 +2,8 @@
 MYSQL_USERNAME="root"
 MYSQL_PASSWORD="lark2022"
 MYSQL_HOST="lark.com"
-MYSQL_PORT=13307
-MYSQL_DB="lark_chat_msg"
+MYSQL_PORT=3307
+MYSQL_DB="lark"
 
 folder="mysql/lark_chat_msg/sqls"
 

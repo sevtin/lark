@@ -14,8 +14,9 @@ import (
 
 func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidList []int64, chatType pb_enum.CHAT_TYPE) (rowsAffected int64, err error) {
 	var (
-		key1     = s.cfg.Redis.Prefix + constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.Int64ToStr(chatId)
-		key2     = s.cfg.Redis.Prefix + constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.Int64ToStr(chatId)
+		htk      = utils.GetHashTagKey(chatId)
+		key1     = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + htk
+		key2     = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + htk
 		uidCount = len(uidList)
 
 		uid   int64
@@ -69,18 +70,20 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 	xants.Submit(func() {
 		var (
 			keys   []string
-			fields []interface{}
+			fields []string
+			field  string
 			kv     *do.KeysValues
 			err    error
 		)
 		keys = make([]string, uidCount*2)
-		fields = make([]interface{}, uidCount*2)
+		fields = make([]string, uidCount*2)
 		for index, uid = range uidList {
+			field = utils.ToString(uid)
 			keys[index] = key1
-			fields[index] = uid
+			fields[index] = field
 
 			keys[index+uidCount] = key2
-			fields[index+uidCount] = uid
+			fields[index+uidCount] = field
 		}
 		if len(keys) == 0 {
 			return

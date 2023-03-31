@@ -71,7 +71,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 	}
 
 	// 删除缓存
-	err = s.userCache.DelUserInfo(s.cfg.Redis.Prefix, req.OwnerId)
+	err = s.userCache.DelUserInfo(req.OwnerId)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED)
 		return

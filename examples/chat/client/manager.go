@@ -23,6 +23,7 @@ var (
 type Manager struct {
 	unregister  chan *Client
 	clients     *obj.RwMap
+	FirstUid    int64 // First user id
 	OnlineCount int64 // Online users
 	SendCount   int64 // Number of messages send
 	MemberCount int64 // Number of group members
@@ -32,10 +33,11 @@ type Manager struct {
 	Cluster     bool
 }
 
-func NewManager(onlineCount int64, sendCount int64, memberCount int64, testCount int64, chatId int64, cluster bool, serverCount int) (mgr *Manager) {
+func NewManager(firstUid int64, onlineCount int64, sendCount int64, memberCount int64, testCount int64, chatId int64, cluster bool, serverCount int) (mgr *Manager) {
 	mgr = &Manager{
 		unregister:  make(chan *Client, 1000),
 		clients:     obj.NewRwMap(),
+		FirstUid:    firstUid,
 		OnlineCount: onlineCount,
 		SendCount:   sendCount,
 		MemberCount: memberCount,
@@ -51,18 +53,20 @@ func (m *Manager) Run() {
 	var (
 		uid        int64
 		uidStr     string
-		kv1        = map[string]interface{}{}
-		kv2        = map[string]interface{}{}
+		kv1        = map[string]string{}
+		kv2        = map[string]string{}
 		key        string
 		err        error
-		sid        int64
+		sid        int64 = 10000
 		memberInfo *pb_chat_member.ChatMemberInfo
 		jsonStr    string
+		start      = m.FirstUid
+		end        = start + m.MemberCount
 	)
 
 	m.debug()
 
-	for uid = 1; uid <= m.MemberCount; uid++ {
+	for uid = start; uid < end; uid++ {
 		uidStr = utils.Int64ToStr(uid)
 		// 0:ServerId, 1:Platform, 2:Uid, 3:Status
 		if m.Cluster == true {
@@ -75,9 +79,9 @@ func (m *Manager) Run() {
 			default:
 				sid = 10000
 			}
-			kv1[uidStr] = fmt.Sprintf("%d,%d,%d", sid, uid, 0)
+			kv1[uidStr] = fmt.Sprintf("%d,%d", sid, 0)
 		} else {
-			kv1[uidStr] = fmt.Sprintf("%d,%d,%d", 10000, uid, 0)
+			kv1[uidStr] = fmt.Sprintf("%d,%d", sid, 0)
 		}
 
 		memberInfo = &pb_chat_member.ChatMemberInfo{
@@ -90,14 +94,15 @@ func (m *Manager) Run() {
 		}
 		jsonStr, _ = utils.Marshal(memberInfo)
 		kv2[uidStr] = jsonStr
+		xredis.Set(constant.RK_SYNC_USER_SERVER+utils.GetHashTagKey(uid), sid, 0)
 	}
-	key = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.Int64ToStr(m.ChatId)
+	key = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.GetHashTagKey(m.ChatId)
 	err = xredis.HMSet(key, kv1)
 	if err != nil {
 		xlog.Error(err.Error())
 		return
 	}
-	key = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.Int64ToStr(m.ChatId)
+	key = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.GetHashTagKey(m.ChatId)
 	err = xredis.HMSet(key, kv2)
 	if err != nil {
 		xlog.Error(err.Error())
@@ -132,9 +137,11 @@ func (m *Manager) batchCreate(count int64) {
 		server = "127.0.0.1"
 		port   = 7301
 		sid    int64
+		start  = m.FirstUid
+		end    = start + count
 	)
 	ch := make(chan int, 1000)
-	for i = 1; i <= count; i++ {
+	for i = start; i < end; i++ {
 		ch <- 0
 		if m.Cluster == true {
 			sid = i % int64(m.ServerCount)
@@ -177,6 +184,8 @@ func (m *Manager) loopSend() {
 			i      int64
 			count  int64
 			ticker = time.NewTicker(time.Second * 1)
+			start  = m.FirstUid
+			end    = start + m.SendCount
 		)
 		defer ticker.Stop()
 		for {
@@ -186,7 +195,7 @@ func (m *Manager) loopSend() {
 					isStart = true
 					msgTimer.Run()
 				}
-				for i = 1; i <= m.SendCount; i++ {
+				for i = start; i < end; i++ {
 					client, ok := m.clients.Get(i)
 					if ok == false {
 						continue

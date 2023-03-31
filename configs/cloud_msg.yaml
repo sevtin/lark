@@ -2,7 +2,7 @@ name: lark_cloud_msg_server
 server_id: 1
 log: "./configs/logger.yaml"
 etcd:
-  endpoints: ["lark-etcd:12379"]
+  endpoints: ["lark-etcd-01:12379","lark-etcd-02:12381","lark-etcd-03:12383"]
   username:
   password:
   schema: lark
@@ -10,20 +10,23 @@ etcd:
   write_timeout: 5000
   dial_timeout: 5000
 mysql:
-  address: "lark-mysql-user:13306"
-  username: root
-  password: lark2022
-  db: lark_user
-  max_open_conn: 20
-  max_idle_conn: 10
-  conn_lifetime: 120000
+  max_open_conns: 20
+  max_idle_conns: 10
+  max_lifetime: 120000
+  max_idle_time: 7200000
   charset: utf8
+  sources:
+    - {address: "lark-mysql-user-01:13306",username: root,password: lark2022,db: lark_user}
+    - {address: "lark-mysql-user-02:13307",username: root,password: lark2022,db: lark_user}
+  replicas:
+    - {address: "lark-mysql-user-03:13308",username: root,password: lark2022,db: lark_user}
+    - {address: "lark-mysql-user-04:13309",username: root,password: lark2022,db: lark_user}
 redis:
-  address: ["lark-redis:63791"]
+  address: ["lark-redis-01:7001","lark-redis-02:7002","lark-redis-03:7003","lark-redis-04:7004"]
   db: 0
   password: lark2022
   prefix: "LK:"
 msg_consumer:
-  address: ["lark-kafka:9092"]
+  address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: ["to_cloud_msg"] # msg_gateway->cloud_msg
   group_id: offline_push

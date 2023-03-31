@@ -51,21 +51,20 @@ func (s *distService) MessageHandler(msg []byte, msgKey string) (err error) {
 
 func (s *distService) getChatMembers(chatId int64) (serverMembers map[int64][]*pb_obj.Int64Array) {
 	var (
-		hashmap    map[string]string
-		memberList []string
+		hashmap map[string]string
 	)
-	// 1万人占用 661KB Redis Memory
+	// 1万人占用 753KB Redis Memory
 	hashmap = s.chatMemberCache.GetAllDistChatMembers(chatId)
 	if len(hashmap) > 0 {
 		serverMembers = logic.GetMembersFromHash(hashmap)
 	} else {
-		memberList = s.getMemberList(chatId)
-		serverMembers = logic.GetMembersFromList(memberList)
+		hashmap = s.getMemberList(chatId)
+		serverMembers = logic.GetMembersFromHash(hashmap)
 	}
 	return
 }
 
-func (s *distService) getMemberList(chatId int64) (list []string) {
+func (s *distService) getMemberList(chatId int64) (members map[string]string) {
 	var (
 		userListReq = &pb_chat_member.GetDistMemberListReq{ChatId: chatId}
 		resp        *pb_chat_member.GetDistMemberListResp
@@ -79,7 +78,7 @@ func (s *distService) getMemberList(chatId int64) (list []string) {
 		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
-	return resp.List
+	return resp.Members
 }
 
 func (s *distService) getClient(serverId int64) (client gw_client.MessageGatewayClient) {

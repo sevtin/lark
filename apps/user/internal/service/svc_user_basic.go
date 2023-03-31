@@ -31,7 +31,7 @@ func (s *userService) GetBasicUserInfo(ctx context.Context, req *pb_user.GetBasi
 }
 
 func (s *userService) cacheBasicUsers(list []*pb_user.BasicUserInfo) {
-	err := s.userCache.SetBasicUserInfoList(s.cfg.Redis.Prefix, list)
+	err := s.userCache.SetBasicUserInfoList(list)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_USER_REDIS_SET_FAILED, ERROR_USER_REDIS_SET_FAILED, err.Error())
 	}

@@ -133,11 +133,11 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			err error
 		)
 		// 6 缓存成员hash
-		err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status))
+		err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d", creator.ServerId, member.Status))
 		if err != nil {
 			xlog.Warn(err.Error())
 			var (
-				kfv = do.KeyFieldValue{member.ChatId, member.Uid, fmt.Sprintf("%d,%d,%d", creator.ServerId, member.Uid, member.Status)}
+				kfv = do.KeyFieldValue{member.ChatId, member.Uid, fmt.Sprintf("%d,%d", creator.ServerId, member.Status)}
 			)
 			_, _, err = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT)
 			if err != nil {
@@ -169,7 +169,6 @@ func (s *chatService) sendChatInviteNotificationMessage(inviteReq *pb_invite.Ini
 	req, err = biz_chat_invite.ConstructChatInviteNotificationMessage(
 		inviteReq,
 		invitees,
-		s.cfg.Redis.Prefix,
 		s.chatCache,
 		s.userCache,
 		s.chatClient,
@@ -180,6 +179,7 @@ func (s *chatService) sendChatInviteNotificationMessage(inviteReq *pb_invite.Ini
 	if req == nil {
 		return
 	}
+	// TODO: rpc error: code = ResourceExhausted desc = grpc: received message larger than max (25156 vs. 4096)
 	resp = s.distClient.ChatInviteNotification(req)
 	if resp == nil {
 		xlog.Warn(ERROR_CODE_CHAT_GRPC_SERVICE_FAILURE, ERROR_CHAT_GRPC_SERVICE_FAILURE)

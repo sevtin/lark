@@ -53,5 +53,6 @@ var (
 )
 
 var (
-	ERR_CHAT_INVITE_QUERY_DB_FAILED = errors.New("查询失败")
+	ERR_CHAT_INVITE_QUERY_DB_FAILED  = errors.New("查询失败")
+	ERR_CHAT_INVITE_REPEAT_OPERATION = errors.New("重复的操作")
 )

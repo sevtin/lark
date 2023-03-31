@@ -11,7 +11,7 @@ func (s *authService) SignOut(ctx context.Context, req *pb_auth.SignOutReq) (res
 	var (
 		err error
 	)
-	err = s.userCache.SignOut(s.cfg.Redis.Prefix, req.Uid, req.Platform)
+	err = s.userCache.SignOut(req.Uid, req.Platform)
 	if err != nil {
 		resp.Set(ERROR_CODE_AUTH_LOGOUT_FAILED, ERROR_AUTH_LOGOUT_FAILED)
 		xlog.Warn(ERROR_CODE_AUTH_LOGOUT_FAILED, ERROR_AUTH_LOGOUT_FAILED, err.Error())

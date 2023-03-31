@@ -22,6 +22,14 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 		maxSeqId  uint64
 		err       error
 	)
+	defer func() {
+		if resp.Msgs != nil && len(resp.Msgs.List) > 0 {
+			sort.Slice(resp.Msgs.List, func(i, j int) bool {
+				return resp.Msgs.List[i].SeqId < resp.Msgs.List[j].SeqId
+			})
+		}
+	}()
+
 	if req.Order == pb_enum.ORDER_TYPE_ASC {
 		// 1、消息边界
 		maxSeqId, err = s.chatMessageCache.GetMaxSeqID(req.ChatId)
@@ -53,7 +61,6 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 	}
 	if len(cacheList) > 0 && len(list) > 0 {
 		list = append(list, cacheList...)
-		sortMessageList(list, true)
 		copier.Copy(&resp.Msgs.List, list)
 		return
 	}
@@ -82,6 +89,13 @@ func (s *chatMessageService) GetChatMessages(_ context.Context, req *pb_chat_msg
 		next        bool
 		err         error
 	)
+	defer func() {
+		if req.New == true && len(resp.List) > 0 {
+			sort.Slice(resp.List, func(i, j int) bool {
+				return resp.List[i].SeqId < resp.List[j].SeqId
+			})
+		}
+	}()
 	// 1、消息边界
 	maxSeqId, _ = s.chatMessageCache.GetMaxSeqID(req.ChatId)
 	if req.SeqId >= int64(maxSeqId) {
@@ -97,9 +111,6 @@ func (s *chatMessageService) GetChatMessages(_ context.Context, req *pb_chat_msg
 		cacheList, next, err = s.GetCacheMessages(req, int64(maxSeqId))
 		if next == false || err != nil {
 			if len(cacheList) > 0 {
-				if req.New == false {
-					sortMessageList(cacheList, true)
-				}
 				copier.Copy(&resp.List, cacheList)
 			}
 			return
@@ -146,19 +157,16 @@ func (s *chatMessageService) GetChatMessages(_ context.Context, req *pb_chat_msg
 	if msgCount == 0 {
 		return
 	}
-	if req.New == false {
-		sortMessageList(list, true)
-	}
 	copier.Copy(&resp.List, list)
 	return
 }
 
-func sortMessageList(list []*po.Message, asc bool) {
-	sort.Slice(list, func(i, j int) bool {
-		if asc == true {
-			return list[i].SeqId < list[j].SeqId
-		} else {
-			return list[i].SeqId > list[j].SeqId
-		}
-	})
-}
+//func sortMessageList(list []*po.Message, asc bool) {
+//	sort.Slice(list, func(i, j int) bool {
+//		if asc == true {
+//			return list[i].SeqId < list[j].SeqId
+//		} else {
+//			return list[i].SeqId > list[j].SeqId
+//		}
+//	})
+//}

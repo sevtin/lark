@@ -26,25 +26,28 @@ import (
 func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite.ChatInviteHandleReq) (resp *pb_invite.ChatInviteHandleResp, _ error) {
 	resp = new(pb_invite.ChatInviteHandleResp)
 	var (
-		tx     *gorm.DB
-		u      = entity.NewMysqlUpdate()
-		invite *po.ChatInvite
-		cont   bool
-		err    error
+		tx           *gorm.DB
+		u            = entity.NewMysqlUpdate()
+		rowsAffected int64
+		invite       *po.ChatInvite
+		cont         bool
+		err          error
 	)
-
 	// 1 校验邀请
 	invite, cont = s.chatInviteExists(req, resp)
 	if cont == false {
 		return
 	}
-	// 2 重复操作验证
-	cont = s.alreadyMember(invite, resp)
-	if cont == false {
-		return
-	}
+	/*
+		// 2 重复操作验证
+		cont = s.alreadyMember(invite, resp)
+		if cont == false {
+			return
+		}
+	*/
 	// 3 更新邀请
 	u.SetFilter("invite_id=?", req.InviteId)
+	u.SetFilter("invitee_uid=?", req.HandlerUid)
 	u.Set("handler_uid", req.HandlerUid)
 	u.Set("handle_result", req.HandleResult)
 	u.Set("handle_msg", req.HandleMsg)
@@ -59,9 +62,9 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 			xlog.Warn(resp.Code, resp.Msg, err.Error())
 		}
 	}()
-
-	err = s.chatInviteRepo.TxUpdateChatInvite(tx, u)
-	if err != nil {
+	rowsAffected = s.chatInviteRepo.TxUpdateChatInvite(tx, u)
+	if rowsAffected == 0 {
+		err = ERR_CHAT_INVITE_REPEAT_OPERATION
 		resp.Set(ERROR_CODE_CHAT_INVITE_UPDATE_VALUE_FAILED, ERROR_CHAT_INVITE_UPDATE_VALUE_FAILED)
 		return
 	}
@@ -122,7 +125,7 @@ func (s *chatInviteService) alreadyMember(invite *po.ChatInvite, resp *pb_invite
 		return
 	}
 	if count > 0 {
-		//resp.Set(ERROR_CODE_CHAT_INVITE_ALREADY_MEMBER, ERROR_CHAT_INVITE_ALREADY_MEMBER)
+		resp.Set(ERROR_CODE_CHAT_INVITE_ALREADY_MEMBER, ERROR_CHAT_INVITE_ALREADY_MEMBER)
 		return
 	}
 	cont = true
@@ -237,20 +240,18 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	}
 	xants.Submit(func() {
 		var (
-			distMaps = make(map[string]interface{})
+			distMaps = make(map[string]string)
 			km       *do.KeyMaps
 			err      error
 		)
 		for index, member = range members {
-			distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d,%d", servers[index], member.Uid, member.Status)
+			distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d", servers[index], member.Status)
 		}
 		// 8 缓存 chat member
 		err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
 		if err != nil {
 			xlog.Warn(err.Error())
-			km = &do.KeyMaps{
-				Key:  member.ChatId,
-				Maps: distMaps}
+			km = &do.KeyMaps{Key: member.ChatId, Maps: distMaps}
 			_, _, err = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION)
 			if err != nil {
 				xlog.Warn(err.Error())
@@ -355,6 +356,7 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 	initiator, err = s.chatMemberCache.GetChatMemberInfo(invite.ChatId, invite.InitiatorUid)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_INVITE_REDIS_GET_FAILED, ERROR_CHAT_INVITE_REDIS_GET_FAILED, err.Error())
+		return
 	}
 	if initiator.Uid == 0 {
 		w := entity.NewMysqlWhere()

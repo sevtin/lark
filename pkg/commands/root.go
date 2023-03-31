@@ -2,7 +2,6 @@ package commands
 
 import (
 	"errors"
-	"flag"
 	_ "lark/pkg/common/xstat"
 	"math/rand"
 	"os"
@@ -24,8 +23,6 @@ type MainInstance interface {
 }
 
 func Run(inst MainInstance) {
-	flag.Parse()
-
 	if inst == nil {
 		panic(errors.New("inst is nil, exit"))
 		return

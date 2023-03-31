@@ -16,7 +16,7 @@ message GetDistMemberListReq {
 message GetDistMemberListResp {
   int32 code = 1;
   string msg = 2;
-  repeated string list = 3;
+  map<string, string> members = 3;
 }
 
 message GetChatMemberInfoReq {

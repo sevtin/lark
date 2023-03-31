@@ -127,7 +127,7 @@ func GetConn(opt *conf.GrpcDialOption) *grpc.ClientConn {
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	if r.cli == nil {
-		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%s", target)
+		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%v", target)
 	}
 	r.cc = cc
 	ctx, _ := context.WithTimeout(context.Background(), CONST_DURATION_GRPC_TIMEOUT_SECOND)

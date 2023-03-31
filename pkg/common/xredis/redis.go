@@ -11,27 +11,25 @@ import (
 )
 
 var (
-	cli *RedisClient
+	Cli *RedisClient
 )
 
 type RedisClient struct {
-	client   *redis.Client
+	Client   *redis.ClusterClient
 	RedsSync *redsync.Redsync
 	Prefix   string
 }
 
-func NewRedisClient(cfg *conf.Redis) *redis.Client {
+func NewRedisClient(cfg *conf.Redis) *redis.ClusterClient {
 	var (
-		client   *redis.Client
+		client   *redis.ClusterClient
 		pool     redsyncredis.Pool
 		redsSync *redsync.Redsync
 		err      error
 	)
-	// 单机redis
-	client = redis.NewClient(&redis.Options{
-		Addr:     cfg.Address[0],
-		Password: cfg.Password,
-		DB:       cfg.Db,
+	// 集群redis
+	client = redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs: cfg.Address,
 	})
 	// 判断是否能够链接到redis
 	_, err = client.Ping(context.Background()).Result()
@@ -42,6 +40,6 @@ func NewRedisClient(cfg *conf.Redis) *redis.Client {
 	pool = goredis.NewPool(client)
 	redsSync = redsync.New(pool)
 
-	cli = &RedisClient{client, redsSync, cfg.Prefix}
+	Cli = &RedisClient{client, redsSync, cfg.Prefix}
 	return client
 }

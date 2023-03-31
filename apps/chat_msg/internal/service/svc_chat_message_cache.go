@@ -71,10 +71,10 @@ func (s *chatMessageService) GetCacheChatMessages(req *pb_chat_msg.GetChatMessag
 		} else {
 			seqId = maxSeqId - index
 		}
-		key = s.cfg.Redis.Prefix + constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(req.ChatId) + ":" + strconv.Itoa(seqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + strconv.Itoa(seqId)
 		keys[index] = key
 	}
-	values, err = s.chatMessageCache.MGetMessages(keys...)
+	values, err = s.chatMessageCache.MGetMessages(keys)
 	if err != nil {
 		return
 	}
@@ -123,11 +123,11 @@ func (s *chatMessageService) GetCacheChatMessageList(req *pb_chat_msg.GetChatMes
 		val     interface{}
 	)
 	for index, seqId = range req.SeqIds {
-		key = s.cfg.Redis.Prefix + constant.RK_SYNC_MSG_CACHE + utils.Int64ToStr(req.ChatId) + ":" + utils.Int64ToStr(seqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + utils.Int64ToStr(seqId)
 		keys[index] = key
 		seqMaps[seqId] = 0
 	}
-	values, err = s.chatMessageCache.MGetMessages(keys...)
+	values, err = s.chatMessageCache.MGetMessages(keys)
 	if err != nil {
 		return
 	}

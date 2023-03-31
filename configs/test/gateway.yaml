@@ -3,7 +3,7 @@ server_id: 1
 port: 9088
 log: "./configs/logger.yaml"
 etcd:
-  endpoints: ["lark-etcd:12379"]
+  endpoints: ["lark-etcd-01:12379","lark-etcd-02:12381","lark-etcd-03:12383"]
   username:
   password:
   schema: lark

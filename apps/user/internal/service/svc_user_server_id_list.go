@@ -22,7 +22,7 @@ func (s *userService) GetServerIdList(ctx context.Context, req *pb_user.GetServe
 		return
 	}
 	xants.Submit(func() {
-		s.userCache.SetUserServerList(s.cfg.Redis.Prefix, resp.List)
+		s.userCache.SetUserServerList(resp.List)
 	})
 	return
 }

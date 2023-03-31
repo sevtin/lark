@@ -15,6 +15,12 @@ func Int32ToBytes(n int32) []byte {
 	return bytesBuffer.Bytes()
 }
 
+func Int64ToBytes(i int64) []byte {
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(i))
+	return buf
+}
+
 func BytesToInt32(b []byte) int32 {
 	bytesBuffer := bytes.NewBuffer(b)
 	var x int32

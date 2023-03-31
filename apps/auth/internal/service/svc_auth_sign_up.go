@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"lark/domain/po"
@@ -10,7 +9,9 @@ import (
 	"lark/pkg/common/xjwt"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
+	"lark/pkg/common/xsnowflake"
 	"lark/pkg/constant"
+	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
@@ -22,51 +23,44 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 	var (
 		user   = new(po.User)
 		avatar *po.Avatar
-		tx     *gorm.DB
 		err    error
 	)
 	copier.Copy(user, req)
 	user.AvatarKey = constant.CONST_AVATAR_KEY_SMALL
 	user.Password = utils.MD5(user.Password)
 	user.ServerId = utils.NewServerId(0, req.ServerId, req.RegPlatform)
+	user.LarkId = xsnowflake.DefaultLarkId()
+	user.Hash = utils.MD5(user.LarkId)
 
-	tx = xmysql.GetTX()
-	err = s.authRepo.TxCreate(tx, user)
-	if err != nil {
-		// 回滚
-		tx.Rollback()
-		switch err.(type) {
-		case *mysql.MySQLError:
-			if err.(*mysql.MySQLError).Number == constant.ERROR_CODE_MYSQL_DUPLICATE_ENTRY {
-				resp.Set(ERROR_CODE_AUTH_MOBILE_HAS_BEEN_REGISTERED, ERROR_AUTH_MOBILE_HAS_BEEN_REGISTERED)
-				xlog.Warn(ERROR_CODE_AUTH_MOBILE_HAS_BEEN_REGISTERED, ERROR_AUTH_MOBILE_HAS_BEEN_REGISTERED, err.Error())
-				return
-			}
+	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
+		// mobile 重复校验
+		err = s.RecheckMobile(tx, -1, req.Mobile, resp)
+		if err != nil {
+			return
 		}
-		resp.Set(ERROR_CODE_AUTH_REGISTER_ERR, ERROR_AUTH_REGISTER_TYPE_ERR)
-		xlog.Warn(ERROR_CODE_AUTH_REGISTER_ERR, ERROR_AUTH_REGISTER_TYPE_ERR, err.Error())
+		err = s.authRepo.TxCreate(tx, user)
+		if err != nil {
+			resp.Set(ERROR_CODE_AUTH_REGISTER_ERR, ERROR_AUTH_REGISTER_TYPE_ERR)
+			return
+		}
+		avatar = &po.Avatar{
+			OwnerId:      user.Uid,
+			OwnerType:    int(pb_enum.AVATAR_OWNER_USER_AVATAR),
+			AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
+			AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
+			AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
+		}
+		err = s.avatarRepo.TxCreate(tx, avatar)
+		if err != nil {
+			resp.Set(ERROR_CODE_AUTH_INSERT_VALUE_FAILED, ERROR_AUTH_INSERT_VALUE_FAILED)
+			return
+		}
 		return
-	}
-	avatar = &po.Avatar{
-		OwnerId:      user.Uid,
-		OwnerType:    int(pb_enum.AVATAR_OWNER_USER_AVATAR),
-		AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
-		AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
-		AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
-	}
-	err = s.avatarRepo.TxCreate(tx, avatar)
+	})
 	if err != nil {
-		// 回滚
-		tx.Rollback()
-		resp.Set(ERROR_CODE_AUTH_INSERT_VALUE_FAILED, ERROR_AUTH_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_AUTH_INSERT_VALUE_FAILED, ERROR_AUTH_INSERT_VALUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
-	// 提交
-	tx.Commit()
-	copier.Copy(resp.UserInfo, user)
-	copier.Copy(resp.UserInfo.Avatar, avatar)
-
 	var (
 		accessToken  *pb_auth.Token
 		refreshToken *pb_auth.Token
@@ -77,11 +71,16 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, err.Error())
 		return
 	}
+	copier.Copy(resp.UserInfo, user)
+	copier.Copy(resp.UserInfo.Avatar, avatar)
 	resp.AccessToken = accessToken
 	resp.RefreshToken = refreshToken
 
 	xants.Submit(func() {
-		s.userCache.SetUserAndServer(s.cfg.Redis.Prefix, resp.UserInfo, user.ServerId)
+		terr := s.userCache.SetUserAndServer(resp.UserInfo, user.ServerId)
+		if terr != nil {
+			xlog.Warn(terr.Error())
+		}
 	})
 	return
 }
@@ -101,7 +100,7 @@ func (s *authService) CreateToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aT
 		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, err.Error())
 		return
 	}
-	err = s.authCache.SetSessionId(s.cfg.Redis.Prefix, uid, int32(platform), accessToken.SessionId, refreshToken.SessionId)
+	err = s.authCache.SetSessionId(uid, int32(platform), accessToken.SessionId, refreshToken.SessionId)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_AUTH_REDIS_SET_FAILED, ERROR_AUTH_REDIS_SET_FAILED, err.Error())
 		return
@@ -113,6 +112,25 @@ func (s *authService) CreateToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aT
 	rToken = &pb_auth.Token{
 		Token:  refreshToken.Token,
 		Expire: refreshToken.Expire,
+	}
+	return
+}
+
+func (s *authService) RecheckMobile(tx *gorm.DB, uid int64, mobile string, resp *pb_auth.SignUpResp) (err error) {
+	var (
+		w      = entity.NewMysqlWhere()
+		exists bool
+	)
+	w.SetFilter("mobile=?", mobile)
+	exists, err = s.userRepo.TxExists(tx, w, uid)
+	if err != nil {
+		resp.Set(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED)
+		return
+	}
+	if exists == true {
+		err = ERR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT
+		resp.Set(ERROR_CODE_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT, ERROR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT)
+		return
 	}
 	return
 }

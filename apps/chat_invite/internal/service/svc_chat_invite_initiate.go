@@ -94,7 +94,6 @@ func (s *chatInviteService) sendChatInviteNotificationMessage(inviteReq *pb_invi
 	req, err = biz_chat_invite.ConstructChatInviteNotificationMessage(
 		inviteReq,
 		invitees,
-		s.cfg.Redis.Prefix,
 		s.chatCache,
 		s.userCache,
 		s.chatClient,
