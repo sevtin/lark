@@ -45,7 +45,8 @@ func GetTX() *gorm.DB {
 //事务处理
 func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	var (
-		db *gorm.DB
+		db   *gorm.DB
+		terr error
 	)
 	db = GetDB()
 	if db == nil {
@@ -55,7 +56,8 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	tx := db.Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
 	err = handle(tx)
 	if err != nil {
-		err = tx.Rollback().Error
+		terr = tx.Rollback().Error
+		xlog.Error(terr.Error())
 		return
 	}
 	err = tx.Commit().Error

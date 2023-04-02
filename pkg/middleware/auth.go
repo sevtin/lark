@@ -31,10 +31,7 @@ func JwtAuth() gin.HandlerFunc {
 			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_JWT_TOKEN_ERR, err.Error())
 			return
 		}
-		claims := jwt.MapClaims{}
-		for key, value := range token.Claims.(jwt.MapClaims) {
-			claims[key] = value
-		}
+		claims := token.Claims.(jwt.MapClaims)
 		if uid, ok = claims[constant.USER_UID]; ok == false {
 			ctx.Abort()
 			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_USER_ID_DOESNOT_EXIST, xhttp.ERROR_HTTP_USER_ID_DOESNOT_EXIST)
@@ -52,7 +49,7 @@ func JwtAuth() gin.HandlerFunc {
 		}
 		if sessionId, ok = claims[constant.USER_JWT_SESSION_ID]; ok == false {
 			ctx.Abort()
-			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_JWT_TOKEN_UUID_DOESNOT_EXIST, xhttp.ERROR_HTTP_JWT_TOKEN_UUID_DOESNOT_EXIST)
+			xhttp.Error(ctx, xhttp.ERROR_CODE_HTTP_JWT_TOKEN_SESSION_ID_DOESNOT_EXIST, xhttp.ERROR_HTTP_JWT_TOKEN_SESSION_ID_DOESNOT_EXIST)
 			return
 		}
 		uidVal, err = utils.ToInt64(uid)
