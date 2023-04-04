@@ -189,7 +189,7 @@ type CliChatMessage struct {
 	ChatId int64 `protobuf:"varint,4,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty" validate:"required,gt=0"` // 会话ID
 	// @inject_tag: validate:"required,gt=0"
 	MsgType pb_enum.MSG_TYPE `protobuf:"varint,5,opt,name=msg_type,json=msgType,proto3,enum=pb_enum.MSG_TYPE" json:"msg_type,omitempty" validate:"required,gt=0"` // 消息类型
-	Body    []byte           `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`                                             // 消息本体
+	Body    []byte           `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`                                                                      // 消息本体
 	// @inject_tag: validate:"required,gt=0"
 	SentTs int64 `protobuf:"varint,7,opt,name=sent_ts,json=sentTs,proto3" json:"sent_ts,omitempty" validate:"required,gt=0"` // 客户端本地发送时间
 }

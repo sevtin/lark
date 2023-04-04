@@ -57,7 +57,9 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	err = handle(tx)
 	if err != nil {
 		terr = tx.Rollback().Error
-		xlog.Error(terr.Error())
+		if terr != nil {
+			xlog.Error(terr.Error())
+		}
 		return
 	}
 	err = tx.Commit().Error
