@@ -1,5 +1,8 @@
 DROP TABLE IF EXISTS `messages`;
 CREATE TABLE `messages` (
+  `chat_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '会话ID',
+  `seq_id` int unsigned NOT NULL DEFAULT '0' COMMENT '消息唯一ID',
+  `chat_type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '会话类型',
   `srv_msg_id` bigint unsigned NOT NULL COMMENT '服务端消息号',
   `cli_msg_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '客户端消息号',
   `root_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '根消息id',
@@ -9,9 +12,6 @@ CREATE TABLE `messages` (
   `sender_platform` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '发送者平台',
   `sender_name` varchar(64) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '发送者姓名',
   `sender_avatar_key` varchar(50) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '发送者头像',
-  `chat_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '会话ID',
-  `chat_type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '会话类型',
-  `seq_id` int unsigned NOT NULL DEFAULT '0' COMMENT '消息唯一ID',
   `msg_from` int unsigned NOT NULL DEFAULT '0' COMMENT '消息来源',
   `msg_type` int unsigned NOT NULL DEFAULT '0' COMMENT '消息类型',
   `body` varchar(2048) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '消息本体',
@@ -20,12 +20,6 @@ CREATE TABLE `messages` (
   `srv_ts` bigint NOT NULL DEFAULT '0' COMMENT '服务端接收消息的时间',
   `updated_ts` bigint NOT NULL DEFAULT '0' COMMENT '更新时间',
   `deleted_ts` bigint NOT NULL DEFAULT '0' COMMENT '删除时间',
-  PRIMARY KEY (`srv_msg_id`),
-  UNIQUE KEY `srv_msg_id` (`srv_msg_id`),
-  UNIQUE KEY `chatId_seqId` (`chat_id`,`seq_id`),
-  KEY `idx_deletedTs` (`deleted_ts`),
-  KEY `idx_chatId` (`chat_id`),
-  KEY `idx_chatType` (`chat_type`),
-  KEY `idx_senderId` (`sender_id`),
-  KEY `idx_seqId` (`seq_id`)
+  PRIMARY KEY (`chat_id`,`seq_id`),
+  UNIQUE KEY `srv_msg_id` (`srv_msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

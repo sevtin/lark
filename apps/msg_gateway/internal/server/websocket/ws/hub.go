@@ -26,8 +26,9 @@ func NewHub(serverId int, msgCallback MessageCallback) *Hub {
 	return &Hub{
 		serverId: serverId,
 		upgrader: websocket.Upgrader{
-			ReadBufferSize:  WS_READ_BUFFER_SIZE,
-			WriteBufferSize: WS_WRITE_BUFFER_SIZE,
+			ReadBufferSize:    WS_READ_BUFFER_SIZE,
+			WriteBufferSize:   WS_WRITE_BUFFER_SIZE,
+			EnableCompression: false, //关闭压缩
 		},
 		readChan:    make(chan *Message, WS_CHAN_SERVER_READ_MESSAGE_SIZE),
 		msgCallback: msgCallback,

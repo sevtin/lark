@@ -36,6 +36,7 @@ const (
 const (
 	CONST_DURATION_SERVER_MGR_SECOND    = 60 * 60 * 10 * time.Second
 	CONST_DURATION_REDSYNC_MUTEX_SECOND = 5 * time.Second
+	CONST_DURATION_REDIS_LOCK_EXPIRY    = 10 * time.Second
 )
 
 const (

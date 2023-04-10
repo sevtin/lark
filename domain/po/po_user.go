@@ -6,7 +6,6 @@ type User struct {
 	entity.GormEntityTs
 	Uid         int64  `gorm:"column:uid;primary_key" json:"uid"`                          // 用户ID 系统生成
 	LarkId      string `gorm:"column:lark_id;NOT NULL" json:"lark_id"`                     // 账户ID 用户设置
-	Hash        string `gorm:"column:hash;NOT NULL" json:"hash"`                           // 账户ID HASH
 	Password    string `gorm:"column:password;NOT NULL" json:"password"`                   // 密码
 	Udid        string `gorm:"column:udid;NOT NULL" json:"udid"`                           // 注册设备唯一标识
 	Status      int    `gorm:"column:status;default:0;NOT NULL" json:"status"`             // 用户状态

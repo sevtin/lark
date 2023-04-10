@@ -2,7 +2,6 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `uid` bigint unsigned NOT NULL COMMENT '用户ID 系统生成',
   `lark_id` varchar(32) NOT NULL DEFAULT '' COMMENT '账户ID 用户设置',
-  `hash` varchar(32) NOT NULL DEFAULT '' COMMENT '账户ID HASH',
   `password` varchar(32) NOT NULL DEFAULT '' COMMENT '密码',
   `udid` varchar(40) NOT NULL DEFAULT '' COMMENT '注册设备唯一标识',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态',
@@ -21,16 +20,8 @@ CREATE TABLE `users` (
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `uid` (`uid`),
-  UNIQUE KEY `hash` (`hash`),
-  UNIQUE KEY `larkId_deletedTs` (`lark_id`,`deleted_ts`),
-  UNIQUE KEY `mobile_deletedTs` (`mobile`,`deleted_ts`),
-  KEY `idx_deletedTs` (`deleted_ts`),
-  KEY `idx_larkId` (`lark_id`),
-  KEY `idx_hash` (`hash`),
-  KEY `idx_status` (`status`),
-  KEY `idx_mobile` (`mobile`),
+  UNIQUE KEY `uniq_larkId_deletedTs` (`lark_id`,`deleted_ts`),
+  UNIQUE KEY `uniq_mobile_deletedTs` (`mobile`,`deleted_ts`),
   KEY `idx_gender` (`gender`),
-  KEY `idx_cityId` (`city_id`),
-  KEY `idx_password` (`password`)
+  KEY `idx_cityId` (`city_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

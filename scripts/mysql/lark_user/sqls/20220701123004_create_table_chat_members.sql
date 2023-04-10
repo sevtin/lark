@@ -16,11 +16,8 @@ CREATE TABLE `chat_members` (
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chat_id`,`uid`),
-  UNIQUE KEY `chatId_uid_deletedTs` (`chat_id`,`uid`,`deleted_ts`),
-  KEY `idx_deletedTs` (`deleted_ts`),
+  PRIMARY KEY (`chat_id`,`uid`,`deleted_ts`),
   KEY `idx_chatType` (`chat_type`),
-  KEY `idx_uid` (`uid`),
   KEY `idx_sync` (`sync`),
   KEY `idx_status` (`status`),
   KEY `idx_joinSource` (`join_source`)

@@ -12,6 +12,7 @@ import (
 type UserRepository interface {
 	Create(user *po.User) (err error)
 	VerifyUserIdentity(w *entity.MysqlWhere) (user *po.User, err error)
+	Exists(w *entity.MysqlWhere, uid int64) (exists bool, err error)
 	TxExists(tx *gorm.DB, w *entity.MysqlWhere, uid int64) (exists bool, err error)
 	UserInfo(w *entity.MysqlWhere) (user *po.User, err error)
 	BasicUserInfo(w *entity.MysqlWhere) (user *pb_user.BasicUserInfo, err error)
@@ -77,6 +78,21 @@ func (r *userRepository) TxBasicUserList(tx *gorm.DB, w *entity.MysqlWhere) (lis
 func (r *userRepository) TxUserSrvList(tx *gorm.DB, w *entity.MysqlWhere) (list []*pb_user.UserSrvInfo, err error) {
 	list = make([]*pb_user.UserSrvInfo, 0)
 	err = tx.Model(po.User{}).Select("uid,nickname,avatar_key,server_id").Where(w.Query, w.Args...).Find(&list).Error
+	return
+}
+
+func (r *userRepository) Exists(w *entity.MysqlWhere, uid int64) (exists bool, err error) {
+	var (
+		user = new(po.User)
+		db   = xmysql.GetDB()
+	)
+	err = db.Select("uid").Where(w.Query, w.Args...).Find(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		err = nil
+	}
+	if user.Uid > 0 && user.Uid != uid {
+		exists = true
+	}
 	return
 }
 

@@ -15,19 +15,13 @@ CREATE TABLE `users` (
   `reg_platform` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '注册平台',
   `server_id` int NOT NULL DEFAULT '0' COMMENT '分配的ws服务器',
   `city_id` int NOT NULL DEFAULT '0' COMMENT '城市ID',
-  `avatar_key` varchar(64) DEFAULT '' COMMENT '小图 72*72',
+  `avatar_key` varchar(64) NOT NULL DEFAULT '' COMMENT '小图 72*72',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `uid` (`uid`),
-  UNIQUE KEY `larkId_deletedTs` (`lark_id`,`deleted_ts`),
-  UNIQUE KEY `mobile_deletedTs` (`mobile`,`deleted_ts`),
-  KEY `idx_deletedTs` (`deleted_ts`),
-  KEY `idx_larkId` (`lark_id`),
-  KEY `idx_status` (`status`),
-  KEY `idx_mobile` (`mobile`),
+  UNIQUE KEY `uniq_larkId_deletedTs` (`lark_id`,`deleted_ts`),
+  UNIQUE KEY `uniq_mobile_deletedTs` (`mobile`,`deleted_ts`),
   KEY `idx_gender` (`gender`),
-  KEY `idx_cityId` (`city_id`),
-  KEY `idx_password` (`password`)
+  KEY `idx_cityId` (`city_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -2,10 +2,11 @@ package constant
 
 //无状态
 const (
-	RK_MSG_CLI_MSG_ID = "MSG:CLI_MSG_ID:" // 缓存客户端消息ID + ChatId + CliMsgId {}
-	RK_MSG_CONVO_MSG  = "MSG:CONVO:"      // 最新一条会话消息 {}
-	RK_MSG_SEQ_TS     = "MSG:SEQ_TS:"     // 最新一条会话消息 SEQ + TIMESTAMP {}
-	RK_MSG_SEQ_ID     = "MSG:SEQ_ID:"     // {}
+	RK_MSG_CLI_MSG_ID   = "MSG:CLI_MSG_ID:" // 缓存客户端消息ID + ChatId + CliMsgId {}
+	RK_MSG_CONVO_MSG    = "MSG:CONVO:"      // 最新一条会话消息 {}
+	RK_MSG_SEQ_TS       = "MSG:SEQ_TS:"     // 最新一条会话消息 SEQ + TIMESTAMP {}
+	RK_MSG_SEQ_ID       = "MSG:SEQ_ID:"     // {}
+	RK_USER_LOCK_MOBILE = "USER_LOCK:MOBILE:"
 )
 
 //有状态

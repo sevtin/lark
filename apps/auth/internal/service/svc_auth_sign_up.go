@@ -30,14 +30,12 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 	user.Password = utils.MD5(user.Password)
 	user.ServerId = utils.NewServerId(0, req.ServerId, req.RegPlatform)
 	user.LarkId = xsnowflake.DefaultLarkId()
-	user.Hash = utils.MD5(user.LarkId)
-
+	// TODO 分布式锁 mobile 重复校验
+	err = s.RecheckMobile(-1, req.Mobile, resp)
+	if err != nil {
+		return
+	}
 	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
-		// mobile 重复校验
-		err = s.RecheckMobile(tx, -1, req.Mobile, resp)
-		if err != nil {
-			return
-		}
 		err = s.authRepo.TxCreate(tx, user)
 		if err != nil {
 			resp.Set(ERROR_CODE_AUTH_REGISTER_ERR, ERROR_AUTH_REGISTER_TYPE_ERR)
@@ -116,13 +114,13 @@ func (s *authService) CreateToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aT
 	return
 }
 
-func (s *authService) RecheckMobile(tx *gorm.DB, uid int64, mobile string, resp *pb_auth.SignUpResp) (err error) {
+func (s *authService) RecheckMobile(uid int64, mobile string, resp *pb_auth.SignUpResp) (err error) {
 	var (
 		w      = entity.NewMysqlWhere()
 		exists bool
 	)
 	w.SetFilter("mobile=?", mobile)
-	exists, err = s.userRepo.TxExists(tx, w, uid)
+	exists, err = s.userRepo.Exists(w, uid)
 	if err != nil {
 		resp.Set(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED)
 		return
