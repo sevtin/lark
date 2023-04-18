@@ -204,6 +204,29 @@ func (c *userCache) GetServerId(uid int64) (serverId string, err error) {
 	return
 }
 
+func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error) {
+	var (
+		i       int
+		uid     int64
+		keys    = make([]string, len(uidList))
+		cmdList = make([]*redis.StringCmd, len(uidList))
+		cmd     *redis.StringCmd
+		pipe    = xredis.Cli.Client.Pipeline()
+	)
+	for i, uid = range uidList {
+		cmdList[i] = pipe.Get(context.Background(), xredis.RealKey(constant.RK_SYNC_USER_SERVER+utils.GetHashTagKey(uid)))
+	}
+	_, err = pipe.Exec(context.Background())
+	if err != nil {
+		return
+	}
+	serverIds = make([]string, len(keys))
+	for i, cmd = range cmdList {
+		serverIds[i] = cmd.Val()
+	}
+	return
+}
+
 func (c *userCache) SetUserAndServer(info *pb_user.UserInfo, serverId int64) (err error) {
 	var (
 		val string

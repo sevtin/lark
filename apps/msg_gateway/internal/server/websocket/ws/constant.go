@@ -8,7 +8,7 @@ const (
 	// Time allowed to write a message to the peer.
 	WS_WRITE_WAIT = 10 * time.Second
 	// Time allowed to read the next pong message from the peer.
-	WS_PONG_WAIT = 60 * time.Second
+	WS_PONG_WAIT = 300 * time.Second
 	// Send pings to peer with this period. Must be less than pongWait.
 	WS_PING_PERIOD    = (WS_PONG_WAIT * 9) / 10
 	WS_RITE_WAIT      = time.Second
@@ -17,8 +17,8 @@ const (
 	WS_READ_MAX_MESSAGE_BUFFER_SIZE        = 2048
 	WS_WRITE_MAX_MESSAGE_BUFFER_SIZE       = 2048
 	WS_WRITE_MAX_MERGE_MESSAGE_BUFFER_SIZE = 1024
-	WS_WRITE_MAX_MESSAGE_CHAN_SIZE         = 512
-	WS_WRITE_MAX_MERGE_MESSAGE_SIZE        = 32
+	WS_WRITE_MAX_MESSAGE_CHAN_SIZE         = 256
+	WS_WRITE_MAX_MERGE_MESSAGE_SIZE        = 16
 	WS_WRITE_MESSAGE_THRESHOLD             = WS_WRITE_MAX_MESSAGE_CHAN_SIZE - WS_WRITE_MAX_MERGE_MESSAGE_SIZE
 	WS_READ_BUFFER_SIZE                    = 1024
 	WS_WRITE_BUFFER_SIZE                   = 1024

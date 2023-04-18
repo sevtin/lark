@@ -7,6 +7,10 @@ import (
 	"lark/pkg/proto/pb_obj"
 )
 
+const (
+	MAX_NUMBER_OF_PUSHES = 500
+)
+
 type SendOnlineMessageHandler func(uid int64, platform int32, message []byte) (result int32)
 type SendCloudMessageHandler func(req *pb_cm.CloudMessageReq)
 
@@ -45,7 +49,9 @@ func SendMessage(message *pb_gw.SendMessage, msgBuf []byte, onlineMsgHandler Sen
 			}
 			switch platform {
 			case pb_enum.PLATFORM_TYPE_IOS, pb_enum.PLATFORM_TYPE_ANDROID:
-				cmMembers = append(cmMembers, cmMember)
+				if len(cmMembers) <= MAX_NUMBER_OF_PUSHES {
+					cmMembers = append(cmMembers, cmMember)
+				}
 			}
 		}
 	}
@@ -53,6 +59,9 @@ func SendMessage(message *pb_gw.SendMessage, msgBuf []byte, onlineMsgHandler Sen
 }
 
 func sendCloudMsg(message *pb_gw.SendMessage, members []*pb_cm.CloudMessageMember, cloudMsgHandler SendCloudMessageHandler) {
+	if len(members) == 0 {
+		return
+	}
 	req := &pb_cm.CloudMessageReq{
 		Topic:    message.Topic,
 		SubTopic: message.SubTopic,

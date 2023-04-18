@@ -1,54 +1,54 @@
 sudo vim /etc/hosts
 
 # 通用
-10.0.115.14       lark.com
+10.0.105.38       lark.com
 
 # 集群服务器
-10.0.115.14       lark-etcd-01
-10.0.115.14       lark-etcd-02
-10.0.115.14       lark-etcd-03
+10.0.105.38       lark-etcd-01
+10.0.105.38       lark-etcd-02
+10.0.105.38       lark-etcd-03
 
-10.0.115.14       lark-redis-01
-10.0.115.14       lark-redis-02
-10.0.115.14       lark-redis-03
-10.0.115.14       lark-redis-04
+10.0.105.38       lark-redis-01
+10.0.105.38       lark-redis-02
+10.0.105.38       lark-redis-03
+10.0.105.38       lark-redis-04
 
-10.0.115.14       lark-mysql-user-01
-10.0.115.14       lark-mysql-user-02
-10.0.115.14       lark-mysql-user-03
-10.0.115.14       lark-mysql-user-04
+10.0.105.38       lark-mysql-user-01
+10.0.105.38       lark-mysql-user-02
+10.0.105.38       lark-mysql-user-03
+10.0.105.38       lark-mysql-user-04
 
-10.0.115.14       lark-mysql-msg-01
-10.0.115.14       lark-mysql-msg-02
-10.0.115.14       lark-mysql-msg-proxy
+10.0.105.38       lark-mysql-msg-01
+10.0.105.38       lark-mysql-msg-02
+10.0.105.38       lark-mysql-msg-proxy
 
-10.0.115.14       lark-kafka-01
-10.0.115.14       lark-kafka-02
-10.0.115.14       lark-kafka-03
+10.0.105.38       lark-kafka-01
+10.0.105.38       lark-kafka-02
+10.0.105.38       lark-kafka-03
 
-10.0.115.14       lark-elasticsearch-01
-10.0.115.14       lark-elasticsearch-02
-10.0.115.14       lark-elasticsearch-03
+10.0.105.38       lark-elasticsearch-01
+10.0.105.38       lark-elasticsearch-02
+10.0.105.38       lark-elasticsearch-03
 
 # 单机服务器
-10.0.115.14       lark-etcd
-10.0.115.14       lark-mysql-user
-10.0.115.14       lark-mysql-msg
-10.0.115.14       lark-mongo-msg
-10.0.115.14       lark-redis
-10.0.115.14       lark-rabbitmq
-10.0.115.14       lark-zookeeper
-10.0.115.14       lark-kafka
-10.0.115.14       lark-minio
-10.0.115.14       lark-elasticsearch
-10.0.115.14       lark-minio.com
-10.0.115.14       bucket.lark-minio.com
-10.0.115.14       lark-jaeger
+10.0.105.38       lark-etcd
+10.0.105.38       lark-mysql-user
+10.0.105.38       lark-mysql-msg
+10.0.105.38       lark-mongo-msg
+10.0.105.38       lark-redis
+10.0.105.38       lark-rabbitmq
+10.0.105.38       lark-zookeeper
+10.0.105.38       lark-kafka
+10.0.105.38       lark-minio
+10.0.105.38       lark-elasticsearch
+10.0.105.38       lark-minio.com
+10.0.105.38       bucket.lark-minio.com
+10.0.105.38       lark-jaeger
 
-10.0.115.14       lark-mqbroker
-10.0.115.14       lark-mqnamesrv
+10.0.105.38       lark-mqbroker
+10.0.105.38       lark-mqnamesrv
 
 # 业务服务器
-10.0.115.14       lark_msg_gateway_server
-10.0.115.14       lark_push_server
-10.0.115.14       lark-ws-server.com
+10.0.105.38       lark_msg_gateway_server
+10.0.105.38       lark_push_server
+10.0.105.38       lark-ws-server.com

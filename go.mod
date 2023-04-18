@@ -27,6 +27,7 @@ require (
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/panjf2000/ants/v2 v2.5.0
+	github.com/pion/opus v0.0.0-20230408025906-6520e40488b7
 	github.com/prometheus/client_golang v1.13.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/shimingyah/pool v1.0.0

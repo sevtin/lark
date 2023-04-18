@@ -17,11 +17,11 @@ type chatServer struct {
 	pb_chat.UnimplementedChatServer
 	cfg         *config.Config
 	grpcServer  *xgrpc.GrpcServer
-	ChatService service.ChatService
+	chatService service.ChatService
 }
 
-func NewChatServer(cfg *config.Config, ChatService service.ChatService) ChatServer {
-	return &chatServer{cfg: cfg, ChatService: ChatService}
+func NewChatServer(cfg *config.Config, chatService service.ChatService) ChatServer {
+	return &chatServer{cfg: cfg, chatService: chatService}
 }
 
 func (s *chatServer) Run() {

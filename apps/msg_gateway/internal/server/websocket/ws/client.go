@@ -238,7 +238,7 @@ func (c *Client) writeLoop() {
 			if bufLen < WS_WRITE_MAX_MERGE_MESSAGE_BUFFER_SIZE {
 				chLen = len(c.sendChan)
 				for index = 0; index < chLen; index++ {
-					if bufLen >= WS_WRITE_MAX_MESSAGE_BUFFER_SIZE {
+					if bufLen >= WS_WRITE_MAX_MERGE_MESSAGE_BUFFER_SIZE {
 						break
 					}
 					merges++
@@ -286,12 +286,9 @@ func (c *Client) Send(message []byte) {
 			//wsLog.Warn(r, string(debug.Stack()))
 		}
 	}()
-	c.rwLock.RLock()
 	if c.closed == true {
-		c.rwLock.RUnlock()
 		return
 	}
-	c.rwLock.RUnlock()
 	if len(c.sendChan) >= WS_WRITE_MESSAGE_THRESHOLD {
 		return
 	}

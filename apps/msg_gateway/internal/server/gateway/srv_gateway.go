@@ -118,7 +118,7 @@ func (s *gatewayServer) timedTask() {
 	go func() {
 		var (
 			member = s.conf.GrpcServer.Name + ":" + utils.IntToStr(s.conf.WsServer.Port)
-			num    int64
+			num    int
 		)
 		s.serverMgrCache.ZAddMsgGateway(0, member)
 		onlineTicker := time.NewTicker(constant.CONST_DURATION_NUMBER_OF_CHAT_MEMBER_ONLINE_SECOND)

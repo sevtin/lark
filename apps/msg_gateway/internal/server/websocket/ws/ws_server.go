@@ -51,6 +51,6 @@ func (ws *WServer) IsOnline(uid int64, platform int32) (ok bool) {
 	return ws.hub.IsOnline(uid, platform)
 }
 
-func (ws *WServer) NumberOfOnline() int64 {
+func (ws *WServer) NumberOfOnline() int {
 	return ws.hub.NumberOfOnline()
 }

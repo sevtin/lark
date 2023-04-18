@@ -98,9 +98,12 @@ func (h *Hub) Run() {
 	)
 	for index = 0; index < loop; index++ {
 		go func() {
+			var (
+				msg *Message
+			)
 			for {
 				select {
-				case msg := <-h.readChan:
+				case msg = <-h.readChan:
 					h.msgCallback(msg)
 				}
 			}
@@ -128,8 +131,8 @@ func (h *Hub) SendMessage(uid int64, platform int32, message []byte) (result int
 	return
 }
 
-func (h *Hub) NumberOfOnline() int64 {
-	return int64(h.clients.Len())
+func (h *Hub) NumberOfOnline() int {
+	return h.clients.Len()
 }
 
 func (h *Hub) broadcastMessage() {
@@ -150,7 +153,7 @@ func (h *Hub) debug() {
 		for {
 			select {
 			case <-allTicker.C:
-				log.Println("在线人数:", h.clients.Len(), " 发送消息数量:", h.sentMessageCount)
+				log.Println("在线人数:", h.clients.Len(), " 发送消息数量:", atomic.LoadInt64(&h.sentMessageCount))
 			}
 		}
 	}()
