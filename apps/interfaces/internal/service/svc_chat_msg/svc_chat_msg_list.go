@@ -50,26 +50,26 @@ func (s *chatMessageService) GetChatMessageList(req *dto_chat_msg.GetChatMessage
 }
 
 // 弃用
-func (s *chatMessageService) GetChatMessages(req *dto_chat_msg.GetChatMessagesReq) (resp *xhttp.Resp) {
-	resp = new(xhttp.Resp)
-	var (
-		getChatMessagesReq  = new(pb_chat_msg.GetChatMessagesReq)
-		getChatMessagesResp *pb_chat_msg.GetChatMessagesResp
-		list                = make([]*dto_chat_msg.SrvChatMessage, 0)
-	)
-	copier.Copy(getChatMessagesReq, req)
-	getChatMessagesResp = s.chatMessageClient.GetChatMessages(getChatMessagesReq)
-	if getChatMessagesResp == nil {
-		resp.SetResult(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
-		xlog.Warn(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
-		return
-	}
-	if getChatMessagesResp.Code > 0 {
-		resp.SetResult(getChatMessagesResp.Code, getChatMessagesResp.Msg)
-		xlog.Warn(getChatMessagesResp.Code, getChatMessagesResp.Msg)
-		return
-	}
-	copier.Copy(&list, getChatMessagesResp.List)
-	resp.Data = list
-	return
-}
+//func (s *chatMessageService) GetChatMessages(req *dto_chat_msg.GetChatMessagesReq) (resp *xhttp.Resp) {
+//	resp = new(xhttp.Resp)
+//	var (
+//		getChatMessagesReq  = new(pb_chat_msg.GetChatMessagesReq)
+//		getChatMessagesResp *pb_chat_msg.GetChatMessagesResp
+//		list                = make([]*dto_chat_msg.SrvChatMessage, 0)
+//	)
+//	copier.Copy(getChatMessagesReq, req)
+//	getChatMessagesResp = s.chatMessageClient.GetChatMessages(getChatMessagesReq)
+//	if getChatMessagesResp == nil {
+//		resp.SetResult(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
+//		xlog.Warn(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
+//		return
+//	}
+//	if getChatMessagesResp.Code > 0 {
+//		resp.SetResult(getChatMessagesResp.Code, getChatMessagesResp.Msg)
+//		xlog.Warn(getChatMessagesResp.Code, getChatMessagesResp.Msg)
+//		return
+//	}
+//	copier.Copy(&list, getChatMessagesResp.List)
+//	resp.Data = list
+//	return
+//}

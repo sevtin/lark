@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `uid` bigint unsigned NOT NULL COMMENT '用户ID 系统生成',
   `lark_id` varchar(32) NOT NULL DEFAULT '' COMMENT '账户ID 用户设置',
-  `password` varchar(32) NOT NULL DEFAULT '' COMMENT '密码',
+  `password` char(32) NOT NULL DEFAULT '' COMMENT '密码',
   `udid` varchar(40) NOT NULL DEFAULT '' COMMENT '注册设备唯一标识',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态',
   `nickname` varchar(64) NOT NULL DEFAULT '' COMMENT '昵称',

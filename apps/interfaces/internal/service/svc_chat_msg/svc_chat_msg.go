@@ -11,7 +11,7 @@ import (
 type ChatMessageService interface {
 	GetChatMessageList(req *dto_chat_msg.GetChatMessageListReq) (resp *xhttp.Resp)
 	// 弃用
-	GetChatMessages(req *dto_chat_msg.GetChatMessagesReq) (resp *xhttp.Resp)
+	// GetChatMessages(req *dto_chat_msg.GetChatMessagesReq) (resp *xhttp.Resp)
 	Search(req *dto_chat_msg.SearchMessageReq, uid int64) (resp *xhttp.Resp)
 	MessageOperation(req *dto_chat_msg.MessageOperationReq, uid int64, platform int32) (resp *xhttp.Resp)
 	SendChatMessage(req *dto_chat_msg.SendChatMessageReq, uid int64, platform int32) (resp *xhttp.Resp)

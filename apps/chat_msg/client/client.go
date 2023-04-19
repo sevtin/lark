@@ -12,7 +12,7 @@ import (
 type ChatMessageClient interface {
 	GetChatMessageList(req *pb_chat_msg.GetChatMessageListReq) (resp *pb_chat_msg.GetChatMessageListResp)
 	// 弃用
-	GetChatMessages(req *pb_chat_msg.GetChatMessagesReq) (resp *pb_chat_msg.GetChatMessagesResp)
+	// GetChatMessages(req *pb_chat_msg.GetChatMessagesReq) (resp *pb_chat_msg.GetChatMessagesResp)
 	SearchMessage(req *pb_chat_msg.SearchMessageReq) (resp *pb_chat_msg.SearchMessageResp)
 	MessageOperation(req *pb_chat_msg.MessageOperationReq) (resp *pb_chat_msg.MessageOperationResp)
 }
@@ -44,19 +44,19 @@ func (c *chatMessageClient) GetChatMessageList(req *pb_chat_msg.GetChatMessageLi
 	return
 }
 
-func (c *chatMessageClient) GetChatMessages(req *pb_chat_msg.GetChatMessagesReq) (resp *pb_chat_msg.GetChatMessagesResp) {
-	conn := c.GetClientConn()
-	if conn == nil {
-		return
-	}
-	client := pb_chat_msg.NewChatMessageClient(conn)
-	var err error
-	resp, err = client.GetChatMessages(context.Background(), req)
-	if err != nil {
-		xlog.Warn(err.Error())
-	}
-	return
-}
+//func (c *chatMessageClient) GetChatMessages(req *pb_chat_msg.GetChatMessagesReq) (resp *pb_chat_msg.GetChatMessagesResp) {
+//	conn := c.GetClientConn()
+//	if conn == nil {
+//		return
+//	}
+//	client := pb_chat_msg.NewChatMessageClient(conn)
+//	var err error
+//	resp, err = client.GetChatMessages(context.Background(), req)
+//	if err != nil {
+//		xlog.Warn(err.Error())
+//	}
+//	return
+//}
 
 func (c *chatMessageClient) SearchMessage(req *pb_chat_msg.SearchMessageReq) (resp *pb_chat_msg.SearchMessageResp) {
 	conn := c.GetClientConn()

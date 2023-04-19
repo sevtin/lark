@@ -2,14 +2,13 @@ package service
 
 import (
 	"lark/domain/po"
-	"lark/pkg/common/xants"
-	"lark/pkg/common/xlog"
+	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
 	"lark/pkg/proto/pb_chat_msg"
 	"lark/pkg/utils"
-	"strconv"
 )
 
+/*
 func (s *chatMessageService) GetCacheMessages(req *pb_chat_msg.GetChatMessagesReq, maxSeqId int64) (list []*po.Message, next bool, err error) {
 	var (
 		msgCount int
@@ -107,9 +106,6 @@ func (s *chatMessageService) cacheChatMessage(msg *po.Message) {
 		s.chatMessageCache.SetChatMessage(msg)
 	})
 }
-
-/*
----------------------- 分割线 ----------------------
 */
 
 func (s *chatMessageService) GetCacheChatMessageList(req *pb_chat_msg.GetChatMessageListReq) (list []*po.Message, err error) {
@@ -123,7 +119,7 @@ func (s *chatMessageService) GetCacheChatMessageList(req *pb_chat_msg.GetChatMes
 		val     interface{}
 	)
 	for index, seqId = range req.SeqIds {
-		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + utils.Int64ToStr(seqId)
+		key = xredis.GetPrefix() + constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + utils.Int64ToStr(seqId)
 		keys[index] = key
 		seqMaps[seqId] = 0
 	}
