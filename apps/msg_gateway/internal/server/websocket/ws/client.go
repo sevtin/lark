@@ -85,8 +85,9 @@ func (c *Client) closeConn() {
 	}
 	c.closed = true
 	c.rwLock.Unlock()
-	c.hub.unregisterClient(c)
+	close(c.sendChan)
 	c.cancel()
+	c.hub.unregisterChan <- c
 	c.conn.Close()
 }
 
@@ -107,7 +108,7 @@ func (c *Client) readLoop() {
 	)
 
 	c.conn.SetReadLimit(WS_READ_MAX_MESSAGE_BUFFER_SIZE)
-	c.conn.SetReadDeadline(time.Now().Add(WS_PONG_WAIT))
+	c.conn.SetReadDeadline(c.hub.now.Add(WS_PONG_WAIT))
 	c.conn.SetPongHandler(c.pongHandler)
 	//c.conn.SetPingHandler(c.pingHandler)
 	c.conn.SetCloseHandler(c.closeHandler)
@@ -116,11 +117,13 @@ func (c *Client) readLoop() {
 		if msgType, buf, err = c.conn.ReadMessage(); err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 			}
-			switch err.(type) {
-			case *websocket.CloseError:
-			default:
-				wsLog.Warn(err.Error())
-			}
+			/*
+				switch err.(type) {
+				case *websocket.CloseError:
+				default:
+					wsLog.Warn(err.Error())
+				}
+			*/
 			break
 		}
 		if c.closed == true {
@@ -153,7 +156,7 @@ func (c *Client) readLoop() {
 }
 
 func (c *Client) pongHandler(appData string) (err error) {
-	err = c.conn.SetReadDeadline(time.Now().Add(WS_PONG_WAIT))
+	err = c.conn.SetReadDeadline(c.hub.now.Add(WS_PONG_WAIT))
 	if err != nil {
 		wsLog.Warn(err.Error())
 		c.closeConn()
@@ -162,7 +165,7 @@ func (c *Client) pongHandler(appData string) (err error) {
 }
 
 func (c *Client) pingHandler(appData string) (err error) {
-	err = c.conn.WriteControl(websocket.PongMessage, WS_MSG_BUF_PONG, time.Now().Add(time.Second))
+	err = c.conn.WriteControl(websocket.PongMessage, WS_MSG_BUF_PONG, c.hub.now.Add(time.Second))
 	/*
 		if err == websocket.ErrCloseSent {
 			return
@@ -180,7 +183,7 @@ func (c *Client) pingHandler(appData string) (err error) {
 func (c *Client) closeHandler(code int, text string) (err error) {
 	c.closeConn()
 	//message := websocket.FormatCloseMessage(code, "")
-	//c.conn.WriteControl(websocket.CloseMessage, message, time.Now().Add(time.Second))
+	//c.conn.WriteControl(websocket.CloseMessage, message, c.hub.now.Add(time.Second))
 	return
 }
 
@@ -215,7 +218,7 @@ func (c *Client) writeLoop() {
 				return
 			}
 			merges = 1
-			if err = c.conn.SetWriteDeadline(time.Now().Add(WS_WRITE_WAIT)); err != nil {
+			if err = c.conn.SetWriteDeadline(c.hub.now.Add(WS_WRITE_WAIT)); err != nil {
 				wsLog.Warn(err.Error())
 				return
 			}
@@ -247,16 +250,18 @@ func (c *Client) writeLoop() {
 					}
 					message = <-c.sendChan
 					bufLen += len(message)
+					if c.closed == true {
+						break
+					}
 					_, err = wc.Write(message)
 					if err != nil {
-						wsLog.Warn(err.Error())
-						return
+						//wsLog.Warn(err.Error())
+						break
 					}
 				}
 			}
-
 			if err = wc.Close(); err != nil {
-				wsLog.Warn(err.Error())
+				//wsLog.Warn(err.Error())
 				return
 			}
 		case _, ok = <-pingTicker.C:
@@ -266,7 +271,7 @@ func (c *Client) writeLoop() {
 			if c.closed == true {
 				return
 			}
-			if err = c.conn.SetWriteDeadline(time.Now().Add(WS_WRITE_WAIT)); err != nil {
+			if err = c.conn.SetWriteDeadline(c.hub.now.Add(WS_WRITE_WAIT)); err != nil {
 				wsLog.Warn(err.Error())
 				return
 			}
