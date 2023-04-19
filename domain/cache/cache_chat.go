@@ -42,7 +42,7 @@ func (c *chatCache) DelGroupChatInfo(chatId int64) (err error) {
 	var (
 		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(chatId)
 	)
-	err = xredis.Del(key)
+	err = xredis.Unlink(key)
 	return
 }
 
@@ -50,7 +50,7 @@ func (c *chatCache) DelChatInfo(chatId int64) (err error) {
 	var (
 		key = constant.RK_SYNC_GROUP_CHAT_INFO + utils.GetHashTagKey(chatId)
 	)
-	err = xredis.Del(key)
+	err = xredis.Unlink(key)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_DELETE_FAILED, ERROR_CACHE_REDIS_DELETE_FAILED, err.Error())
 	}

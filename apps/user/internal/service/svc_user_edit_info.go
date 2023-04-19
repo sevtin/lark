@@ -9,7 +9,6 @@ import (
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/protocol"
-	"lark/pkg/utils"
 )
 
 func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInfoReq) (resp *pb_user.EditUserInfoResp, _ error) {
@@ -18,7 +17,6 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 		u        = entity.NewMysqlUpdate()
 		larkId   interface{}
 		mobile   interface{}
-		hash     string
 		nickname interface{}
 		ok       bool
 		result   *protocol.Result
@@ -40,9 +38,7 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 		if larkId, ok = u.Values["lark_id"]; ok == true {
 			switch larkId.(type) {
 			case string:
-				hash = utils.MD5(larkId.(string))
-				u.Values["hash"] = hash
-				err = s.RecheckLarkId(tx, req.Uid, hash, resp)
+				err = s.RecheckLarkId(tx, req.Uid, larkId.(string), resp)
 				if err != nil {
 					return
 				}
@@ -120,12 +116,12 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 	return
 }
 
-func (s *userService) RecheckLarkId(tx *gorm.DB, uid int64, hash string, resp *pb_user.EditUserInfoResp) (err error) {
+func (s *userService) RecheckLarkId(tx *gorm.DB, uid int64, larkId string, resp *pb_user.EditUserInfoResp) (err error) {
 	var (
 		w      = entity.NewMysqlWhere()
 		exists bool
 	)
-	w.SetFilter("hash=?", hash)
+	w.SetFilter("lark_id=?", larkId)
 	exists, err = s.userRepo.TxExists(tx, w, uid)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)

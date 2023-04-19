@@ -54,7 +54,7 @@ func (c *userCache) DelUserInfo(uid int64) (err error) {
 	var (
 		htk = utils.GetHashTagKey(uid)
 	)
-	err = xredis.CDel([]string{constant.RK_SYNC_USER_INFO + htk, constant.RK_SYNC_BASIC_USER_INFO + htk})
+	err = xredis.CUnlink([]string{constant.RK_SYNC_USER_INFO + htk, constant.RK_SYNC_BASIC_USER_INFO + htk})
 	return
 }
 
@@ -170,7 +170,7 @@ func (c *userCache) SignOut(uid int64, platform pb_enum.PLATFORM_TYPE) (err erro
 		key2        = constant.RK_SYNC_USER_REFRESH_TOKEN_SESSION_ID + htk + ":" + platformStr
 		key3        = constant.RK_SYNC_USER_SERVER + htk
 	)
-	err = xredis.CDel([]string{key1, key2, key3})
+	err = xredis.CUnlink([]string{key1, key2, key3})
 	if err != nil {
 		return
 	}

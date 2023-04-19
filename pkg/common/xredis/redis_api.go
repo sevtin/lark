@@ -26,9 +26,14 @@ func (r *RedisClient) RealKey(key string) string {
 	return r.Prefix + key
 }
 
-func Del(key string) error {
+//func Del(key string) error {
+//	key = RealKey(key)
+//	return Cli.Client.Del(context.Background(), key).Err()
+//}
+
+func Unlink(key string) error {
 	key = RealKey(key)
-	return Cli.Client.Del(context.Background(), key).Err()
+	return Cli.Client.Unlink(context.Background(), key).Err()
 }
 
 func TTL(key string) time.Duration {
@@ -40,13 +45,25 @@ func TTL(key string) time.Duration {
 //	return Cli.Client.Del(context.Background(), keys...).Err()
 //}
 
-func CDel(keys []string) (err error) {
+//func CDel(keys []string) (err error) {
+//	var (
+//		pipe = Cli.Client.Pipeline()
+//		key  string
+//	)
+//	for _, key = range keys {
+//		pipe.Del(context.Background(), RealKey(key))
+//	}
+//	_, err = pipe.Exec(context.Background())
+//	return
+//}
+
+func CUnlink(keys []string) (err error) {
 	var (
 		pipe = Cli.Client.Pipeline()
 		key  string
 	)
 	for _, key = range keys {
-		pipe.Del(context.Background(), key)
+		pipe.Unlink(context.Background(), RealKey(key))
 	}
 	_, err = pipe.Exec(context.Background())
 	return
@@ -324,28 +341,28 @@ func EvalShaResult(sha string, keys []string, args []interface{}) (interface{}, 
 }
 
 // 可能只删除部分
-func DelKeysByMatch(match string, timeout time.Duration) (err error) {
-	var (
-		ctx    context.Context
-		cancel context.CancelFunc
-		iter   *redis.ScanIterator
-	)
-	match = RealKey(match)
-	ctx, cancel = context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	iter = Cli.Client.Scan(ctx, 0, match, 0).Iterator()
-	for iter.Next(ctx) {
-		err = Cli.Client.Del(ctx, iter.Val()).Err()
-		if err != nil {
-			return
-		}
-	}
-	if err = iter.Err(); err != nil {
-		return
-	}
-	return
-}
+//func DelKeysByMatch(match string, timeout time.Duration) (err error) {
+//	var (
+//		ctx    context.Context
+//		cancel context.CancelFunc
+//		iter   *redis.ScanIterator
+//	)
+//	match = RealKey(match)
+//	ctx, cancel = context.WithTimeout(context.Background(), timeout)
+//	defer cancel()
+//
+//	iter = Cli.Client.Scan(ctx, 0, match, 0).Iterator()
+//	for iter.Next(ctx) {
+//		err = Cli.Client.Del(ctx, iter.Val()).Err()
+//		if err != nil {
+//			return
+//		}
+//	}
+//	if err = iter.Err(); err != nil {
+//		return
+//	}
+//	return
+//}
 
 func ZAdd(key string, score float64, member string) (err error) {
 	key = RealKey(key)
