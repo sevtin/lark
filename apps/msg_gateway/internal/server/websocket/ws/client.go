@@ -88,15 +88,19 @@ func (c *Client) closeConn() {
 	close(c.sendChan)
 	c.cancel()
 	c.hub.unregisterChan <- c
+	nowAt := time.Now()
+	c.conn.SetWriteDeadline(nowAt.Add(WS_RW_DEAD_LINE))
+	c.conn.SetReadDeadline(nowAt.Add(WS_RW_DEAD_LINE))
+	// 耗时操作!!!
 	c.conn.Close()
 }
 
 func (c *Client) readLoop() {
 	defer func() {
-		c.closeConn()
 		if r := recover(); r != nil {
 			wsLog.Warn(r, string(debug.Stack()))
 		}
+		c.closeConn()
 	}()
 
 	var (
@@ -190,11 +194,11 @@ func (c *Client) closeHandler(code int, text string) (err error) {
 func (c *Client) writeLoop() {
 	pingTicker := time.NewTicker(WS_PING_PERIOD)
 	defer func() {
-		pingTicker.Stop()
-		c.closeConn()
 		if r := recover(); r != nil {
 			wsLog.Warn(r, string(debug.Stack()))
 		}
+		pingTicker.Stop()
+		c.closeConn()
 	}()
 
 	var (

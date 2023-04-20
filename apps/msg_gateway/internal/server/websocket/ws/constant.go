@@ -13,6 +13,7 @@ const (
 	WS_PING_PERIOD    = (WS_PONG_WAIT * 9) / 10
 	WS_RITE_WAIT      = time.Second
 	WS_WRITE_TIME_OUT = 5 * time.Second
+	WS_RW_DEAD_LINE   = 200 * time.Millisecond
 	// Maximum message size allowed from peer.
 	WS_READ_MAX_MESSAGE_BUFFER_SIZE        = 2048
 	WS_WRITE_MAX_MESSAGE_BUFFER_SIZE       = 2048

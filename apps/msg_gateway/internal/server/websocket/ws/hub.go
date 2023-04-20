@@ -9,20 +9,18 @@ import (
 	"log"
 	"runtime/debug"
 	"strconv"
-	"sync/atomic"
 	"time"
 )
 
 type Hub struct {
-	serverId         int
-	upgrader         websocket.Upgrader
-	registerChan     chan *Client
-	unregisterChan   chan *Client    // 只在Client调用closeConn()函数时触发
-	readChan         chan *Message   // 客户端发送的消息
-	msgCallback      MessageCallback // 回调
-	clients          *CliMap         // key:platform-uid
-	sentMessageCount int64
-	now              time.Time
+	serverId       int
+	upgrader       websocket.Upgrader
+	registerChan   chan *Client
+	unregisterChan chan *Client    // 只在Client调用closeConn()函数时触发
+	readChan       chan *Message   // 客户端发送的消息
+	msgCallback    MessageCallback // 回调
+	clients        *CliMap         // key:platform-uid
+	now            time.Time
 }
 
 func NewHub(serverId int, msgCallback MessageCallback) *Hub {
@@ -161,7 +159,6 @@ func (h *Hub) SendMessage(uid int64, platform int32, message []byte) (result int
 	if cli, ok = h.clients.Get(clientKey(uid, platform)); ok == false {
 		return
 	}
-	atomic.AddInt64(&h.sentMessageCount, 1)
 	cli.Send(message)
 	result = WS_SEND_MSG_SUCCESS
 	return
@@ -184,12 +181,12 @@ func (h *Hub) broadcastMessage() {
 
 func (h *Hub) debug() {
 	go func() {
-		allTicker := time.NewTicker(time.Second * 60)
-		defer allTicker.Stop()
+		ticker := time.NewTicker(time.Second * 30)
+		defer ticker.Stop()
 		for {
 			select {
-			case <-allTicker.C:
-				log.Println("在线人数:", h.clients.Len(), " 发送消息数量:", atomic.LoadInt64(&h.sentMessageCount))
+			case <-ticker.C:
+				log.Println("在线人数:", h.clients.Len())
 			}
 		}
 	}()

@@ -28,7 +28,7 @@ var (
 	// 起始uid
 	uid = flag.Int64("uid", 1639998887770000000, "First user id")
 	// 在线成员数量
-	on = flag.Int64("on", 2000, "Online users")
+	on = flag.Int64("on", 1000, "Online users")
 	// 每次发送消息数量
 	sn = flag.Int64("sn", 500, "Number of messages send")
 	// 群成员数量
