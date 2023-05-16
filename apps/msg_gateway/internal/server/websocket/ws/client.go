@@ -2,7 +2,6 @@ package ws
 
 import (
 	"bytes"
-	"context"
 	"github.com/gorilla/websocket"
 	"io"
 	"lark/pkg/utils"
@@ -13,30 +12,29 @@ import (
 )
 
 type Client struct {
-	rwLock   sync.RWMutex
-	hub      *Hub
-	conn     *websocket.Conn
-	uid      int64 // 用户ID
-	platform int32 // 平台ID
-	key      string
-	onlineTs int64 // 上线时间戳（毫秒）
-	sendChan chan []byte
-	closed   bool
-	ctx      context.Context
-	cancel   context.CancelFunc
+	lock      sync.Mutex
+	hub       *Hub
+	conn      *websocket.Conn
+	uid       int64 // 用户ID
+	platform  int32 // 平台ID
+	key       string
+	onlineTs  int64 // 上线时间戳（毫秒）
+	sendChan  chan []byte
+	closeChan chan struct{}
+	closed    bool
 }
 
 func newClient(hub *Hub, conn *websocket.Conn, uid int64, platform int32) *Client {
 	cli := &Client{
-		hub:      hub,
-		conn:     conn,
-		uid:      uid,
-		platform: platform,
-		key:      clientKey(uid, platform),
-		onlineTs: time.Now().UnixNano() / 1e6,
-		sendChan: make(chan []byte, WS_WRITE_MAX_MESSAGE_CHAN_SIZE),
+		hub:       hub,
+		conn:      conn,
+		uid:       uid,
+		platform:  platform,
+		key:       clientKey(uid, platform),
+		onlineTs:  time.Now().UnixNano() / 1e6,
+		sendChan:  make(chan []byte, WS_WRITE_MAX_MESSAGE_CHAN_SIZE),
+		closeChan: make(chan struct{}),
 	}
-	cli.ctx, cli.cancel = context.WithCancel(context.Background())
 	//cli.debug()
 	return cli
 }
@@ -78,15 +76,14 @@ func (c *Client) debug() {
 }
 
 func (c *Client) closeConn() {
-	c.rwLock.Lock()
+	c.lock.Lock()
 	if c.closed == true {
-		c.rwLock.Unlock()
+		c.lock.Unlock()
 		return
 	}
 	c.closed = true
-	c.rwLock.Unlock()
-	close(c.sendChan)
-	c.cancel()
+	c.lock.Unlock()
+	close(c.closeChan)
 	c.hub.unregisterChan <- c
 	nowAt := time.Now()
 	c.conn.SetWriteDeadline(nowAt.Add(WS_RW_DEAD_LINE))
@@ -252,7 +249,10 @@ func (c *Client) writeLoop() {
 					if merges > WS_WRITE_MAX_MERGE_MESSAGE_SIZE {
 						break
 					}
-					message = <-c.sendChan
+					message, ok = <-c.sendChan
+					if ok == false {
+						break
+					}
 					bufLen += len(message)
 					if c.closed == true {
 						break
@@ -283,7 +283,7 @@ func (c *Client) writeLoop() {
 				wsLog.Warn(err.Error())
 				return
 			}
-		case <-c.ctx.Done():
+		case <-c.closeChan:
 			return
 		}
 	}
@@ -305,21 +305,16 @@ func (c *Client) Send(message []byte) {
 }
 
 func (c *Client) Close() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			//wsLog.Warn(r, string(debug.Stack()))
-		}
-	}()
-	c.rwLock.RLock()
+	c.lock.Lock()
 	if c.closed == true {
-		c.rwLock.RUnlock()
+		c.lock.Unlock()
 		return
 	}
-	c.rwLock.RUnlock()
+	c.lock.Unlock()
 	err = c.conn.WriteMessage(websocket.CloseMessage, WS_MSG_BUF_CLOSE)
 	if err != nil {
 		wsLog.Warn(err.Error())
 	}
-	c.cancel()
+	c.closeConn()
 	return
 }
