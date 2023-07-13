@@ -60,7 +60,7 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 
 func (s *chatMessageService) GetMessage(chatId int64, seqId int64) (message *po.Message, err error) {
 	var (
-		w = entity.NewNormalWhere()
+		w = entity.NewNormalQuery()
 	)
 	message, _ = s.chatMessageCache.GetChatMessage(chatId, seqId)
 	if message.SrvMsgId > 0 {

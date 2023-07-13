@@ -7,6 +7,7 @@ enum ACCOUNT_TYPE
   UNKNOWN_ACCOUNT_TYPE = 0;
   MOBILE = 1; // 手机登录
   LARK = 2; // lark账户登录
+  UID = 3; // lark账户UID
 }
 
 enum TOPIC
@@ -134,4 +135,9 @@ enum GENDER {
   UNKNOWN_GENDER = 0;
   MALE = 1; // 男
   FEMALE = 2; // 女
+}
+
+enum LOGIN_CHANNEL {
+    UNKNOWN_CHANNEL = 0;
+    GITHUB = 1;
 }

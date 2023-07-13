@@ -14,6 +14,7 @@ type AuthClient interface {
 	SignIn(req *pb_auth.SignInReq) (resp *pb_auth.SignInResp)
 	RefreshToken(req *pb_auth.RefreshTokenReq) (resp *pb_auth.RefreshTokenResp)
 	SignOut(req *pb_auth.SignOutReq) (resp *pb_auth.SignOutResp)
+	GithubOAuth2Callback(req *pb_auth.GithubOAuth2CallbackReq) (resp *pb_auth.GithubOAuth2CallbackResp)
 }
 
 type authClient struct {
@@ -79,6 +80,20 @@ func (c *authClient) SignOut(req *pb_auth.SignOutReq) (resp *pb_auth.SignOutResp
 	client := pb_auth.NewAuthClient(conn)
 	var err error
 	resp, err = client.SignOut(context.Background(), req)
+	if err != nil {
+		xlog.Warn(err.Error())
+	}
+	return
+}
+
+func (c *authClient) GithubOAuth2Callback(req *pb_auth.GithubOAuth2CallbackReq) (resp *pb_auth.GithubOAuth2CallbackResp) {
+	conn := c.GetClientConn()
+	if conn == nil {
+		return
+	}
+	client := pb_auth.NewAuthClient(conn)
+	var err error
+	resp, err = client.GithubOAuth2Callback(context.Background(), req)
 	if err != nil {
 		xlog.Warn(err.Error())
 	}

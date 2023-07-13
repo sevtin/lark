@@ -106,7 +106,7 @@ func (s *messageHistoryService) MessageOperation(msg []byte) (err error) {
 func (s *messageHistoryService) GetMessage(chatId int64, seqId int64) (message *po.Message, err error) {
 	message = new(po.Message)
 	var (
-		w = entity.NewNormalWhere()
+		w = entity.NewNormalQuery()
 	)
 	message, err = s.chatMessageCache.GetChatMessage(chatId, seqId)
 	if message.SrvMsgId > 0 {

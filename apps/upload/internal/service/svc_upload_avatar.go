@@ -61,14 +61,19 @@ func (s *uploadService) UploadAvatar(ctx *gin.Context, params *dto.UploadAvatarR
 		xlog.Warn(xhttp.ERROR_CODE_HTTP_READ_UPLOAD_FILE_FAILED, xhttp.ERROR_HTTP_READ_UPLOAD_FILE_FAILED, resultList.Err.Error())
 		return
 	}
+	var (
+		pi   *xresize.PhotoInfo
+		host = "http://" + xminio.GetEndpoint() + "/photos/"
+	)
 	for _, pr = range resultList.List {
-		switch photos.Maps[pr.Info.Key].Tag {
+		pi = photos.Maps[pr.Info.Key]
+		switch pi.Tag {
 		case xresize.PhotoTagSmall:
-			avatarReq.AvatarSmall = pr.Info.Key
+			avatarReq.AvatarSmall = host + pi.Key
 		case xresize.PhotoTagMedium:
-			avatarReq.AvatarMedium = pr.Info.Key
+			avatarReq.AvatarMedium = host + pi.Key
 		case xresize.PhotoTagLarge:
-			avatarReq.AvatarLarge = pr.Info.Key
+			avatarReq.AvatarLarge = host + pi.Key
 		}
 		path := photos.Maps[pr.Info.Key].Path
 		xants.Submit(func() {

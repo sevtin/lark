@@ -1,0 +1,11 @@
+package service
+
+const (
+	ERROR_CODE_LBS_QUERY_DB_FAILED     int32 = 17001
+	ERROR_CODE_LBS_UPDATE_VALUE_FAILED int32 = 17002
+)
+
+const (
+	ERROR_LBS_QUERY_DB_FAILED     = "查询失败"
+	ERROR_LBS_UPDATE_VALUE_FAILED = "更新Value失败"
+)

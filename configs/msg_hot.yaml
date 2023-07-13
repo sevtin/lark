@@ -10,9 +10,10 @@ etcd:
   write_timeout: 5000
   dial_timeout: 5000
 mongo:
-  address: "lark-mongo-msg:27017"
+  hosts: ["lark-mongo-msg1:27017","lark-mongo-msg2:27018","lark-mongo-msg3:27019"]
   username: admin
   password: lark2022
+  replica_set: lark
   db: lark
   direct: false
   timeout: 5000

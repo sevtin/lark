@@ -48,7 +48,7 @@ func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTop
 	var (
 		seqId      int64
 		nowMilli   = utils.NowMilli()
-		w          = entity.NewNormalWhere()
+		w          = entity.NewNormalQuery()
 		memberList []*pb_chat_member.ChatMemberBasicInfo
 		msg        *pb_msg.SrvChatMessage
 		inbox      *pb_mq.InboxMessage
@@ -59,21 +59,21 @@ func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTop
 		return
 	}
 	msg = &pb_msg.SrvChatMessage{
-		SrvMsgId:        xsnowflake.NewSnowflakeID(),
-		CliMsgId:        xsnowflake.NewSnowflakeID(),
-		SenderId:        0,
-		SenderPlatform:  0,
-		SenderName:      "",
-		SenderAvatarKey: "",
-		ChatId:          chatId,
-		ChatType:        pb_enum.CHAT_TYPE_GROUP,
-		SeqId:           seqId,
-		MsgFrom:         pb_enum.MSG_FROM_SYSTEM,
-		MsgType:         msgType,
-		Body:            nil,
-		Status:          0,
-		SentTs:          nowMilli,
-		SrvTs:           nowMilli,
+		SrvMsgId:       xsnowflake.NewSnowflakeID(),
+		CliMsgId:       xsnowflake.NewSnowflakeID(),
+		SenderId:       0,
+		SenderPlatform: 0,
+		SenderName:     "",
+		SenderAvatar:   "",
+		ChatId:         chatId,
+		ChatType:       pb_enum.CHAT_TYPE_GROUP,
+		SeqId:          seqId,
+		MsgFrom:        pb_enum.MSG_FROM_SYSTEM,
+		MsgType:        msgType,
+		Body:           nil,
+		Status:         0,
+		SentTs:         nowMilli,
+		SrvTs:          nowMilli,
 	}
 	w.SetFilter("chat_id=?", chatId)
 	w.SetFilter("uid IN(?)", uidList)

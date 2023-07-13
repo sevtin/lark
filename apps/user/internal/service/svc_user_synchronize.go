@@ -12,7 +12,7 @@ import (
 func (s *userService) updateChatMemberCacheInfo(tx *gorm.DB, uid int64) (r *protocol.Result, err error) {
 	r = new(protocol.Result)
 	var (
-		w       = entity.NewMysqlWhere()
+		w       = entity.NewMysqlQuery()
 		members []*pb_chat_member.ChatMemberInfo
 		member  *pb_chat_member.ChatMemberInfo
 		uidStr  = utils.Int64ToStr(uid)

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"lark/domain/pdo"
 	"lark/domain/po"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
@@ -43,11 +44,12 @@ func (s *userService) GetUserInfo(ctx context.Context, req *pb_user.UserInfoReq)
 
 func (s *userService) queryUserInfo(uid int64, resp *pb_user.UserInfoResp) (err error) {
 	var (
-		w    = entity.NewMysqlWhere()
-		user *po.User
+		q    = entity.NewMysqlQuery()
+		user = new(pdo.UserInfo)
 	)
-	w.SetFilter("uid = ?", uid)
-	user, err = s.userRepo.UserInfo(w)
+	q.Fields = user.GetField()
+	q.SetFilter("uid = ?", uid)
+	err = s.userRepo.QueryUser(q, user)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
 		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
@@ -55,7 +57,7 @@ func (s *userService) queryUserInfo(uid int64, resp *pb_user.UserInfoResp) (err 
 	}
 	if user.Uid == 0 {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, user.Uid)
+		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
 		return
 	}
 	copier.Copy(resp.UserInfo, user)
@@ -64,7 +66,7 @@ func (s *userService) queryUserInfo(uid int64, resp *pb_user.UserInfoResp) (err 
 
 func (s *userService) queryUserAvatar(uid int64, resp *pb_user.UserInfoResp) (err error) {
 	var (
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		avatar *po.Avatar
 	)
 	w.SetFilter("owner_id = ?", uid)

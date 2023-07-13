@@ -23,6 +23,7 @@ func init() {
 	container.Provide(repo.NewChatMemberRepository)
 	container.Provide(cache.NewAuthCache)
 	container.Provide(cache.NewUserCache)
+	container.Provide(cache.NewServerMgrCache)
 }
 
 func Invoke(i interface{}) error {

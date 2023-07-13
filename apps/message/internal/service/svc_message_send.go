@@ -38,7 +38,7 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
 		return
 	}
-
+	// TODO:待优化
 	// 2、重复消息校验
 	result, ok = s.chatMessageCache.RepeatMessageVerify(s.cfg.Redis.Prefix, req.Msg.ChatId, req.Msg.CliMsgId)
 	if ok == false {
@@ -76,7 +76,7 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	inbox.Msg.SrvTs = utils.NowMilli()
 	inbox.Msg.MsgFrom = pb_enum.MSG_FROM_USER
 	inbox.Msg.SenderName = senderInfo.Alias
-	inbox.Msg.SenderAvatarKey = senderInfo.MemberAvatarKey
+	inbox.Msg.SenderAvatar = senderInfo.MemberAvatar
 
 	// 5、将消息推送到kafka消息队列
 	if s.producer == nil {

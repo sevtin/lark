@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"github.com/go-redis/redis/v9"
 	"github.com/jinzhu/copier"
 	"lark/domain/po"
 	"lark/pkg/common/xlog"
@@ -122,11 +121,7 @@ func (c *chatMessageCache) IncrSeqID(chatId int64) (seqId int64, err error) {
 
 func (c *chatMessageCache) GetMaxSeqID(chatId int64) (seqId uint64, err error) {
 	if seqId, err = xredis.GetMaxSeqID(chatId); err != nil {
-		if err != redis.Nil {
-			err = nil
-		} else {
-			xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
-		}
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
 	}
 	return
 }

@@ -50,3 +50,22 @@ redis:
   db: 0
   password: lark2022
   prefix: "LK:"
+chat_member_server:
+  name: lark_chat_member_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+jaeger:
+  host_port: "lark-jaeger:6831"
+  sampler_type: "const"
+  param: 1
+  log_spans: true
+  buffer_flush_interval: 1
+  max_packet_size: 0
+  enabled: false
+github_oauth2:
+  client_id: "91207c9fb0fb556c0753"
+  client_secret: "61618bf55fa6127e8d2701a62a308fdfea99c844"
+  redirect_url: "http://localhost:8088/open/auth/oauth2/github/callback"
+

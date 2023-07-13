@@ -20,3 +20,7 @@ func (s *authServer) RefreshToken(ctx context.Context, req *pb_auth.RefreshToken
 func (s *authServer) SignOut(ctx context.Context, req *pb_auth.SignOutReq) (resp *pb_auth.SignOutResp, err error) {
 	return s.authService.SignOut(ctx, req)
 }
+
+func (s *authServer) GithubOAuth2Callback(ctx context.Context, req *pb_auth.GithubOAuth2CallbackReq) (resp *pb_auth.GithubOAuth2CallbackResp, err error) {
+	return s.authService.GithubOAuth2Callback(ctx, req)
+}

@@ -9,13 +9,16 @@ import (
 )
 
 type Config struct {
-	Name       string      `yaml:"name"`
-	ServerID   int         `yaml:"server_id"`
-	Log        string      `yaml:"log"`
-	GrpcServer *conf.Grpc  `yaml:"grpc_server"`
-	Etcd       *conf.Etcd  `yaml:"etcd"`
-	Mysql      *conf.Mysql `yaml:"mysql"`
-	Redis      *conf.Redis `yaml:"redis"`
+	Name             string             `yaml:"name"`
+	ServerID         int                `yaml:"server_id"`
+	Log              string             `yaml:"log"`
+	GrpcServer       *conf.Grpc         `yaml:"grpc_server"`
+	Etcd             *conf.Etcd         `yaml:"etcd"`
+	Mysql            *conf.Mysql        `yaml:"mysql"`
+	Redis            *conf.Redis        `yaml:"redis"`
+	Github           *conf.GithubOAuth2 `yaml:"github_oauth2"`
+	ChatMemberServer *conf.GrpcServer   `yaml:"chat_member_server"`
+	Jaeger           *conf.Jaeger       `yaml:"jaeger"`
 }
 
 var (

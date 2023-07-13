@@ -1,4 +1,4 @@
-endpoint: 'lark-minio:9000'
+endpoint: 'lark-minio.com:19000'
 options:
   secure: false
   credentials:

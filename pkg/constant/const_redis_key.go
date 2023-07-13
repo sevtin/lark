@@ -1,6 +1,6 @@
 package constant
 
-//无状态
+// 无状态
 const (
 	RK_MSG_CLI_MSG_ID   = "MSG:CLI_MSG_ID:" // 缓存客户端消息ID + ChatId + CliMsgId {}
 	RK_MSG_CONVO_MSG    = "MSG:CONVO:"      // 最新一条会话消息 {}
@@ -9,7 +9,7 @@ const (
 	RK_USER_LOCK_MOBILE = "USER_LOCK:MOBILE:"
 )
 
-//有状态
+// 有状态
 const (
 	RK_SYNC_USER_ACCESS_TOKEN_SESSION_ID  = "USER:ACCESS_TOKEN_SESSION_ID:"  // {}
 	RK_SYNC_USER_REFRESH_TOKEN_SESSION_ID = "USER:REFRESH_TOKEN_SESSION_ID:" // {}
@@ -27,7 +27,7 @@ const (
 	RK_SYNC_SERVER_REDSYNC_MUTEX          = "SERVER_REDSYNC_MUTEX:"
 )
 
-//弃用key
+// 弃用key
 const (
 	RK_SYNC_GROUP_CHAT_DETAILS = "CHAT:GROUP_CHAT_DETAILS:"
 )

@@ -11,7 +11,7 @@ import (
 func (s *chatMemberService) GetChatMemberInfo(ctx context.Context, req *pb_chat_member.GetChatMemberInfoReq) (resp *pb_chat_member.GetChatMemberInfoResp, _ error) {
 	resp = &pb_chat_member.GetChatMemberInfoResp{Info: new(pb_chat_member.ChatMemberInfo)}
 	var (
-		w   = entity.NewNormalWhere()
+		w   = entity.NewNormalQuery()
 		err error
 	)
 	w.SetFilter("chat_id = ?", req.ChatId)

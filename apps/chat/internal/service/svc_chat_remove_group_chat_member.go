@@ -14,7 +14,7 @@ import (
 
 func (s *chatService) getChat(chatId int64) (chat *po.Chat, err error) {
 	var (
-		w = entity.NewMysqlWhere()
+		w = entity.NewMysqlQuery()
 	)
 	w.SetFilter("chat_id=?", chatId)
 	chat, err = s.chatRepo.Chat(w)
@@ -23,7 +23,7 @@ func (s *chatService) getChat(chatId int64) (chat *po.Chat, err error) {
 
 func (s *chatService) getChatMember(chatId int64, uid int64) (member *pb_chat_member.ChatMemberInfo, err error) {
 	var (
-		w = entity.NewMysqlWhere()
+		w = entity.NewMysqlQuery()
 	)
 	w.SetFilter("chat_id=?", chatId)
 	w.SetFilter("uid=?", uid)

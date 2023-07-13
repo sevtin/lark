@@ -18,7 +18,7 @@ func (s *chatInviteService) InitiateChatInvite(_ context.Context, req *pb_invite
 	resp = new(pb_invite.InitiateChatInviteResp)
 	var (
 		invite = new(po.ChatInvite)
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		err    error
 	)
 	switch req.ChatType {
@@ -96,8 +96,8 @@ func (s *chatInviteService) sendChatInviteNotificationMessage(inviteReq *pb_invi
 		invitees,
 		s.chatCache,
 		s.userCache,
-		s.chatClient,
-		s.userClient)
+		s.chatRepo,
+		s.userRepo)
 	if err != nil {
 		return
 	}

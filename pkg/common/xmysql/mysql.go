@@ -42,7 +42,7 @@ func GetTX() *gorm.DB {
 	return GetDB().Begin()
 }
 
-//事务处理
+// 事务处理
 func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	var (
 		db   *gorm.DB

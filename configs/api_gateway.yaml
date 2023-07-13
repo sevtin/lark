@@ -75,6 +75,12 @@ convo_server:
     cert_file: ./configs/tls/grpc/server.pem
     enabled: true
     server_name_override: lark.com
+lbs_server:
+  name: lark_lbs_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
 minio:
   photo_directory: "/private/tmp/lark/photos/"
 jaeger:

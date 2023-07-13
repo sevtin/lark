@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
+	"lark/domain/do"
 	"lark/domain/po"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xjwt"
@@ -13,6 +14,7 @@ import (
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
+	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
@@ -21,58 +23,43 @@ import (
 func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp *pb_auth.SignUpResp, _ error) {
 	resp = &pb_auth.SignUpResp{UserInfo: &pb_user.UserInfo{Avatar: &pb_user.AvatarInfo{}}}
 	var (
+		server *pb_auth.ServerInfo
 		user   = new(po.User)
 		avatar *po.Avatar
 		err    error
+		signUp *do.SignUp
 	)
+	server = s.getWsServer()
 	copier.Copy(user, req)
-	user.AvatarKey = constant.CONST_AVATAR_KEY_SMALL
+	user.Avatar = constant.CONST_AVATAR_SMALL
 	user.Password = utils.MD5(user.Password)
-	user.ServerId = utils.NewServerId(0, req.ServerId, req.RegPlatform)
+	user.ServerId = utils.NewServerId(0, int64(server.ServerId), req.RegPlatform)
+	user.Uid = xsnowflake.NewSnowflakeID()
 	user.LarkId = xsnowflake.DefaultLarkId()
-	// TODO 分布式锁 mobile 重复校验
+
+	avatar = &po.Avatar{
+		OwnerId:      user.Uid,
+		OwnerType:    int(pb_enum.AVATAR_OWNER_USER_AVATAR),
+		AvatarSmall:  constant.CONST_AVATAR_SMALL,
+		AvatarMedium: constant.CONST_AVATAR_MEDIUM,
+		AvatarLarge:  constant.CONST_AVATAR_LARGE,
+	}
+	// TODO:分布式锁 mobile 重复校验
 	err = s.RecheckMobile(-1, req.Mobile, resp)
 	if err != nil {
 		return
 	}
-	err = xmysql.Transaction(func(tx *gorm.DB) (err error) {
-		err = s.authRepo.TxCreate(tx, user)
-		if err != nil {
-			resp.Set(ERROR_CODE_AUTH_REGISTER_ERR, ERROR_AUTH_REGISTER_TYPE_ERR)
-			return
-		}
-		avatar = &po.Avatar{
-			OwnerId:      user.Uid,
-			OwnerType:    int(pb_enum.AVATAR_OWNER_USER_AVATAR),
-			AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
-			AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
-			AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
-		}
-		err = s.avatarRepo.TxCreate(tx, avatar)
-		if err != nil {
-			resp.Set(ERROR_CODE_AUTH_INSERT_VALUE_FAILED, ERROR_AUTH_INSERT_VALUE_FAILED)
-			return
-		}
-		return
-	})
-	if err != nil {
-		xlog.Warn(resp.Code, resp.Msg, err.Error())
+	signUp = s.signUpTransaction(xmysql.GetTX(), user, avatar, req.RegPlatform)
+	if signUp.Err != nil || signUp.Code > 0 {
+		resp.Set(signUp.Code, signUp.Msg)
 		return
 	}
-	var (
-		accessToken  *pb_auth.Token
-		refreshToken *pb_auth.Token
-	)
-	accessToken, refreshToken, err = s.CreateToken(user.Uid, req.RegPlatform)
-	if err != nil {
-		resp.Set(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED)
-		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, err.Error())
-		return
-	}
+
 	copier.Copy(resp.UserInfo, user)
 	copier.Copy(resp.UserInfo.Avatar, avatar)
-	resp.AccessToken = accessToken
-	resp.RefreshToken = refreshToken
+	resp.AccessToken = signUp.AccessToken
+	resp.RefreshToken = signUp.RefreshToken
+	resp.Server = server
 
 	xants.Submit(func() {
 		terr := s.userCache.SetUserAndServer(resp.UserInfo, user.ServerId)
@@ -83,7 +70,36 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 	return
 }
 
-func (s *authService) CreateToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aToken *pb_auth.Token, rToken *pb_auth.Token, err error) {
+func (s *authService) signUpTransaction(tx *gorm.DB, user *po.User, avatar *po.Avatar, regPlatform pb_enum.PLATFORM_TYPE) (signUp *do.SignUp) {
+	signUp = new(do.SignUp)
+	signUp.User = user
+	signUp.Avatar = avatar
+	signUp.Err = s.authRepo.TxCreate(tx, user)
+	if signUp.Err != nil {
+		signUp.Code = ERROR_CODE_AUTH_REGISTER_ERR
+		signUp.Msg = ERROR_AUTH_REGISTER_TYPE_ERR
+		tx.Rollback()
+		return
+	}
+	signUp.Err = s.avatarRepo.TxCreate(tx, avatar)
+	if signUp.Err != nil {
+		signUp.Code = ERROR_CODE_AUTH_INSERT_VALUE_FAILED
+		signUp.Msg = ERROR_AUTH_INSERT_VALUE_FAILED
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	signUp.AccessToken, signUp.RefreshToken, signUp.Err = s.createToken(user.Uid, regPlatform)
+	if signUp.Err != nil {
+		signUp.Code = ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED
+		signUp.Msg = ERROR_AUTH_GENERATE_TOKEN_FAILED
+		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, signUp.Err.Error())
+		return
+	}
+	return
+}
+
+func (s *authService) createToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aToken *pb_auth.Token, rToken *pb_auth.Token, err error) {
 	var (
 		accessToken  *xjwt.JwtToken
 		refreshToken *xjwt.JwtToken
@@ -116,7 +132,7 @@ func (s *authService) CreateToken(uid int64, platform pb_enum.PLATFORM_TYPE) (aT
 
 func (s *authService) RecheckMobile(uid int64, mobile string, resp *pb_auth.SignUpResp) (err error) {
 	var (
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		exists bool
 	)
 	w.SetFilter("mobile=?", mobile)
@@ -129,6 +145,35 @@ func (s *authService) RecheckMobile(uid int64, mobile string, resp *pb_auth.Sign
 		err = ERR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT
 		resp.Set(ERROR_CODE_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT, ERROR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT)
 		return
+	}
+	return
+}
+
+func (s *authService) chatMemberOnOffLine(uid int64, serverId int64, platform pb_enum.PLATFORM_TYPE) (resp *pb_chat_member.ChatMemberOnOffLineResp) {
+	req := &pb_chat_member.ChatMemberOnOffLineReq{
+		Uid:      uid,
+		ServerId: serverId,
+		Platform: platform,
+	}
+	return s.chatMemberClient.ChatMemberOnOffLine(req)
+}
+
+func (s *authService) getWsServer() (wsServer *pb_auth.ServerInfo) {
+	var (
+		member   string
+		server   string
+		serverId int64
+		port     int
+	)
+	list := s.svrMgrCache.ZRevRangeMsgGateway(0, 0)
+	if len(list) > 0 {
+		member = list[0]
+	}
+	server, serverId, port = utils.GetMsgGatewayServer(member)
+	wsServer = &pb_auth.ServerInfo{
+		ServerId: int32(serverId),
+		Name:     server,
+		Port:     int32(port),
 	}
 	return
 }

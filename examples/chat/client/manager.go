@@ -85,12 +85,12 @@ func (m *Manager) Run() {
 		}
 
 		memberInfo = &pb_chat_member.ChatMemberInfo{
-			ChatId:          m.ChatId,
-			ChatType:        pb_enum.CHAT_TYPE_GROUP,
-			Uid:             uid,
-			Alias:           "昵称:" + utils.Int64ToStr(uid),
-			MemberAvatarKey: "b11883ba-f3d7-4164-a593-700c177c37c8.jpeg",
-			RoleId:          1,
+			ChatId:       m.ChatId,
+			ChatType:     pb_enum.CHAT_TYPE_GROUP,
+			Uid:          uid,
+			Alias:        "昵称:" + utils.Int64ToStr(uid),
+			MemberAvatar: "https://photos.bucket.lark.com/b11883ba-f3d7-4164-a593-700c177c37c8",
+			RoleId:       1,
 		}
 		jsonStr, _ = utils.Marshal(memberInfo)
 		kv2[uidStr] = jsonStr

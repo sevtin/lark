@@ -19,7 +19,7 @@ type SignUpReq struct {
 	BirthTs     int64                 `json:"birth_ts" binding:"omitempty,gt=0"`               // 生日
 	Email       string                `json:"email" binding:"omitempty,email"`                 // Email
 	Mobile      string                `json:"mobile" binding:"required,min=8,max=20"`          // 手机号
-	AvatarKey   string                `json:"avatar_key" binding:"omitempty"`                  // 头像(暂时弃用)
+	Avatar      string                `json:"avatar" binding:"omitempty"`                      // 头像(暂时弃用)
 	CityId      int64                 `json:"city_id" binding:"omitempty,gte=0"`               // 城市ID
 	Code        string                `json:"code" binding:"omitempty,min=4,max=6"`            // 验证码(暂时弃用)
 	Udid        string                `json:"udid" binding:"required,len=40"`                  // UDID

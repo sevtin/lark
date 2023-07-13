@@ -1,6 +1,8 @@
 package po
 
-import "lark/pkg/entity"
+import (
+	"lark/pkg/entity"
+)
 
 type User struct {
 	entity.GormEntityTs
@@ -19,5 +21,5 @@ type User struct {
 	RegPlatform int    `gorm:"column:reg_platform;default:0;NOT NULL" json:"reg_platform"` // 注册平台
 	ServerId    int64  `gorm:"column:server_id;default:0;NOT NULL" json:"server_id"`       // 分配的ws服务器
 	CityId      int    `gorm:"column:city_id;default:0;NOT NULL" json:"city_id"`           // 城市ID
-	AvatarKey   string `gorm:"column:avatar_key" json:"avatar_key"`                        // 小图 72*72
+	Avatar      string `gorm:"column:avatar" json:"avatar"`                                // 小图 72*72
 }

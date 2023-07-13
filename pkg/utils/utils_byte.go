@@ -133,60 +133,62 @@ func EncodeCliMessage(topic int32, subtopic int32, msgId int64, message []byte) 
 
 /*
 const (
+
 	MessageLength   uint32 = 4
 	MessageTopic    uint32 = 8
 	MessageSubtopic uint32 = 12
 	MessageType     uint32 = 16
 	MessageId       uint32 = 24
+
 )
 
-func Decode(buf []byte) (msg *pb_msg.Packet, endNode uint32) {
-	msg = new(pb_msg.Packet)
-	var (
-		totalLength  uint32
-		lengthBuff   []byte
-		length       uint32
-		topicBuff    []byte
-		topic        uint32
-		subtopicBuff []byte
-		subtopic     uint32
-		msgTypeBuff  []byte
-		msgType      uint32
-		body         []byte
-		msgId        uint64
-		msgIdBuff    []byte
-	)
+	func Decode(buf []byte) (msg *pb_msg.Packet, endNode uint32) {
+		msg = new(pb_msg.Packet)
+		var (
+			totalLength  uint32
+			lengthBuff   []byte
+			length       uint32
+			topicBuff    []byte
+			topic        uint32
+			subtopicBuff []byte
+			subtopic     uint32
+			msgTypeBuff  []byte
+			msgType      uint32
+			body         []byte
+			msgId        uint64
+			msgIdBuff    []byte
+		)
 
-	totalLength = uint32(len(buf))
-	if totalLength < MessageId {
+		totalLength = uint32(len(buf))
+		if totalLength < MessageId {
+			return
+		}
+		lengthBuff = buf[:MessageLength]
+		length = binary.LittleEndian.Uint32(lengthBuff)
+		endNode = MessageId + length
+		if totalLength < endNode {
+			return
+		}
+		topicBuff = buf[MessageLength:MessageTopic]
+		topic = binary.LittleEndian.Uint32(topicBuff)
+
+		subtopicBuff = buf[MessageTopic:MessageSubtopic]
+		subtopic = binary.LittleEndian.Uint32(subtopicBuff)
+
+		msgTypeBuff = buf[MessageSubtopic:MessageType]
+		msgType = binary.LittleEndian.Uint32(msgTypeBuff)
+
+		msgIdBuff = buf[MessageType:MessageId]
+		msgId = binary.LittleEndian.Uint64(msgIdBuff)
+
+		body = buf[MessageId:endNode]
+		msg.Topic = pb_enum.TOPIC(topic)
+		msg.SubTopic = pb_enum.SUB_TOPIC(subtopic)
+		msg.MsgType = pb_enum.MESSAGE_TYPE(msgType)
+		msg.MsgId = int64(msgId)
+		msg.Data = body
 		return
 	}
-	lengthBuff = buf[:MessageLength]
-	length = binary.LittleEndian.Uint32(lengthBuff)
-	endNode = MessageId + length
-	if totalLength < endNode {
-		return
-	}
-	topicBuff = buf[MessageLength:MessageTopic]
-	topic = binary.LittleEndian.Uint32(topicBuff)
-
-	subtopicBuff = buf[MessageTopic:MessageSubtopic]
-	subtopic = binary.LittleEndian.Uint32(subtopicBuff)
-
-	msgTypeBuff = buf[MessageSubtopic:MessageType]
-	msgType = binary.LittleEndian.Uint32(msgTypeBuff)
-
-	msgIdBuff = buf[MessageType:MessageId]
-	msgId = binary.LittleEndian.Uint64(msgIdBuff)
-
-	body = buf[MessageId:endNode]
-	msg.Topic = pb_enum.TOPIC(topic)
-	msg.SubTopic = pb_enum.SUB_TOPIC(subtopic)
-	msg.MsgType = pb_enum.MESSAGE_TYPE(msgType)
-	msg.MsgId = int64(msgId)
-	msg.Data = body
-	return
-}
 */
 const (
 	CliMessageHeaderLen = 20 // len(4) + topic(4) + subtopic(4) + msgId(8)

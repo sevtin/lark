@@ -2,6 +2,7 @@ package repo
 
 import (
 	"gorm.io/gorm"
+	"lark/domain/pdo"
 	"lark/domain/po"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/common/xsnowflake"
@@ -11,7 +12,10 @@ import (
 type AuthRepository interface {
 	Create(user *po.User) (err error)
 	TxCreate(tx *gorm.DB, user *po.User) (err error)
-	VerifyIdentity(w *entity.MysqlWhere) (user *po.User, err error)
+	VerifyIdentity(q *entity.MysqlQuery) (user *po.User, err error)
+	TxCreateOauthUser(tx *gorm.DB, user *po.OauthUser) (err error)
+	GetOAuthUser(q *entity.MysqlQuery) (user *pdo.OauthUser, err error)
+	UpdateOauthUser(u *entity.MysqlUpdate) (err error)
 }
 
 type authRepository struct {
@@ -38,17 +42,32 @@ func (r *authRepository) Create(user *po.User) (err error) {
 }
 
 func (r *authRepository) TxCreate(tx *gorm.DB, user *po.User) (err error) {
-	user.Uid = xsnowflake.NewSnowflakeID()
-	if user.LarkId == "" {
-		user.LarkId = xsnowflake.DefaultLarkId()
-	}
 	err = tx.Create(user).Error
 	return
 }
 
-func (r *authRepository) VerifyIdentity(w *entity.MysqlWhere) (user *po.User, err error) {
+func (r *authRepository) VerifyIdentity(q *entity.MysqlQuery) (user *po.User, err error) {
 	user = new(po.User)
 	db := xmysql.GetDB()
-	err = db.Where(w.Query, w.Args...).Find(user).Error
+	err = db.Where(q.Query, q.Args...).Find(user).Error
+	return
+}
+
+func (r *authRepository) TxCreateOauthUser(tx *gorm.DB, user *po.OauthUser) (err error) {
+	db := xmysql.GetDB()
+	err = db.Create(user).Error
+	return
+}
+
+func (r *authRepository) GetOAuthUser(q *entity.MysqlQuery) (user *pdo.OauthUser, err error) {
+	user = new(pdo.OauthUser)
+	db := xmysql.GetDB()
+	err = db.Model(&po.OauthUser{}).Select(user.GetField()).Where(q.Query, q.Args...).Find(user).Error
+	return
+}
+
+func (r *authRepository) UpdateOauthUser(u *entity.MysqlUpdate) (err error) {
+	db := xmysql.GetDB()
+	err = db.Model(&po.OauthUser{}).Where(u.Query, u.Args...).Updates(u.Values).Error
 	return
 }

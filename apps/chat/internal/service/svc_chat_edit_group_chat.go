@@ -15,7 +15,7 @@ import (
 func (s *chatService) EditGroupChat(ctx context.Context, req *pb_chat.EditGroupChatReq) (resp *pb_chat.EditGroupChatResp, _ error) {
 	resp = &pb_chat.EditGroupChatResp{}
 	var (
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		u      = entity.NewMysqlUpdate()
 		member *pb_chat_member.ChatMemberInfo
 		chat   *po.Chat

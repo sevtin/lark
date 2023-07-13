@@ -12,7 +12,7 @@ import (
 )
 
 type Client struct {
-	lock      sync.Mutex
+	lock      sync.RWMutex
 	hub       *Hub
 	conn      *websocket.Conn
 	uid       int64 // 用户ID
@@ -295,9 +295,12 @@ func (c *Client) Send(message []byte) {
 			//wsLog.Warn(r, string(debug.Stack()))
 		}
 	}()
+	c.lock.RLock()
 	if c.closed == true {
+		c.lock.RUnlock()
 		return
 	}
+	c.lock.RUnlock()
 	if len(c.sendChan) >= WS_WRITE_MESSAGE_THRESHOLD {
 		return
 	}

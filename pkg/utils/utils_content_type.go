@@ -1,5 +1,7 @@
 package utils
 
+import "strings"
+
 var contentTypes = map[string]string{
 	".*":       "application/octet-stream",
 	".001":     "application/x-001",
@@ -330,8 +332,7 @@ func GetContentType(suffix string) (tp string) {
 	var (
 		ok bool
 	)
-	//suffix = strings.ToLower(suffix)
-	suffix = "." + suffix
+	suffix = strings.ToLower(suffix)
 	if tp, ok = contentTypes[suffix]; ok {
 		return
 	}

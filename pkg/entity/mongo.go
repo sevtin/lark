@@ -27,31 +27,39 @@ func NewContext() (ctx context.Context, cancelFunc context.CancelFunc) {
 	return
 }
 
-type MongoWhere struct {
+type MongoQuery struct {
 	Filter      bson.D
 	FindOptions *options.FindOptions
 }
 
-func NewMongoWhere() *MongoWhere {
-	return &MongoWhere{
+func NewMongoQuery() *MongoQuery {
+	return &MongoQuery{
 		Filter:      bson.D{},
 		FindOptions: new(options.FindOptions),
 	}
 }
 
-func (m *MongoWhere) SetSort(key string, asc bool) {
-	var val = 1
-	if asc == false {
-		val = -1
-	}
-	m.FindOptions.SetSort(bson.D{bson.E{key, val}})
+//func (m *MongoQuery) SetSort(key string, asc bool) {
+//	var val = 1
+//	if asc == false {
+//		val = -1
+//	}
+//	m.FindOptions.SetSort(bson.D{bson.E{key, val}})
+//}
+
+func (m *MongoQuery) SetSort(sort bson.D) {
+	m.FindOptions.SetSort(sort)
 }
 
-func (m *MongoWhere) SetLimit(limit int64) {
+func (m *MongoQuery) SetLimit(limit int64) {
 	m.FindOptions.SetLimit(limit)
 }
 
-func (m *MongoWhere) SetFilter(key string, value interface{}) {
+func (m *MongoQuery) SetSkip(skip int64) {
+	m.FindOptions.SetSkip(skip)
+}
+
+func (m *MongoQuery) SetFilter(key string, value interface{}) {
 	m.Filter = append(m.Filter, bson.D{{key, value}}...)
 }
 

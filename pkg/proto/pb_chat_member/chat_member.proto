@@ -33,7 +33,7 @@ message GetChatMemberInfoResp {
 message GroupChatMemberInfo {
   int64 uid = 1;
   string alias = 2;
-  string member_avatar_key = 3;
+  string member_avatar = 3;
   int32 role_id = 4;
   int32 status = 5;
 }
@@ -43,7 +43,7 @@ message ChatMemberInfo {
   pb_enum.CHAT_TYPE chat_type = 2;
   int64 uid = 3;
   string alias = 4;
-  string member_avatar_key = 5;
+  string member_avatar = 5;
   int32 role_id = 6;
   int32 status = 7;
 }
@@ -75,7 +75,7 @@ message ChatMemberBasicInfo {
   int64 uid = 1;
   string alias = 2;
   string remark = 3;
-  string member_avatar_key = 4;
+  string member_avatar = 4;
   pb_enum.CHAT_STATUS status= 5;
 }
 
@@ -107,7 +107,7 @@ message GroupChatBasicInfo {
   int64 chat_id = 1;
   string chat_name = 2;
   string remark = 3;
-  string chat_avatar_key = 4;
+  string chat_avatar = 4;
 }
 
 service ChatMember {

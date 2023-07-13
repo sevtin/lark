@@ -79,7 +79,7 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 
 func (s *chatInviteService) chatInviteExists(req *pb_invite.ChatInviteHandleReq, resp *pb_invite.ChatInviteHandleResp) (invite *po.ChatInvite, cont bool) {
 	var (
-		w   = entity.NewMysqlWhere()
+		w   = entity.NewMysqlQuery()
 		err error
 	)
 	// 1 校验邀请
@@ -111,7 +111,7 @@ func (s *chatInviteService) chatInviteExists(req *pb_invite.ChatInviteHandleReq,
 
 func (s *chatInviteService) alreadyMember(invite *po.ChatInvite, resp *pb_invite.ChatInviteHandleResp) (cont bool) {
 	var (
-		w     = entity.NewMysqlWhere()
+		w     = entity.NewMysqlQuery()
 		count int64
 		err   error
 	)
@@ -135,7 +135,7 @@ func (s *chatInviteService) alreadyMember(invite *po.ChatInvite, resp *pb_invite
 func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite, resp *pb_invite.ChatInviteHandleResp) (err error) {
 	// 5 同意邀请
 	var (
-		w           = entity.NewMysqlWhere()
+		w           = entity.NewMysqlQuery()
 		chat        *po.Chat
 		members     []*po.ChatMember
 		servers     []int64
@@ -207,25 +207,25 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 				info = list[0]
 			}
 			member = &po.ChatMember{
-				ChatId:          invite.ChatId,
-				ChatType:        invite.ChatType,
-				Uid:             info.Uid,
-				OwnerId:         user.Uid,
-				Alias:           info.Nickname,
-				MemberAvatarKey: info.AvatarKey,
-				Sync:            constant.SYNCHRONIZE_USER_INFO,
+				ChatId:       invite.ChatId,
+				ChatType:     invite.ChatType,
+				Uid:          info.Uid,
+				OwnerId:      user.Uid,
+				Alias:        info.Nickname,
+				MemberAvatar: info.Avatar,
+				Sync:         constant.SYNCHRONIZE_USER_INFO,
 			}
 			serverId = info.ServerId
 		case pb_enum.CHAT_TYPE_GROUP:
 			member = &po.ChatMember{
-				ChatId:          invite.ChatId,
-				ChatType:        invite.ChatType,
-				Uid:             user.Uid,
-				Alias:           user.Nickname,
-				MemberAvatarKey: user.AvatarKey,
-				Sync:            constant.SYNCHRONIZE_USER_INFO,
-				ChatAvatarKey:   chat.AvatarKey,
-				ChatName:        chat.Name,
+				ChatId:       invite.ChatId,
+				ChatType:     invite.ChatType,
+				Uid:          user.Uid,
+				Alias:        user.Nickname,
+				MemberAvatar: user.Avatar,
+				Sync:         constant.SYNCHRONIZE_USER_INFO,
+				ChatAvatar:   chat.Avatar,
+				ChatName:     chat.Name,
 			}
 			serverId = user.ServerId
 		}
@@ -302,21 +302,21 @@ func (s *chatInviteService) addedContactMessage(chat *po.Chat, invite *po.ChatIn
 			m = members[0]
 		}
 		msg := &pb_msg.SrvChatMessage{
-			SrvMsgId:        xsnowflake.NewSnowflakeID(),
-			CliMsgId:        xsnowflake.NewSnowflakeID(),
-			SenderId:        m.Uid,
-			SenderPlatform:  0,
-			SenderName:      m.Alias,
-			SenderAvatarKey: m.MemberAvatarKey,
-			ChatId:          chat.ChatId,
-			ChatType:        pb_enum.CHAT_TYPE_PRIVATE,
-			SeqId:           seqId,
-			MsgFrom:         pb_enum.MSG_FROM_SYSTEM,
-			MsgType:         0,
-			Body:            nil,
-			Status:          0,
-			SentTs:          0,
-			SrvTs:           0,
+			SrvMsgId:       xsnowflake.NewSnowflakeID(),
+			CliMsgId:       xsnowflake.NewSnowflakeID(),
+			SenderId:       m.Uid,
+			SenderPlatform: 0,
+			SenderName:     m.Alias,
+			SenderAvatar:   m.MemberAvatar,
+			ChatId:         chat.ChatId,
+			ChatType:       pb_enum.CHAT_TYPE_PRIVATE,
+			SeqId:          seqId,
+			MsgFrom:        pb_enum.MSG_FROM_SYSTEM,
+			MsgType:        0,
+			Body:           nil,
+			Status:         0,
+			SentTs:         0,
+			SrvTs:          0,
 		}
 		if member.OwnerId == chat.CreatorUid {
 			msg.SentTs = nowMilli
@@ -359,7 +359,7 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 		return
 	}
 	if initiator.Uid == 0 {
-		w := entity.NewMysqlWhere()
+		w := entity.NewMysqlQuery()
 		w.SetFilter("chat_id=?", invite.ChatId)
 		w.SetFilter("uid=?", invite.InitiatorUid)
 		initiator, err = s.chatMemberRepo.ChatMember(w)
@@ -378,32 +378,32 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 		return
 	}
 	msg = &pb_msg.SrvChatMessage{
-		SrvMsgId:        xsnowflake.NewSnowflakeID(),
-		CliMsgId:        xsnowflake.NewSnowflakeID(),
-		SenderId:        0,
-		SenderPlatform:  0,
-		SenderName:      "",
-		SenderAvatarKey: "",
-		ChatId:          chat.ChatId,
-		ChatType:        pb_enum.CHAT_TYPE_GROUP,
-		SeqId:           seqId,
-		MsgFrom:         pb_enum.MSG_FROM_SYSTEM,
-		MsgType:         pb_enum.MSG_TYPE_JOINED_GROUP_CHAT,
-		Body:            nil,
-		Status:          0,
-		SentTs:          nowMilli,
-		SrvTs:           nowMilli,
+		SrvMsgId:       xsnowflake.NewSnowflakeID(),
+		CliMsgId:       xsnowflake.NewSnowflakeID(),
+		SenderId:       0,
+		SenderPlatform: 0,
+		SenderName:     "",
+		SenderAvatar:   "",
+		ChatId:         chat.ChatId,
+		ChatType:       pb_enum.CHAT_TYPE_GROUP,
+		SeqId:          seqId,
+		MsgFrom:        pb_enum.MSG_FROM_SYSTEM,
+		MsgType:        pb_enum.MSG_TYPE_JOINED_GROUP_CHAT,
+		Body:           nil,
+		Status:         0,
+		SentTs:         nowMilli,
+		SrvTs:          nowMilli,
 	}
 	joinedMsg = &pb_msg.JoinedGroupChatMessage{
 		Inviter: &pb_chat_member.ChatMemberBasicInfo{
-			Uid:             initiator.Uid,
-			Alias:           initiator.Alias,
-			MemberAvatarKey: initiator.MemberAvatarKey,
+			Uid:          initiator.Uid,
+			Alias:        initiator.Alias,
+			MemberAvatar: initiator.MemberAvatar,
 		},
 		Invitee: &pb_chat_member.ChatMemberBasicInfo{
-			Uid:             member.Uid,
-			Alias:           member.Alias,
-			MemberAvatarKey: member.MemberAvatarKey,
+			Uid:          member.Uid,
+			Alias:        member.Alias,
+			MemberAvatar: member.MemberAvatar,
 		},
 	}
 	msg.Body, err = proto.Marshal(joinedMsg)

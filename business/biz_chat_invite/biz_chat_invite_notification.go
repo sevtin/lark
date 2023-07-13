@@ -2,10 +2,11 @@ package biz_chat_invite
 
 import (
 	"github.com/jinzhu/copier"
-	chat_client "lark/apps/chat/client"
-	user_client "lark/apps/user/client"
 	"lark/domain/cache"
+	"lark/domain/cr/cr_chat"
+	"lark/domain/cr/cr_user"
 	"lark/domain/po"
+	"lark/domain/repo"
 	"lark/pkg/common/xlog"
 	"lark/pkg/proto/pb_chat"
 	"lark/pkg/proto/pb_dist"
@@ -20,21 +21,25 @@ func ConstructChatInviteNotificationMessage(
 	invitees []*po.ChatInvite,
 	chatCache cache.ChatCache,
 	userCache cache.UserCache,
-	chatClient chat_client.ChatClient,
-	userClient user_client.UserClient) (req *pb_dist.ChatInviteNotificationReq, err error) {
+	chatRepo repo.ChatRepository,
+	userRepo repo.UserRepository) (req *pb_dist.ChatInviteNotificationReq, err error) {
 	var (
 		userInfo    *pb_user.BasicUserInfo
 		chatInfo    *pb_chat.ChatInfo
 		userSrvMaps map[int64]int64
 	)
 	// 1、获取邀请人信息
-	userInfo = GetUserInfo(inviteReq.InitiatorUid, userCache, userClient)
+	userInfo, err = cr_user.GetBasicUserInfo(userCache, userRepo, inviteReq.InitiatorUid)
+	if err != nil {
+		xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_INVITER_INFO_FAILED, ERROR_CHAT_INVITE_GET_INVITER_INFO_FAILED, err.Error())
+		return
+	}
 	if userInfo.Uid == 0 {
 		xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_INVITER_INFO_FAILED, ERROR_CHAT_INVITE_GET_INVITER_INFO_FAILED)
 		return
 	}
 	// 2、获取被邀请人serverId
-	userSrvMaps, err = GetServerIdList(inviteReq.InviteeUids, userCache, userClient)
+	userSrvMaps, err = cr_user.GetUserServerList(userCache, userRepo, inviteReq.InviteeUids)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_INVITEE_INFO_FAILED, ERROR_CHAT_INVITE_GET_INVITEE_INFO_FAILED, err.Error())
 		return
@@ -45,7 +50,11 @@ func ConstructChatInviteNotificationMessage(
 	}
 	if inviteReq.ChatType == pb_enum.CHAT_TYPE_GROUP {
 		// 3、获取群信息
-		chatInfo = GetGroupChatInfo(inviteReq.ChatId, chatCache, chatClient)
+		chatInfo, err = cr_chat.GetGroupChatInfo(chatCache, chatRepo, inviteReq.ChatId)
+		if err != nil {
+			xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_CHAT_INFO_FAILED, ERROR_CHAT_INVITE_GET_CHAT_INFO_FAILED, err.Error())
+			return
+		}
 		if chatInfo.ChatId == 0 {
 			xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_CHAT_INFO_FAILED, ERROR_CHAT_INVITE_GET_CHAT_INFO_FAILED)
 			return
@@ -87,80 +96,5 @@ func ConstructChatInviteNotificationMessage(
 		}
 		req.Notifications = append(req.Notifications, notification)
 	}
-	return
-}
-
-func GetServerIdList(inviteIds []int64, userCache cache.UserCache, userClient user_client.UserClient) (userSrvMaps map[int64]int64, err error) {
-	var (
-		notUids []int64
-		resp    *pb_user.GetServerIdListResp
-		server  *pb_user.UserServerId
-	)
-	userSrvMaps, notUids, _ = userCache.GetUserServerList(inviteIds)
-	if len(notUids) == 0 {
-		return
-	}
-	resp = userClient.GetServerIdList(&pb_user.GetServerIdListReq{Uids: notUids})
-	if resp == nil {
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_GRPC_SERVICE_FAILURE, ERROR_CHAT_INVITE_GRPC_SERVICE_FAILURE)
-		err = ERR_CHAT_INVITE_QUERY_DB_FAILED
-		return
-	}
-	if resp.Code > 0 {
-		xlog.Warn(resp.Code, resp.Msg)
-		err = ERR_CHAT_INVITE_QUERY_DB_FAILED
-		return
-	}
-	for _, server = range resp.List {
-		userSrvMaps[server.Uid] = server.ServerId
-	}
-	return
-}
-
-func GetGroupChatInfo(chatId int64, chatCache cache.ChatCache, chatClient chat_client.ChatClient) (chatInfo *pb_chat.ChatInfo) {
-	chatInfo, _ = chatCache.GetGroupChatInfo(chatId)
-	if chatInfo.ChatId > 0 {
-		return
-	}
-	var (
-		req  = &pb_chat.GetChatInfoReq{ChatId: chatId}
-		resp *pb_chat.GetChatInfoResp
-	)
-	resp = chatClient.GetChatInfo(req)
-	if resp == nil {
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_GRPC_SERVICE_FAILURE, ERROR_CHAT_INVITE_GRPC_SERVICE_FAILURE)
-		return
-	}
-	if resp.Code > 0 {
-		xlog.Warn(resp.Code, resp.Msg)
-		return
-	}
-	chatInfo = resp.ChatInfo
-	return
-}
-
-func GetUserInfo(uid int64, userCache cache.UserCache, userClient user_client.UserClient) (userInfo *pb_user.BasicUserInfo) {
-	userInfo, _ = userCache.GetBasicUserInfo(uid)
-	if userInfo.Uid > 0 {
-		return
-	}
-	var (
-		req  = &pb_user.GetBasicUserInfoReq{Uid: uid}
-		resp *pb_user.GetBasicUserInfoResp
-	)
-	resp = userClient.GetBasicUserInfo(req)
-	if resp == nil {
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_GRPC_SERVICE_FAILURE, ERROR_CHAT_INVITE_GRPC_SERVICE_FAILURE)
-		return
-	}
-	if resp.Code > 0 {
-		xlog.Warn(resp.Code, resp.Msg)
-		return
-	}
-	if resp.UserInfo.Uid == 0 {
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_GET_USER_INFO_FAILED, ERROR_CHAT_INVITE_GET_USER_INFO_FAILED)
-		return
-	}
-	userInfo = resp.UserInfo
 	return
 }

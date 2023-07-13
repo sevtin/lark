@@ -13,7 +13,7 @@ import (
 func (s *chatInviteService) ChatInviteList(_ context.Context, req *pb_invite.ChatInviteListReq) (resp *pb_invite.ChatInviteListResp, _ error) {
 	resp = &pb_invite.ChatInviteListResp{List: make([]*pb_invite.ChatInviteInfo, 0)}
 	var (
-		w    = entity.NewMysqlWhere()
+		w    = entity.NewMysqlQuery()
 		list []*do.ChatInvite
 		err  error
 	)

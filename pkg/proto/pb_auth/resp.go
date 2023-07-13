@@ -19,3 +19,8 @@ func (r *RefreshTokenResp) Set(code int32, msg string) {
 	r.Code = code
 	r.Msg = msg
 }
+
+func (r *GithubOAuth2CallbackResp) Set(code int32, msg string) {
+	r.Code = code
+	r.Msg = msg
+}

@@ -38,7 +38,7 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 
 		u.Reset()
 		u.SetFilter("chat_id=?", req.OwnerId)
-		u.Set("avatar_key", req.AvatarSmall)
+		u.Set("avatar", req.AvatarSmall)
 		err = s.chatRepo.TxUpdateChat(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)
@@ -47,7 +47,7 @@ func (s *chatService) UploadAvatar(ctx context.Context, req *pb_chat.UploadAvata
 
 		u.Reset()
 		u.SetFilter("chat_id=?", req.OwnerId)
-		u.Set("chat_avatar_key", req.AvatarSmall)
+		u.Set("chat_avatar", req.AvatarSmall)
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_SET_AVATAR_FAILED, ERROR_CHAT_SET_AVATAR_FAILED)

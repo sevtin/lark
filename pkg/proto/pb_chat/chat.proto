@@ -19,7 +19,7 @@ message CreateGroupChatResp {
 message ChatInfo {
   int64 chat_id = 1;
   pb_enum.CHAT_TYPE chat_type = 2;
-  string avatar_key = 3;
+  string avatar = 3;
   string name = 4;
   string about = 5;
 }
@@ -111,7 +111,7 @@ message GroupChatDetailsResp {
 message GroupChatDetails {
   int64 chat_id = 1;
   pb_enum.CHAT_TYPE chat_type = 2;
-  string avatar_key = 3;
+  string avatar = 3;
   string name = 4;
   string about = 5;
   ChatCreator creator = 6;
@@ -124,7 +124,7 @@ message ChatCreator {
   int32 gender = 4; // 性别
   int64 birth_ts = 5; // 生日
   int64 city_id = 6; // 城市id
-  string avatar_key = 7; // 头像
+  string avatar = 7; // 头像
 }
 
 service Chat {

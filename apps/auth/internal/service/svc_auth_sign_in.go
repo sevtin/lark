@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
-	"lark/domain/po"
+	"lark/domain/do"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
+	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
@@ -16,57 +17,76 @@ import (
 func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp *pb_auth.SignInResp, _ error) {
 	resp = &pb_auth.SignInResp{UserInfo: &pb_user.UserInfo{Avatar: &pb_user.AvatarInfo{}}}
 	var (
-		w      = entity.NewMysqlWhere()
-		user   *po.User
-		avatar *po.Avatar
-		err    error
+		q         = entity.NewMysqlQuery()
+		signIn    *do.SignIn
+		server    *pb_auth.ServerInfo
+		onOffResp *pb_chat_member.ChatMemberOnOffLineResp
 	)
 	switch req.AccountType {
 	case pb_enum.ACCOUNT_TYPE_MOBILE:
-		w.SetFilter("mobile = ?", req.Account)
+		q.SetFilter("mobile = ?", req.Account)
 	case pb_enum.ACCOUNT_TYPE_LARK:
-		w.SetFilter("lark_id = ?", req.Account)
+		q.SetFilter("lark_id = ?", req.Account)
 	default:
 		// 登录类型错误
 		resp.Set(ERROR_CODE_AUTH_ACCOUNT_TYPE_ERR, ERROR_AUTH_ACCOUNT_TYPE_ERR)
 		return
 	}
-	w.SetFilter("password = ?", utils.MD5(req.Password))
-	user, err = s.authRepo.VerifyIdentity(w)
-	if err != nil {
-		resp.Set(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED, err.Error())
+	// 前端传密码MD5值,服务进行二次MD5加密
+	q.SetFilter("password = ?", utils.MD5(req.Password))
+	signIn = s.signInTransaction(q, req.Platform)
+	if signIn.Err != nil || signIn.Code > 0 {
+		resp.Set(signIn.Code, signIn.Msg)
 		return
 	}
-	if user.Uid == 0 {
-		resp.Set(ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR, ERROR_AUTH_ACCOUNT_OR_PASSWORD_ERR)
+	server = s.getWsServer()
+	onOffResp = s.chatMemberOnOffLine(signIn.User.Uid, int64(server.ServerId), req.Platform)
+	if onOffResp == nil {
+		resp.Set(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
+		xlog.Warn(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
 		return
 	}
-	w.Reset()
-	w.SetFilter("owner_id=?", user.Uid)
-	w.SetFilter("owner_type=?", int32(pb_enum.AVATAR_OWNER_USER_AVATAR))
-	avatar, err = s.avatarRepo.Avatar(w)
-	if err != nil {
-		resp.Set(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED, err.Error())
-		return
-	}
-	var (
-		accessToken  *pb_auth.Token
-		refreshToken *pb_auth.Token
-	)
-	accessToken, refreshToken, err = s.CreateToken(user.Uid, req.Platform)
-	if err != nil {
-		resp.Set(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED)
-		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, err.Error())
-		return
-	}
-	copier.Copy(resp.UserInfo, user)
-	copier.Copy(resp.UserInfo.Avatar, avatar)
-	resp.AccessToken = accessToken
-	resp.RefreshToken = refreshToken
+	copier.Copy(resp.UserInfo, signIn.User)
+	copier.Copy(resp.UserInfo.Avatar, signIn.Avatar)
+	resp.AccessToken = signIn.AccessToken
+	resp.RefreshToken = signIn.RefreshToken
+	resp.Server = server
 	xants.Submit(func() {
 		s.userCache.SetUserInfo(resp.UserInfo)
 	})
+	return
+}
+
+func (s *authService) signInTransaction(q *entity.MysqlQuery, platform pb_enum.PLATFORM_TYPE) (signIn *do.SignIn) {
+	signIn = new(do.SignIn)
+	signIn.User, signIn.Err = s.authRepo.VerifyIdentity(q)
+	if signIn.Err != nil {
+		signIn.Code = ERROR_CODE_AUTH_QUERY_DB_FAILED
+		signIn.Msg = ERROR_AUTH_QUERY_DB_FAILED
+		xlog.Warn(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED, signIn.Err.Error())
+		return
+	}
+	if signIn.User.Uid == 0 {
+		signIn.Code = ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR
+		signIn.Msg = ERROR_AUTH_ACCOUNT_OR_PASSWORD_ERR
+		return
+	}
+	q.Reset()
+	q.SetFilter("owner_id=?", signIn.User.Uid)
+	q.SetFilter("owner_type=?", int32(pb_enum.AVATAR_OWNER_USER_AVATAR))
+	signIn.Avatar, signIn.Err = s.avatarRepo.Avatar(q)
+	if signIn.Err != nil {
+		signIn.Code = ERROR_CODE_AUTH_QUERY_DB_FAILED
+		signIn.Msg = ERROR_AUTH_QUERY_DB_FAILED
+		xlog.Warn(ERROR_CODE_AUTH_QUERY_DB_FAILED, ERROR_AUTH_QUERY_DB_FAILED, signIn.Err.Error())
+		return
+	}
+	signIn.AccessToken, signIn.RefreshToken, signIn.Err = s.createToken(signIn.User.Uid, platform)
+	if signIn.Err != nil {
+		signIn.Code = ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED
+		signIn.Msg = ERROR_AUTH_GENERATE_TOKEN_FAILED
+		xlog.Warn(ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED, ERROR_AUTH_GENERATE_TOKEN_FAILED, signIn.Err.Error())
+		return
+	}
 	return
 }

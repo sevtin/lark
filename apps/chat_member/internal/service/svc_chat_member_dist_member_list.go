@@ -13,7 +13,7 @@ import (
 func (s *chatMemberService) GetDistMemberList(ctx context.Context, req *pb_chat_member.GetDistMemberListReq) (resp *pb_chat_member.GetDistMemberListResp, _ error) {
 	resp = &pb_chat_member.GetDistMemberListResp{}
 	var (
-		w       = entity.NewMysqlWhere()
+		w       = entity.NewMysqlQuery()
 		count   int
 		lastUid int64
 		members []*pb_chat_member.DistMember

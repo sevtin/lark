@@ -1,0 +1,19 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+import "pb_kv/kv.proto";
+package pb_chat_gpt;
+option go_package = "lark/pkg/proto/pb_chat_gpt;pb_chat_gpt";
+
+message SendMessageReq {
+  int64 chat_id = 1;
+  int64 uid = 2;
+}
+
+message SendMessageResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service ChatGpt {
+  rpc SendMessage(SendMessageReq) returns(SendMessageResp);
+}

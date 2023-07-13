@@ -14,11 +14,10 @@ message SignUpReq {
   int64 birth_ts = 7; // 生日
   string email = 8; // Email
   string mobile = 9; // 手机号
-  string avatar_key = 10; // 头像
+  string avatar = 10; // 头像
   int64 city_id = 11; // 城市ID
   int64 code = 12; // 验证码
   string udid = 13; // udid
-  int64 server_id = 14; // server id
 }
 
 message SignUpResp {
@@ -27,6 +26,7 @@ message SignUpResp {
   pb_user.UserInfo user_info = 3;
   Token access_token = 4;
   Token refresh_token = 5;
+  ServerInfo Server = 6;
 }
 
 message SignInReq {
@@ -44,6 +44,7 @@ message SignInResp {
   pb_user.UserInfo user_info = 3;
   Token access_token = 4;
   Token refresh_token = 5;
+  ServerInfo Server = 6;
 }
 
 message RefreshTokenReq {
@@ -63,6 +64,12 @@ message Token {
   int64  expire = 2; // token过期时间戳（秒）
 }
 
+message ServerInfo {
+    int32 server_id = 1; // 服务器ID
+    string name = 2; // 服务器名
+    int32 port = 3; // 端口号
+}
+
 message SignOutReq {
   int64  uid = 1; // uid
   pb_enum.PLATFORM_TYPE  platform = 2; // 平台
@@ -73,9 +80,24 @@ message SignOutResp {
   string msg = 2;
 }
 
+message GithubOAuth2CallbackReq {
+  string code = 1;
+  pb_enum.PLATFORM_TYPE platform = 2; // 平台
+}
+
+message GithubOAuth2CallbackResp {
+  int32 code = 1;
+  string msg = 2;
+  pb_user.UserInfo user_info = 3;
+  Token access_token = 4;
+  Token refresh_token = 5;
+  ServerInfo Server = 6;
+}
+
 service Auth {
   rpc SignUp(SignUpReq)  returns(SignUpResp);
   rpc SignIn(SignInReq)  returns(SignInResp);
   rpc RefreshToken(RefreshTokenReq) returns(RefreshTokenResp);
   rpc SignOut(SignOutReq) returns(SignOutResp);
+  rpc GithubOAuth2Callback(GithubOAuth2CallbackReq) returns(GithubOAuth2CallbackResp);
 }

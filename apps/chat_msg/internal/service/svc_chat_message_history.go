@@ -9,7 +9,7 @@ import (
 func (s *chatMessageService) GetHistoryMessages(req *pb_chat_msg.GetChatMessagesReq) (list []*po.Message, err error) {
 	// 从mysql中获取消息
 	var (
-		w = entity.NewNormalWhere()
+		w = entity.NewNormalQuery()
 	)
 	w.Limit = int(req.Limit)
 	w.SetFilter("chat_id = ?", req.ChatId)
@@ -29,7 +29,7 @@ func (s *chatMessageService) GetHistoryMessages(req *pb_chat_msg.GetChatMessages
 
 func (s *chatMessageService) GetHistoryMessageList(req *pb_chat_msg.GetChatMessageListReq) (list []*po.Message, err error) {
 	var (
-		w = entity.NewNormalWhere()
+		w = entity.NewNormalQuery()
 	)
 	//w.Sort = "seq_id ASC"
 	w.SetFilter("chat_id = ?", req.ChatId)

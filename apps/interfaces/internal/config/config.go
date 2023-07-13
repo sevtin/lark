@@ -25,6 +25,7 @@ type Config struct {
 	ChatServer       *conf.GrpcServer `yaml:"chat_server"`
 	AvatarServer     *conf.GrpcServer `yaml:"avatar_server"`
 	ConvoServer      *conf.GrpcServer `yaml:"convo_server"`
+	LbsServer        *conf.GrpcServer `yaml:"lbs_server"`
 	Jaeger           *conf.Jaeger     `yaml:"jaeger"`
 }
 
