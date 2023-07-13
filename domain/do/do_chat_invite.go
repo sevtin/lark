@@ -20,13 +20,13 @@ func (ChatInvite) TableName() string {
 }
 
 type InitiatorInfo struct {
-	Uid       int64  `gorm:"column:uid" json:"uid"`               // 用户ID
-	LarkId    string `gorm:"column:lark_id" json:"lark_id"`       // 账户ID
-	Nickname  string `gorm:"column:nickname" json:"nickname"`     // 昵称
-	Gender    int    `gorm:"column:gender" json:"gender"`         // 性别
-	BirthTs   int64  `gorm:"column:birth_ts" json:"birth_ts"`     // 生日
-	CityId    int    `gorm:"column:city_id" json:"city_id"`       // 城市ID
-	AvatarKey string `gorm:"column:avatar_key" json:"avatar_key"` // 小图 72*72
+	Uid      int64  `gorm:"column:uid" json:"uid"`           // 用户ID
+	LarkId   string `gorm:"column:lark_id" json:"lark_id"`   // 账户ID
+	Nickname string `gorm:"column:nickname" json:"nickname"` // 昵称
+	Gender   int    `gorm:"column:gender" json:"gender"`     // 性别
+	BirthTs  int64  `gorm:"column:birth_ts" json:"birth_ts"` // 生日
+	CityId   int    `gorm:"column:city_id" json:"city_id"`   // 城市ID
+	Avatar   string `gorm:"column:avatar" json:"avatar"`     // 小图 72*72
 }
 
 func (InitiatorInfo) TableName() string {

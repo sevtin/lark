@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"github.com/go-redis/redis/v9"
 	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
 	"lark/pkg/utils"
@@ -33,9 +32,6 @@ func (c *authCache) GetRefreshTokenSessionId(uid int64, platform int32) (val str
 		key = constant.RK_SYNC_USER_REFRESH_TOKEN_SESSION_ID + utils.GetHashTagKey(uid) + ":" + utils.Int32ToStr(platform)
 	)
 	val, err = xredis.Get(key)
-	if err == redis.Nil {
-		err = nil
-	}
 	return
 }
 

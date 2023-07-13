@@ -37,6 +37,6 @@ func FPutPhotoToMinio(photo *xresize.PhotoInfo, contentType string, resultChan c
 		wg.Done()
 		resultChan <- result
 	}()
-	result.Info, result.Err = FPut(FILE_TYPE_PHOTO, photo.Name, photo.Path, contentType)
+	result.Info, result.Err = FPut(FILE_TYPE_PHOTO, photo.Key, photo.Path, contentType)
 	return
 }

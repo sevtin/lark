@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"lark/business/biz_chat_invite"
 	"lark/domain/do"
+	"lark/domain/pdo"
 	"lark/domain/po"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
@@ -22,8 +23,8 @@ import (
 func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGroupChatReq) (resp *pb_chat.CreateGroupChatResp, _ error) {
 	resp = &pb_chat.CreateGroupChatResp{}
 	var (
-		creator *po.User
-		w       = entity.NewMysqlWhere()
+		creator = new(pdo.ChatCreator)
+		q       = entity.NewMysqlQuery()
 		chat    *po.Chat
 		err     error
 	)
@@ -42,9 +43,10 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	}()
 
 	// 1 获取创建者信息
-	w.SetFilter("uid=?", req.CreatorUid)
-	creator, err = s.userRepo.UserInfo(w)
-	if err != nil {
+	q.Fields = creator.GetField()
+	q.SetFilter("uid=?", req.CreatorUid)
+	err = s.userRepo.QueryUser(q, creator)
+	if err != nil || creator.Uid == 0 {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
 		return
 	}
@@ -53,7 +55,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	chat = &po.Chat{
 		CreatorUid: req.CreatorUid,
 		ChatType:   int(pb_enum.CHAT_TYPE_GROUP),
-		AvatarKey:  constant.CONST_AVATAR_KEY_SMALL,
+		Avatar:     constant.CONST_AVATAR_SMALL,
 		Name:       req.Name,
 		About:      req.About,
 	}
@@ -68,15 +70,15 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 
 		// 4 creator入群/入库
 		member = &po.ChatMember{
-			ChatId:          chat.ChatId,
-			ChatType:        chat.ChatType,
-			ChatName:        chat.Name,
-			Uid:             creator.Uid,
-			RoleId:          int(pb_enum.CHAT_GROUP_ROLE_MASTER),
-			Alias:           creator.Nickname,
-			MemberAvatarKey: creator.AvatarKey,
-			ChatAvatarKey:   chat.AvatarKey,
-			Sync:            constant.SYNCHRONIZE_USER_INFO,
+			ChatId:       chat.ChatId,
+			ChatType:     chat.ChatType,
+			ChatName:     chat.Name,
+			Uid:          creator.Uid,
+			RoleId:       int(pb_enum.CHAT_GROUP_ROLE_MASTER),
+			Alias:        creator.Nickname,
+			MemberAvatar: creator.Avatar,
+			ChatAvatar:   chat.Avatar,
+			Sync:         constant.SYNCHRONIZE_USER_INFO,
 		}
 		err = s.chatMemberRepo.TxCreate(tx, member)
 		if err != nil {
@@ -88,9 +90,9 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		avatar = &po.Avatar{
 			OwnerId:      chat.ChatId,
 			OwnerType:    int(pb_enum.AVATAR_OWNER_CHAT_AVATAR),
-			AvatarSmall:  constant.CONST_AVATAR_KEY_SMALL,
-			AvatarMedium: constant.CONST_AVATAR_KEY_MEDIUM,
-			AvatarLarge:  constant.CONST_AVATAR_KEY_LARGE,
+			AvatarSmall:  constant.CONST_AVATAR_SMALL,
+			AvatarMedium: constant.CONST_AVATAR_MEDIUM,
+			AvatarLarge:  constant.CONST_AVATAR_LARGE,
 		}
 		err = s.avatarRepo.TxCreate(tx, avatar)
 		if err != nil {
@@ -171,8 +173,8 @@ func (s *chatService) sendChatInviteNotificationMessage(inviteReq *pb_invite.Ini
 		invitees,
 		s.chatCache,
 		s.userCache,
-		s.chatClient,
-		s.userClient)
+		s.chatRepo,
+		s.userRepo)
 	if err != nil {
 		return
 	}

@@ -18,7 +18,7 @@ type ChatMessage struct {
 	SenderId        int64  `json:"sender_id" validate:"required,gt=0"`        // 发送者uid
 	SenderPlatform  int    `json:"sender_platform" validate:"required,gte=0"` // 发送者平台
 	SenderName      string `json:"sender_name"`                               // 发送者姓名
-	SenderAvatarKey string `json:"sender_avatar_key"`                         // 发送者头像
+	SenderAvatar string `json:"sender_avatar"`                         // 发送者头像
 	ChatId          int64  `json:"chat_id" validate:"required,gt=0"`          // 会话ID
 	ChatType        int    `json:"chat_type"`                                 // 会话类型
 	SeqId           int    `json:"seq_id"`                                    // 消息唯一ID

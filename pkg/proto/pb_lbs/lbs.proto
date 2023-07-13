@@ -1,0 +1,49 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_lbs;
+option go_package = "lark/pkg/proto/pb_lbs;pb_lbs";
+
+message ReportLngLatReq {
+  int64 uid = 1; // uid
+  double longitude = 2; // 经度
+  double latitude = 3; // 纬度
+}
+
+message ReportLngLatResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message PeopleNearbyReq {
+  int64 uid = 1; // uid
+  double longitude = 2; // 经度
+  double latitude = 3; // 纬度
+  int64 radius= 4; // 半径
+  pb_enum.GENDER gender = 5; // 性别
+  int32 min_age = 6; // 最小年龄
+  int32 max_age = 7; // 最大年龄
+  int64 limit = 8; // 数量限制
+  int64 Skip = 9;
+  double min_distance = 10;
+}
+
+message PeopleNearbyResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated UserLocation list = 3;
+}
+
+message UserLocation {
+  int64 uid = 1; // uid
+  pb_enum.GENDER gender = 2; // 性别
+  int32 age = 3;// 生日
+  string nickname = 4; // 昵称
+  string avatar = 5; // 头像
+  int64 distance = 6; // 距离
+  repeated double coordinates = 7;// 经纬度
+}
+
+service Lbs {
+  rpc ReportLngLat(ReportLngLatReq) returns(ReportLngLatResp);
+  rpc PeopleNearby(PeopleNearbyReq) returns(PeopleNearbyResp);
+}

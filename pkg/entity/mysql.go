@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"reflect"
+	"time"
+)
 
 type GormCreatedTs struct {
 	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime:milli;NOT NULL" json:"created_ts"`
@@ -29,7 +33,9 @@ func Deleted() (column string, value interface{}) {
 	return "deleted_ts", time.Now().UnixNano() / 1e6
 }
 
-type MysqlWhere struct {
+type MysqlQuery struct {
+	Model  interface{}
+	Fields string
 	Query  string
 	Args   []interface{}
 	Limit  int
@@ -37,46 +43,54 @@ type MysqlWhere struct {
 	Sort   string
 }
 
-func NewMysqlWhere() *MysqlWhere {
-	return &MysqlWhere{
+func NewMysqlQuery() *MysqlQuery {
+	return &MysqlQuery{
 		Query: "deleted_ts=0",
 		Args:  make([]interface{}, 0),
 	}
 }
 
-func NewNormalWhere() *MysqlWhere {
-	return &MysqlWhere{
+func NewNormalQuery() *MysqlQuery {
+	return &MysqlQuery{
 		Query: "1=1",
 		Args:  make([]interface{}, 0),
 	}
 }
 
-func (m *MysqlWhere) SetFilter(query string, value interface{}) {
+func (m *MysqlQuery) SetFilter(query string, value ...interface{}) {
 	m.Query += " AND " + query
-	m.Args = append(m.Args, value)
+	m.Args = append(m.Args, value...)
 }
 
-func (m *MysqlWhere) SetSort(sort string) {
+func (m *MysqlQuery) Between(field string, begin interface{}, end interface{}) {
+	m.Query += " AND " + field + " BETWEEN ? AND ?"
+	m.Args = append(m.Args, begin)
+	m.Args = append(m.Args, end)
+}
+
+func (m *MysqlQuery) SetSort(sort string) {
 	m.Sort = sort
 }
 
-func (m *MysqlWhere) SetOffset(offset int) {
+func (m *MysqlQuery) SetOffset(offset int) {
 	m.Offset = offset
 }
 
-func (m *MysqlWhere) SetLimit(limit int32) {
+func (m *MysqlQuery) SetLimit(limit int32) {
 	m.Limit = int(limit)
 }
 
-func (m *MysqlWhere) AndQuery(query string) {
+func (m *MysqlQuery) AndQuery(query string) {
 	m.Query += " AND " + query
 }
 
-func (m *MysqlWhere) AppendArg(value interface{}) {
+func (m *MysqlQuery) AppendArg(value interface{}) {
 	m.Args = append(m.Args, value)
 }
 
-func (m *MysqlWhere) Reset() {
+func (m *MysqlQuery) Reset() {
+	m.Model = nil
+	m.Fields = ""
 	m.Query = "deleted_ts=0"
 	m.Args = make([]interface{}, 0)
 	m.Sort = ""
@@ -84,12 +98,34 @@ func (m *MysqlWhere) Reset() {
 	m.Offset = 0
 }
 
-func (m *MysqlWhere) Normal() {
+func (m *MysqlQuery) Normal() {
+	m.Model = nil
+	m.Fields = ""
 	m.Query = "1=1"
 	m.Args = make([]interface{}, 0)
 	m.Sort = ""
 	m.Limit = 0
 	m.Offset = 0
+}
+
+func (m *MysqlQuery) Find(db *gorm.DB, dist interface{}) (err error) {
+	err = db.Model(m.Model).Select(m.Fields).Where(m.Query, m.Args...).Find(dist).Error
+	return
+}
+
+func (m *MysqlQuery) Finds(db *gorm.DB, model any) (dest any, err error) {
+	var (
+		typ        = reflect.TypeOf(model)
+		sliceType  = reflect.SliceOf(typ)
+		sliceValue = reflect.New(sliceType).Elem()
+	)
+	dest = sliceValue.Interface()
+	err = db.Model(m.Model).Select(m.Fields).Where(m.Query, m.Args...).Find(dest).Error
+	return
+}
+
+func (m *MysqlQuery) Delete(db *gorm.DB) (err error) {
+	return db.Model(m.Model).Where(m.Query, m.Args...).Update(Deleted()).Error
 }
 
 type MysqlUpdate struct {
@@ -110,9 +146,9 @@ func (m *MysqlUpdate) Set(key string, value interface{}) {
 	m.Values[key] = value
 }
 
-func (m *MysqlUpdate) SetFilter(query string, value interface{}) {
+func (m *MysqlUpdate) SetFilter(query string, value ...interface{}) {
 	m.Query += " AND " + query
-	m.Args = append(m.Args, value)
+	m.Args = append(m.Args, value...)
 }
 
 func (m *MysqlUpdate) AndQuery(query string) {
@@ -127,4 +163,14 @@ func (m *MysqlUpdate) Reset() {
 	m.Query = "deleted_ts=0"
 	m.Args = make([]interface{}, 0)
 	m.Values = make(map[string]interface{})
+}
+
+func (m *MysqlUpdate) Normal() {
+	m.Query = "1=1"
+	m.Args = make([]interface{}, 0)
+	m.Values = make(map[string]interface{})
+}
+
+func (m *MysqlUpdate) Updates(db *gorm.DB, model interface{}) *gorm.DB {
+	return db.Model(model).Where(m.Query, m.Args...).Updates(m.Values)
 }

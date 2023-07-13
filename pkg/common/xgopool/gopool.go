@@ -30,9 +30,10 @@ func init() {
 }
 
 // Go is an alternative to the go keyword, which is able to recover panic.
-// gopool.Go(func(arg interface{}){
-//     ...
-// }(nil))
+//
+//	gopool.Go(func(arg interface{}){
+//	    ...
+//	}(nil))
 func Go(f func()) {
 	CtxGo(context.Background(), f)
 }

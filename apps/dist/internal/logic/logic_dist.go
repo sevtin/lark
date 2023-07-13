@@ -8,10 +8,7 @@ import (
 )
 
 func GetMembersFromHash(hashmap map[string]string) (distMembers map[int64][]*pb_obj.Int64Array) {
-	var (
-		length = len(hashmap)
-	)
-	if length == 0 {
+	if len(hashmap) == 0 {
 		return
 	}
 	return groupFromHashmap(hashmap)

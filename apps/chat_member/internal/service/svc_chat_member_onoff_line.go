@@ -41,7 +41,7 @@ func (s *chatMemberService) memberOnOffLine(uid int64, serverId int64, platform 
 	if oldSidStr == "" {
 		var (
 			user *pb_user.UserServerId
-			w    = entity.NewMysqlWhere()
+			w    = entity.NewMysqlQuery()
 		)
 		w.SetFilter("uid=?", uid)
 		user, err = s.userRepo.UserServerId(w)
@@ -76,7 +76,7 @@ func (s *chatMemberService) memberOnOffLine(uid int64, serverId int64, platform 
 func (s *chatMemberService) updateMemberConnectedServer(uid int64, serverId int64) (err error) {
 	var (
 		u         = entity.NewMysqlUpdate()
-		w         = entity.NewMysqlWhere()
+		w         = entity.NewMysqlQuery()
 		allStatus []*do.ChatMemberStatus
 		list      []*do.ChatMemberStatus
 		limit     = 2000

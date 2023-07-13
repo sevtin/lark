@@ -12,9 +12,9 @@ type ChatInviteRepository interface {
 	CreateChatInvites(invites []*po.ChatInvite) (err error)
 	TxCreateChatInvites(tx *gorm.DB, list []*po.ChatInvite) (err error)
 	TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64)
-	TxChatInvite(tx *gorm.DB, w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
-	ChatInvite(w *entity.MysqlWhere) (invite *po.ChatInvite, err error)
-	ChatInviteList(w *entity.MysqlWhere) (list []*do.ChatInvite, err error)
+	TxChatInvite(tx *gorm.DB, w *entity.MysqlQuery) (invite *po.ChatInvite, err error)
+	ChatInvite(w *entity.MysqlQuery) (invite *po.ChatInvite, err error)
+	ChatInviteList(w *entity.MysqlQuery) (list []*do.ChatInvite, err error)
 }
 
 type chatInviteRepository struct {
@@ -40,25 +40,25 @@ func (r *chatInviteRepository) TxUpdateChatInvite(tx *gorm.DB, u *entity.MysqlUp
 	return
 }
 
-func (r *chatInviteRepository) TxChatInvite(tx *gorm.DB, w *entity.MysqlWhere) (invite *po.ChatInvite, err error) {
+func (r *chatInviteRepository) TxChatInvite(tx *gorm.DB, w *entity.MysqlQuery) (invite *po.ChatInvite, err error) {
 	invite = new(po.ChatInvite)
 	err = tx.Where(w.Query, w.Args...).Find(invite).Error
 	return
 }
 
-func (r *chatInviteRepository) ChatInvite(w *entity.MysqlWhere) (invite *po.ChatInvite, err error) {
+func (r *chatInviteRepository) ChatInvite(w *entity.MysqlQuery) (invite *po.ChatInvite, err error) {
 	invite = new(po.ChatInvite)
 	db := xmysql.GetDB()
 	err = db.Where(w.Query, w.Args...).Find(invite).Error
 	return
 }
 
-func (r *chatInviteRepository) ChatInviteList(w *entity.MysqlWhere) (list []*do.ChatInvite, err error) {
+func (r *chatInviteRepository) ChatInviteList(w *entity.MysqlQuery) (list []*do.ChatInvite, err error) {
 	list = make([]*do.ChatInvite, 0)
 	db := xmysql.GetDB()
 	err = db.Model(do.ChatInvite{}).
 		Preload("InitiatorInfo", func(db *gorm.DB) *gorm.DB {
-			return db.Select("uid, lark_id, nickname, gender, birth_ts, city_id, avatar_key")
+			return db.Select("uid, lark_id, nickname, gender, birth_ts, city_id, avatar")
 		}).
 		Where(w.Query, w.Args...).
 		Order(w.Sort).

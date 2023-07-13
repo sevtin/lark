@@ -118,7 +118,7 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 
 func (s *userService) RecheckLarkId(tx *gorm.DB, uid int64, larkId string, resp *pb_user.EditUserInfoResp) (err error) {
 	var (
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		exists bool
 	)
 	w.SetFilter("lark_id=?", larkId)
@@ -137,7 +137,7 @@ func (s *userService) RecheckLarkId(tx *gorm.DB, uid int64, larkId string, resp 
 
 func (s *userService) RecheckMobile(tx *gorm.DB, uid int64, mobile string, resp *pb_user.EditUserInfoResp) (err error) {
 	var (
-		w      = entity.NewMysqlWhere()
+		w      = entity.NewMysqlQuery()
 		exists bool
 	)
 	w.SetFilter("mobile=?", mobile)

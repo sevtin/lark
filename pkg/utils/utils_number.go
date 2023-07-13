@@ -3,6 +3,7 @@ package utils
 import (
 	"strconv"
 	"strings"
+	"time"
 )
 
 func Int64ToStr(val int64) string {
@@ -72,4 +73,8 @@ func Int64ListToStrList(ins []int64) (outs []string) {
 		outs[index] = Int64ToStr(v)
 	}
 	return
+}
+
+func GetAge(birthTs int64) int32 {
+	return int32(time.Now().Year() - time.Unix(birthTs/1000, 0).Year())
 }

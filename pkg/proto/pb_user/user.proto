@@ -57,13 +57,13 @@ message BasicUserInfo {
   int32 gender = 4; // 性别
   int64 birth_ts = 5; // 生日
   int64 city_id = 6; // 城市id
-  string avatar_key = 7; // 头像
+  string avatar = 7; // 头像
 }
 
 message UserSrvInfo {
   int64 uid = 1; // uid
   string nickname = 2; // 昵称
-  string avatar_key = 3; // 头像
+  string avatar = 3; // 头像
   int64 server_id = 4; // ws服务器
 }
 
@@ -106,7 +106,7 @@ message UserSummary {
   string lark_id = 2; // 账户ID
   int32 status = 3; // 用户状态
   string nickname = 4; // 昵称
-  string avatar_key = 5; // 头像
+  string avatar = 5; // 头像
   int32 gender = 6; // 性别
   int64 birth_ts = 7; // 生日
   int64 city_id = 8; // 城市ID

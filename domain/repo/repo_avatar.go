@@ -8,8 +8,8 @@ import (
 )
 
 type AvatarRepository interface {
-	Avatar(w *entity.MysqlWhere) (avatar *po.Avatar, err error)
-	AvatarList(w *entity.MysqlWhere) (avatars []*po.Avatar, err error)
+	Avatar(w *entity.MysqlQuery) (avatar *po.Avatar, err error)
+	AvatarList(w *entity.MysqlQuery) (avatars []*po.Avatar, err error)
 	TxCreate(tx *gorm.DB, avatar *po.Avatar) (err error)
 	TxUpdateAvatar(tx *gorm.DB, u *entity.MysqlUpdate) (err error)
 }
@@ -21,14 +21,14 @@ func NewAvatarRepository() AvatarRepository {
 	return &avatarRepository{}
 }
 
-func (r *avatarRepository) Avatar(w *entity.MysqlWhere) (avatar *po.Avatar, err error) {
+func (r *avatarRepository) Avatar(w *entity.MysqlQuery) (avatar *po.Avatar, err error) {
 	avatar = new(po.Avatar)
 	db := xmysql.GetDB()
 	err = db.Where(w.Query, w.Args...).Find(avatar).Error
 	return
 }
 
-func (r *avatarRepository) AvatarList(w *entity.MysqlWhere) (avatars []*po.Avatar, err error) {
+func (r *avatarRepository) AvatarList(w *entity.MysqlQuery) (avatars []*po.Avatar, err error) {
 	avatars = make([]*po.Avatar, 0)
 	db := xmysql.GetDB()
 	err = db.Where(w.Query, w.Args...).Find(&avatars).Error

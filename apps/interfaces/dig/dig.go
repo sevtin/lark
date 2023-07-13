@@ -17,6 +17,7 @@ func init() {
 	provideChatInvite()
 	provideCache()
 	provideConvo()
+	provideLbs()
 }
 
 func Invoke(i interface{}) error {

@@ -42,7 +42,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 
 		u.Reset()
 		u.SetFilter("uid=?", req.OwnerId)
-		u.Set("avatar_key", req.AvatarSmall)
+		u.Set("avatar", req.AvatarSmall)
 		err = s.userRepo.TxUpdateUser(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
@@ -52,7 +52,7 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		u.Reset()
 		u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
 		u.SetFilter("uid=?", req.OwnerId)
-		u.Set("member_avatar_key", req.AvatarSmall)
+		u.Set("member_avatar", req.AvatarSmall)
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)
 		if err != nil {
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)

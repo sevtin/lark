@@ -11,20 +11,22 @@ import (
 
 type UserRepository interface {
 	Create(user *po.User) (err error)
-	VerifyUserIdentity(w *entity.MysqlWhere) (user *po.User, err error)
-	Exists(w *entity.MysqlWhere, uid int64) (exists bool, err error)
-	TxExists(tx *gorm.DB, w *entity.MysqlWhere, uid int64) (exists bool, err error)
-	UserInfo(w *entity.MysqlWhere) (user *po.User, err error)
-	BasicUserInfo(w *entity.MysqlWhere) (user *pb_user.BasicUserInfo, err error)
-	BasicUserInfoList(w *entity.MysqlWhere) (list []*pb_user.BasicUserInfo, err error)
-	UserList(w *entity.MysqlWhere) (list []*po.User, err error)
-	TxUserList(tx *gorm.DB, w *entity.MysqlWhere) (list []*po.User, err error)
-	TxBasicUserList(tx *gorm.DB, w *entity.MysqlWhere) (list []*pb_user.BasicUserInfo, err error)
-	TxUserSrvList(tx *gorm.DB, w *entity.MysqlWhere) (list []*pb_user.UserSrvInfo, err error)
+	VerifyUserIdentity(w *entity.MysqlQuery) (user *po.User, err error)
+	Exists(w *entity.MysqlQuery, uid int64) (exists bool, err error)
+	TxExists(tx *gorm.DB, w *entity.MysqlQuery, uid int64) (exists bool, err error)
+	//UserInfo(w *entity.MysqlQuery) (user *po.User, err error)
+	//BasicUserInfo(w *entity.MysqlQuery) (user *pb_user.BasicUserInfo, err error)
+	BasicUserInfoList(w *entity.MysqlQuery) (list []*pb_user.BasicUserInfo, err error)
+	UserList(w *entity.MysqlQuery) (list []*pb_user.UserInfo, err error)
+	TxUserList(tx *gorm.DB, w *entity.MysqlQuery) (list []*po.User, err error)
+	TxBasicUserList(tx *gorm.DB, w *entity.MysqlQuery) (list []*pb_user.BasicUserInfo, err error)
+	TxUserSrvList(tx *gorm.DB, w *entity.MysqlQuery) (list []*pb_user.UserSrvInfo, err error)
 	UpdateUser(u *entity.MysqlUpdate) (err error)
 	TxUpdateUser(tx *gorm.DB, u *entity.MysqlUpdate) (err error)
-	UserServerList(u *entity.MysqlWhere) (list []*pb_user.UserServerId, err error)
-	UserServerId(u *entity.MysqlWhere) (server *pb_user.UserServerId, err error)
+	UserServerList(u *entity.MysqlQuery) (list []*pb_user.UserServerId, err error)
+	UserServerId(u *entity.MysqlQuery) (server *pb_user.UserServerId, err error)
+	//Query
+	QueryUser(q *entity.MysqlQuery, dist interface{}) (err error)
 }
 
 type userRepository struct {
@@ -49,39 +51,39 @@ func (r *userRepository) Create(user *po.User) (err error) {
 	return
 }
 
-func (r *userRepository) VerifyUserIdentity(w *entity.MysqlWhere) (user *po.User, err error) {
+func (r *userRepository) VerifyUserIdentity(w *entity.MysqlQuery) (user *po.User, err error) {
 	user = new(po.User)
 	db := xmysql.GetDB()
 	err = db.Where(w.Query, w.Args...).Find(user).Error
 	return
 }
 
-func (r *userRepository) UserList(w *entity.MysqlWhere) (list []*po.User, err error) {
-	list = make([]*po.User, 0)
+func (r *userRepository) UserList(w *entity.MysqlQuery) (list []*pb_user.UserInfo, err error) {
+	list = make([]*pb_user.UserInfo, 0)
 	db := xmysql.GetDB()
-	err = db.Where(w.Query, w.Args...).Find(&list).Error
+	err = db.Where(w.Query, w.Args...).Select("uid,lark_id,status,nickname,firstname,lastname,gender,birth_ts,mobile,city_id").Find(&list).Error
 	return
 }
 
-func (r *userRepository) TxUserList(tx *gorm.DB, w *entity.MysqlWhere) (list []*po.User, err error) {
+func (r *userRepository) TxUserList(tx *gorm.DB, w *entity.MysqlQuery) (list []*po.User, err error) {
 	list = make([]*po.User, 0)
 	err = tx.Where(w.Query, w.Args...).Find(&list).Error
 	return
 }
 
-func (r *userRepository) TxBasicUserList(tx *gorm.DB, w *entity.MysqlWhere) (list []*pb_user.BasicUserInfo, err error) {
+func (r *userRepository) TxBasicUserList(tx *gorm.DB, w *entity.MysqlQuery) (list []*pb_user.BasicUserInfo, err error) {
 	list = make([]*pb_user.BasicUserInfo, 0)
-	err = tx.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar_key").Where(w.Query, w.Args...).Find(&list).Error
+	err = tx.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar").Where(w.Query, w.Args...).Find(&list).Error
 	return
 }
 
-func (r *userRepository) TxUserSrvList(tx *gorm.DB, w *entity.MysqlWhere) (list []*pb_user.UserSrvInfo, err error) {
+func (r *userRepository) TxUserSrvList(tx *gorm.DB, w *entity.MysqlQuery) (list []*pb_user.UserSrvInfo, err error) {
 	list = make([]*pb_user.UserSrvInfo, 0)
-	err = tx.Model(po.User{}).Select("uid,nickname,avatar_key,server_id").Where(w.Query, w.Args...).Find(&list).Error
+	err = tx.Model(po.User{}).Select("uid,nickname,avatar,server_id").Where(w.Query, w.Args...).Find(&list).Error
 	return
 }
 
-func (r *userRepository) Exists(w *entity.MysqlWhere, uid int64) (exists bool, err error) {
+func (r *userRepository) Exists(w *entity.MysqlQuery, uid int64) (exists bool, err error) {
 	var (
 		user = new(po.User)
 		db   = xmysql.GetDB()
@@ -96,7 +98,7 @@ func (r *userRepository) Exists(w *entity.MysqlWhere, uid int64) (exists bool, e
 	return
 }
 
-func (r *userRepository) TxExists(tx *gorm.DB, w *entity.MysqlWhere, uid int64) (exists bool, err error) {
+func (r *userRepository) TxExists(tx *gorm.DB, w *entity.MysqlQuery, uid int64) (exists bool, err error) {
 	var (
 		user = new(po.User)
 	)
@@ -110,24 +112,24 @@ func (r *userRepository) TxExists(tx *gorm.DB, w *entity.MysqlWhere, uid int64) 
 	return
 }
 
-func (r *userRepository) UserInfo(w *entity.MysqlWhere) (user *po.User, err error) {
+func (r *userRepository) UserInfo(w *entity.MysqlQuery) (user *po.User, err error) {
 	user = new(po.User)
 	db := xmysql.GetDB()
 	err = db.Where(w.Query, w.Args...).Find(&user).Error
 	return
 }
 
-func (r *userRepository) BasicUserInfo(w *entity.MysqlWhere) (user *pb_user.BasicUserInfo, err error) {
+func (r *userRepository) BasicUserInfo(w *entity.MysqlQuery) (user *pb_user.BasicUserInfo, err error) {
 	user = new(pb_user.BasicUserInfo)
 	db := xmysql.GetDB()
-	err = db.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar_key").Where(w.Query, w.Args...).Find(&user).Error
+	err = db.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar").Where(w.Query, w.Args...).Find(&user).Error
 	return
 }
 
-func (r *userRepository) BasicUserInfoList(w *entity.MysqlWhere) (list []*pb_user.BasicUserInfo, err error) {
+func (r *userRepository) BasicUserInfoList(w *entity.MysqlQuery) (list []*pb_user.BasicUserInfo, err error) {
 	list = make([]*pb_user.BasicUserInfo, 0)
 	db := xmysql.GetDB()
-	err = db.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar_key").Where(w.Query, w.Args...).Find(&list).Error
+	err = db.Model(po.User{}).Select("uid,lark_id,nickname,gender,birth_ts,city_id,avatar").Where(w.Query, w.Args...).Find(&list).Error
 	return
 }
 
@@ -142,14 +144,14 @@ func (r *userRepository) TxUpdateUser(tx *gorm.DB, u *entity.MysqlUpdate) (err e
 	return
 }
 
-func (r *userRepository) UserServerList(u *entity.MysqlWhere) (list []*pb_user.UserServerId, err error) {
+func (r *userRepository) UserServerList(u *entity.MysqlQuery) (list []*pb_user.UserServerId, err error) {
 	list = make([]*pb_user.UserServerId, 0)
 	db := xmysql.GetDB()
 	err = db.Model(po.User{}).Select("uid,server_id").Where(u.Query, u.Args...).Find(&list).Error
 	return
 }
 
-func (r *userRepository) UserServerId(u *entity.MysqlWhere) (server *pb_user.UserServerId, err error) {
+func (r *userRepository) UserServerId(u *entity.MysqlQuery) (server *pb_user.UserServerId, err error) {
 	server = new(pb_user.UserServerId)
 	db := xmysql.GetDB()
 	err = db.Model(po.User{}).Select("uid,server_id").Where(u.Query, u.Args...).Find(server).Error

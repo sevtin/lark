@@ -12,7 +12,7 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 | 1  | Go                   | 1.18.3          | 开发语言          | https://go.dev/                            |
 | 2  | Lua                  | 5.3             | Redis Lua 脚本  | http://www.lua.org/                        |
 | 3  | Mysql                | 8.0.29          | 关系型数据库        | https://www.mysql.com/                     |
-| 4  | MongoDB              | 5.0.9           | NoSql数据库【已弃用】 | https://www.mongodb.com                    |
+| 4  | MongoDB              | 5.0.9           | NoSql数据库 | https://www.mongodb.com                    |
 | 5  | Elasticsearch        | 7.17.6          | 搜索和分析引擎       | https://www.elastic.co/cn/elasticsearch/   |
 | 6  | Redis                | 6.2.7           | KV 数据库        | https://redis.io/                          |
 | 7  | Kafka                | 3.2.1           | 消息队列          | https://kafka.apache.org/                  |
@@ -73,12 +73,14 @@ Create Buckets And Change Access Policy
 ["documents","photos","videos"]
 Access Policy: Public
 
+mkdir -p /private/tmp/lark/photos
+
 upload files to photos
 ./lark/assets/images/avatar/06b73ea9-0c61-4ea6-b3e5-f89d89d53add.jpeg
 ./lark/assets/images/avatar/6b546cc7-5e4a-4d31-8017-1e5853f88a1c.jpeg
 ./lark/assets/images/avatar/b11883ba-f3d7-4164-a593-700c177c37c8.jpeg
 
-mkdir -p /private/tmp/lark/photos
+update CONST_AVATAR_SMALL/CONST_AVATAR_MEDIUM/CONST_AVATAR_LARGE/SYSTEM_ACCOUNT_AVATAR_CONTACT_INVITE
 
 Step 7
 通过Apache Flink同步数据到Elasticsearch

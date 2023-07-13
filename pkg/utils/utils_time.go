@@ -8,11 +8,11 @@ import (
 )
 
 func NowMilli() int64 {
-	return time.Now().UnixNano() / int64(time.Millisecond)
+	return time.Now().UnixMilli()
 }
 
 func MillisFromTime(t time.Time) int64 {
-	return t.UnixNano() / int64(time.Millisecond)
+	return t.UnixMilli()
 }
 
 func TimeFromMillis(millis int64) time.Time {
@@ -31,4 +31,13 @@ func EndOfDay(t time.Time) time.Time {
 
 func Yesterday() time.Time {
 	return time.Now().AddDate(0, 0, -1)
+}
+
+func CalculateAge(birthday time.Time) int {
+	now := time.Now()
+	age := now.Year() - birthday.Year()
+	if now.YearDay() < birthday.YearDay() {
+		age--
+	}
+	return age
 }

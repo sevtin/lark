@@ -59,7 +59,8 @@ func CropAvatar(in io.Reader, path string) (photos *Photos) {
 	if photos.Error != nil {
 		return
 	}
-	photos.ContentType = utils.GetContentType(format)
+
+	photos.ContentType = utils.GetContentType("." + format)
 	photos.Format = format
 
 	for i = 0; i < count; i++ {
@@ -72,7 +73,7 @@ func CropAvatar(in io.Reader, path string) (photos *Photos) {
 		if photo.Error != nil {
 			photos.Error = photo.Error
 		}
-		photos.Maps[photo.Name] = photo
+		photos.Maps[photo.Key] = photo
 	}
 	return
 }

@@ -305,7 +305,6 @@ func (c *Client) write() {
 
 func (c *Client) SendMsg(chatId int64) (err error) {
 	var (
-		ts      int64
 		msgBuf  []byte
 		msgBody *pb_msg.CliChatMessage
 	)
@@ -315,13 +314,12 @@ func (c *Client) SendMsg(chatId int64) (err error) {
 	if c.closed == true {
 		return
 	}
-	ts = utils.MillisFromTime(time.Now())
 	msgBody = &pb_msg.CliChatMessage{
 		CliMsgId: xsnowflake.NewSnowflakeID(), //客户端唯一消息号
 		ChatId:   chatId,
 		MsgType:  1,
 		Body:     utils.Str2Bytes("文本聊天消息" + utils.Int64ToStr(c.uid)),
-		SentTs:   ts,
+		SentTs:   time.Now().UnixMilli(),
 	}
 	msgBuf, _ = proto.Marshal(msgBody)
 	msgBuf, _ = utils.EncodeCliMessage(int32(pb_enum.TOPIC_CHAT), int32(pb_enum.SUB_TOPIC_CHAT_MSG), msgBody.CliMsgId, msgBuf)

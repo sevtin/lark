@@ -69,9 +69,11 @@ func Post(url string, params map[string]interface{}, headerOptions ...*HeaderOpt
 		req     *http.Request
 		option  *HeaderOption
 	)
-	jsonBuf, err = json.Marshal(params)
-	if err != nil {
-		return
+	if len(params) > 0 {
+		jsonBuf, err = json.Marshal(params)
+		if err != nil {
+			return
+		}
 	}
 	req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBuf))
 	if err != nil {
@@ -80,7 +82,6 @@ func Post(url string, params map[string]interface{}, headerOptions ...*HeaderOpt
 	for _, option = range headerOptions {
 		req.Header.Set(option.Key, option.Value)
 	}
-
 	var (
 		client = &http.Client{Timeout: HTTP_REQUEST_TIME_OUT_SECOND}
 		resp   *http.Response

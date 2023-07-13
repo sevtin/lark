@@ -111,9 +111,9 @@ func Expire(key string, expire time.Duration) error {
 func Get(key string) (val string, err error) {
 	key = RealKey(key)
 	val, err = Cli.Client.Get(context.Background(), key).Result()
-	//if err == redis.Nil {
-	//	err = nil
-	//}
+	if err == redis.Nil {
+		err = nil
+	}
 	return
 }
 

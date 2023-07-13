@@ -13,7 +13,7 @@ import (
 func (s *chatService) GetChatInfo(ctx context.Context, req *pb_chat.GetChatInfoReq) (resp *pb_chat.GetChatInfoResp, _ error) {
 	resp = &pb_chat.GetChatInfoResp{ChatInfo: &pb_chat.ChatInfo{}}
 	var (
-		w    = entity.NewMysqlWhere()
+		w    = entity.NewMysqlQuery()
 		chat *po.Chat
 		err  error
 	)

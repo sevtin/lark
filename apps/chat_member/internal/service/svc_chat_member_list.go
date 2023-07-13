@@ -10,12 +10,12 @@ import (
 func (s *chatMemberService) GetChatMemberList(ctx context.Context, req *pb_chat_member.GetChatMemberListReq) (resp *pb_chat_member.GetChatMemberListResp, _ error) {
 	resp = &pb_chat_member.GetChatMemberListResp{}
 	var (
-		w   = entity.NewMysqlWhere()
+		w   = entity.NewMysqlQuery()
 		err error
 	)
 	w.SetFilter("chat_id=?", req.ChatId)
 	w.SetFilter("uid>?", req.LastUid)
-	w.SetSort("role_id DESC,uid ASC")
+	w.SetSort("uid ASC")
 	w.SetLimit(req.Limit)
 	resp.List, err = s.chatMemberRepo.GroupChatMemberInfoList(w)
 	if err != nil {

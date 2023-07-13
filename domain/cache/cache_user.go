@@ -195,11 +195,7 @@ func (c *userCache) GetServerId(uid int64) (serverId string, err error) {
 	)
 	serverId, err = xredis.Get(key)
 	if err != nil {
-		if err == redis.Nil {
-			err = nil
-		} else {
-			xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
-		}
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
 	}
 	return
 }

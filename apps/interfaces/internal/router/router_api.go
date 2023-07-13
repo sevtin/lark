@@ -8,14 +8,14 @@ import (
 func Register(engine *gin.Engine) {
 	//engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	publicGroup := engine.Group("open")
-	registerPublicRoutes(publicGroup)
+	registerOpenRoutes(publicGroup)
 
 	privateGroup := engine.Group("api")
 	registerPrivateRouter(privateGroup)
 }
 
 // 无需验证
-func registerPublicRoutes(group *gin.RouterGroup) {
+func registerOpenRoutes(group *gin.RouterGroup) {
 	registerOpenAuthRouter(group)
 }
 
@@ -30,6 +30,7 @@ func registerPrivateRouter(group *gin.RouterGroup) {
 	registerChatInviteRouter(group)
 	registerChatRouter(group)
 	registerConvoRouter(group)
+	registerLbsRouter(group)
 }
 
 // 开放式api无需验证会话id

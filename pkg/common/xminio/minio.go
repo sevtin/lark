@@ -79,6 +79,7 @@ var (
 
 type MinioClient struct {
 	client *minio.Client
+	conf   *MinioConfig
 }
 
 func init() {
@@ -105,7 +106,7 @@ func NewMinioClient(conf *MinioConfig) {
 		log.Print("instantiate minio client error:", err)
 		return
 	}
-	minioc = &MinioClient{client: client}
+	minioc = &MinioClient{client: client, conf: conf}
 
 	opts = minio.MakeBucketOptions{
 		Region:        conf.Bucket.MakeBucketOptions.Region,
@@ -127,6 +128,10 @@ func NewMinioClient(conf *MinioConfig) {
 		}
 	}
 	return
+}
+
+func GetEndpoint() string {
+	return minioc.conf.Endpoint
 }
 
 func Put(fileType string, objectName string, reader io.Reader, objectSize int64, contentType string) (info minio.UploadInfo, err error) {

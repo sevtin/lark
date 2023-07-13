@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
+	"strings"
 	"time"
 )
 
@@ -39,13 +40,14 @@ func connectDB(cfg *conf.Mongo) (db *mongo.Database, err error) {
 		client        *mongo.Client
 	)
 
-	uri = fmt.Sprintf("mongodb://%s/?maxPoolSize=%d", cfg.Address, cfg.MaxPoolSize)
+	uri = fmt.Sprintf("mongodb://%s/?maxPoolSize=%d", strings.Join(cfg.Hosts, ","), cfg.MaxPoolSize)
 	// Set client options
 	clientOptions = options.Client().ApplyURI(uri).SetAuth(
 		options.Credential{
-			AuthMechanism: "SCRAM-SHA-256",
+			AuthMechanism: "SCRAM-SHA-256", // [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
 			Username:      cfg.Username,
 			Password:      cfg.Password,
+			AuthSource:    cfg.AuthSource,
 		}).SetConnectTimeout(time.Duration(cfg.Timeout) * time.Millisecond)
 
 	// Connect to MongoDB

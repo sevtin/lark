@@ -39,7 +39,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 		switch req.OwnerType {
 		case pb_enum.AVATAR_OWNER_USER_AVATAR:
 			u.SetFilter("uid=?", req.OwnerId)
-			u.Set("avatar_key", req.AvatarSmall)
+			u.Set("avatar", req.AvatarSmall)
 			s.userRepo.TxUpdateUser(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
@@ -49,10 +49,10 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 			u.Reset()
 			u.SetFilter("sync=?", constant.SYNCHRONIZE_USER_INFO)
 			u.SetFilter("uid=?", req.OwnerId)
-			u.Set("member_avatar_key", req.AvatarSmall)
+			u.Set("member_avatar", req.AvatarSmall)
 		case pb_enum.AVATAR_OWNER_CHAT_AVATAR:
 			u.SetFilter("chat_id=?", req.OwnerId)
-			u.Set("avatar_key", req.AvatarSmall)
+			u.Set("avatar", req.AvatarSmall)
 			err = s.chatRepo.TxUpdateChat(tx, u)
 			if err != nil {
 				resp.Set(ERROR_CODE_AVATAR_SET_AVATAR_FAILED, ERROR_AVATAR_SET_AVATAR_FAILED)
@@ -61,7 +61,7 @@ func (s *avatarService) SetAvatar(ctx context.Context, req *pb_avatar.SetAvatarR
 
 			u.Reset()
 			u.SetFilter("chat_id=?", req.OwnerId)
-			u.Set("chat_avatar_key", req.AvatarSmall)
+			u.Set("chat_avatar", req.AvatarSmall)
 		}
 
 		err = s.chatMemberRepo.TxUpdateChatMember(tx, u)

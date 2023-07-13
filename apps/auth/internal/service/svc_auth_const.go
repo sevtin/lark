@@ -18,6 +18,10 @@ const (
 	ERROR_CODE_AUTH_JWT_TOKEN_ERR                                int32 = 2013
 	ERROR_CODE_AUTH_JWT_SESSION_ID_ERR                           int32 = 2014
 	ERROR_CODE_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT int32 = 2015
+	ERROR_CODE_AUTH_OAUTH_TOKEN_ACQUISITION_FAILED               int32 = 2016
+	ERROR_CODE_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           int32 = 2017
+	ERROR_CODE_AUTH_OAUTH_USER_INFO_QUERY_FAILED                 int32 = 2018
+	ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE                         int32 = 2019
 )
 
 const (
@@ -36,8 +40,23 @@ const (
 	ERROR_AUTH_JWT_TOKEN_ERR                                = "授权token错误"
 	ERROR_AUTH_JWT_SESSION_ID_ERR                           = "会话ID错误"
 	ERROR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT = "该手机号已绑定其他账号"
+	ERROR_AUTH_OAUTH_TOKEN_ACQUISITION_FAILED               = "获取token失败"
+	ERROR_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           = "获取用户信息失败"
+	ERROR_AUTH_OAUTH_USER_INFO_QUERY_FAILED                 = "查询用户信息失败"
+	ERROR_AUTH_GRPC_SERVICE_FAILURE                         = "服务故障"
 )
 
 var (
 	ERR_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT = errors.New("该手机号已绑定其他账号")
+	ERR_AUTH_OAUTH_TOKEN_ACQUISITION_FAILED               = errors.New("oauth token获取失败")
+	ERR_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           = errors.New("获取用户信息失败")
+)
+
+const (
+	API_GITHUB_OAUTH_ACCESS_TOKEN = "https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s"
+	API_GITHUB_USER               = "https://api.github.com/user"
+)
+
+const (
+	DEFAULT_LOGIN_PASSWORD = "EA405B607DE5E4F6797640AB81F1767D" // 密码 12345678
 )

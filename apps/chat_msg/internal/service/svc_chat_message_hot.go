@@ -10,11 +10,11 @@ import (
 func (s *chatMessageService) GetHotMessages(req *pb_chat_msg.GetChatMessagesReq, maxSeqId int64) (list []*po.Message, next bool, err error) {
 	// 从mongo中获取消息
 	var (
-		w        = entity.NewMongoWhere()
+		w        = entity.NewMongoQuery()
 		msgCount int
 	)
 	w.SetLimit(int64(req.Limit))
-	w.SetSort("seq_id", true)
+	//w.SetSort("seq_id", true)
 	w.SetFilter("chat_type", req.ChatType)
 	w.SetFilter("chat_id", req.ChatId)
 

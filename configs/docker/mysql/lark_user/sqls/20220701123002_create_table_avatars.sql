@@ -1,10 +1,10 @@
 DROP TABLE IF EXISTS `avatars`;
 CREATE TABLE `avatars` (
   `owner_id` bigint unsigned NOT NULL COMMENT '用户ID/ChatID',
-  `owner_type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1:用户头像 2:群头像',
-  `avatar_small` varchar(64) NOT NULL COMMENT '小图 72*72',
-  `avatar_medium` varchar(64) NOT NULL COMMENT '中图 240*240',
-  `avatar_large` varchar(64) NOT NULL COMMENT '大图 480*480',
+  `owner_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '1:用户头像 2:群头像',
+  `avatar_small` varchar(160) NOT NULL COMMENT '小图 72*72',
+  `avatar_medium` varchar(160) NOT NULL COMMENT '中图 240*240',
+  `avatar_large` varchar(160) NOT NULL COMMENT '大图 640*640',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',

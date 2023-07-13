@@ -11,7 +11,7 @@ import (
 func (s *userService) GetServerIdList(ctx context.Context, req *pb_user.GetServerIdListReq) (resp *pb_user.GetServerIdListResp, _ error) {
 	resp = new(pb_user.GetServerIdListResp)
 	var (
-		w   = entity.NewMysqlWhere()
+		w   = entity.NewMysqlQuery()
 		err error
 	)
 	w.SetFilter("uid IN(?)", req.Uids)

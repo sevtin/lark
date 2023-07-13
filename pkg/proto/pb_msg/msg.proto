@@ -43,7 +43,7 @@ message SrvChatMessage {
   int64 sender_id = 3; // 发送者uid
   pb_enum.PLATFORM_TYPE sender_platform = 4; // 发送者平台
   string sender_name = 5; // 发送者姓名
-  string sender_avatar_key = 6; // 发送者头像
+  string sender_avatar = 6; // 发送者头像
   int64 chat_id = 7; // 会话ID
   pb_enum.CHAT_TYPE chat_type = 8; // 会话类型
   int64 seq_id = 9; // 消息唯一ID
@@ -136,7 +136,7 @@ message Contact {
   pb_enum.CHAT_TYPE chat_type = 2;
   int64 uid = 3;
   string alias = 4;
-  string member_avatar_key = 5;
+  string member_avatar = 5;
   int32 role_id = 6;
 }
 
