@@ -21,7 +21,7 @@ func GetBasicUserInfo(userCache cache.UserCache, userRepo repo.UserRepository, u
 	if info.Uid > 0 {
 		return
 	}
-	q.Fields = user.GetField()
+	q.Fields = user.GetFields()
 	q.SetFilter("uid=?", uid)
 	err = userRepo.QueryUser(q, user)
 	if err != nil {

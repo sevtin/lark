@@ -62,7 +62,7 @@ func (r *authRepository) TxCreateOauthUser(tx *gorm.DB, user *po.OauthUser) (err
 func (r *authRepository) GetOAuthUser(q *entity.MysqlQuery) (user *pdo.OauthUser, err error) {
 	user = new(pdo.OauthUser)
 	db := xmysql.GetDB()
-	err = db.Model(&po.OauthUser{}).Select(user.GetField()).Where(q.Query, q.Args...).Find(user).Error
+	err = db.Model(&po.OauthUser{}).Select(user.GetFields()).Where(q.Query, q.Args...).Find(user).Error
 	return
 }
 

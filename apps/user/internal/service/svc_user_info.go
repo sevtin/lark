@@ -47,7 +47,7 @@ func (s *userService) queryUserInfo(uid int64, resp *pb_user.UserInfoResp) (err 
 		q    = entity.NewMysqlQuery()
 		user = new(pdo.UserInfo)
 	)
-	q.Fields = user.GetField()
+	q.Fields = user.GetFields()
 	q.SetFilter("uid = ?", uid)
 	err = s.userRepo.QueryUser(q, user)
 	if err != nil {

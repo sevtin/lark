@@ -16,7 +16,7 @@ type BasicUserInfo struct {
 	Avatar   string `json:"avatar" field:"avatar"`     // 头像
 }
 
-func (p *BasicUserInfo) GetField() string {
+func (p *BasicUserInfo) GetFields() string {
 	if field_tag_basic_user_info == "" {
 		field_tag_basic_user_info = utils.GetFields(*p)
 	}

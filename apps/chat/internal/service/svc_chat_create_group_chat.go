@@ -43,7 +43,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 	}()
 
 	// 1 获取创建者信息
-	q.Fields = creator.GetField()
+	q.Fields = creator.GetFields()
 	q.SetFilter("uid=?", req.CreatorUid)
 	err = s.userRepo.QueryUser(q, creator)
 	if err != nil || creator.Uid == 0 {

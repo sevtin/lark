@@ -19,7 +19,7 @@ type UserInfo struct {
 	CityId    int64  `json:"city_id" field:"city_id"`     // 城市ID
 }
 
-func (p *UserInfo) GetField() string {
+func (p *UserInfo) GetFields() string {
 	if field_tag_user_info == "" {
 		field_tag_user_info = utils.GetFields(*p)
 	}

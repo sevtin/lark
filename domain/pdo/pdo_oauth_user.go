@@ -13,7 +13,7 @@ type OauthUser struct {
 	Uid    int64  `json:"uid" field:"uid"`       // lark uid
 }
 
-func (p *OauthUser) GetField() string {
+func (p *OauthUser) GetFields() string {
 	if field_tag_oauth_user == "" {
 		field_tag_oauth_user = utils.GetFields(*p)
 	}

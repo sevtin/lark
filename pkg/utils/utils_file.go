@@ -138,3 +138,23 @@ func Remove(name string) (err error) {
 	fmt.Println(name)
 	return os.Remove(name)
 }
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func Mkdir(path string) (err error) {
+	err = os.MkdirAll(path, 0776)
+	if err != nil {
+		return
+	}
+	err = os.Chmod(path, 0776)
+	return
+}

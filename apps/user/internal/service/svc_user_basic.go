@@ -16,7 +16,7 @@ func (s *userService) GetBasicUserInfo(ctx context.Context, req *pb_user.GetBasi
 		q    = entity.NewMysqlQuery()
 		err  error
 	)
-	q.Fields = user.GetField()
+	q.Fields = user.GetFields()
 	q.SetFilter("uid=?", req.Uid)
 	err = s.userRepo.QueryUser(q, user)
 	if err != nil {

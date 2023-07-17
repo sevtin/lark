@@ -14,7 +14,7 @@ type UserLocation struct {
 	Avatar   string `json:"avatar" field:"avatar"`     // 小图 72*72
 }
 
-func (p *UserLocation) GetField() string {
+func (p *UserLocation) GetFields() string {
 	if field_tag_user_location == "" {
 		field_tag_user_location = utils.GetFields(*p)
 	}

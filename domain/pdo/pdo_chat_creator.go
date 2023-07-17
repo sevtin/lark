@@ -13,7 +13,7 @@ type ChatCreator struct {
 	Avatar   string `json:"avatar" field:"avatar"`       // 小图 72*72
 }
 
-func (p *ChatCreator) GetField() string {
+func (p *ChatCreator) GetFields() string {
 	if field_tag_chat_creator == "" {
 		field_tag_chat_creator = utils.GetFields(*p)
 	}
