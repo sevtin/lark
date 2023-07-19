@@ -146,7 +146,7 @@ func generateAppsServiceConstCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/internal/service", conf.PackageName)
 	conf.Prefix = "svc_"
 	conf.Suffix = "_const"
-	conf.Dict["UpperServiceName"] = strings.ToUpper(conf.PackageName)
+	conf.Dict["AllUpperServiceName"] = strings.ToUpper(conf.PackageName)
 	utils.GenCode(template.AppsServiceConstTemplate, &conf)
 }
 
