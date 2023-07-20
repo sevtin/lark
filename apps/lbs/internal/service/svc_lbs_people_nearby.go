@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	"lark/domain/po"
+	"lark/domain/mpo"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_enum"
@@ -15,9 +15,9 @@ import (
 func (s *lbsService) PeopleNearby(ctx context.Context, req *pb_lbs.PeopleNearbyReq) (resp *pb_lbs.PeopleNearbyResp, _ error) {
 	resp = &pb_lbs.PeopleNearbyResp{}
 	var (
-		locations []*po.UserLocation
+		locations []*mpo.UserLocation
 		i         int
-		loc       *po.UserLocation
+		loc       *mpo.UserLocation
 		err       error
 	)
 	locations, err = s.getLocations(req, resp)
@@ -41,7 +41,14 @@ func (s *lbsService) PeopleNearby(ctx context.Context, req *pb_lbs.PeopleNearbyR
 	return
 }
 
-func (s *lbsService) getLocations(req *pb_lbs.PeopleNearbyReq, resp *pb_lbs.PeopleNearbyResp) (locations []*po.UserLocation, err error) {
+/*
+db.user_locations.ensureIndex({ location: "2dsphere"});
+db.user_locations.createIndex( { "uid": 1 }, { unique: true } )
+db.user_locations.createIndex({"gender":1})
+db.user_locations.createIndex({"birth_ts":1})
+db.user_locations.createIndex({"online_ts":1})
+*/
+func (s *lbsService) getLocations(req *pb_lbs.PeopleNearbyReq, resp *pb_lbs.PeopleNearbyResp) (locations []*mpo.UserLocation, err error) {
 	var (
 		now         = time.Now()
 		minTs       int64

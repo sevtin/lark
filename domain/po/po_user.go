@@ -15,7 +15,7 @@ type User struct {
 	Firstname   string `gorm:"column:firstname;NOT NULL" json:"firstname"`                 // firstname
 	Lastname    string `gorm:"column:lastname;NOT NULL" json:"lastname"`                   // lastname
 	Gender      int    `gorm:"column:gender;default:0;NOT NULL" json:"gender"`             // 性别
-	BirthTs     int64  `gorm:"column:birth_ts;default:0;NOT NULL" json:"birth_ts"`         // 生日
+	BirthTs     int64  `gorm:"column:birth_ts;default:0;NOT NULL" json:"birth_ts"`         // 生日（时间戳ms）
 	Email       string `gorm:"column:email;NOT NULL" json:"email"`                         // Email
 	Mobile      string `gorm:"column:mobile;NOT NULL" json:"mobile"`                       // 手机号
 	RegPlatform int    `gorm:"column:reg_platform;default:0;NOT NULL" json:"reg_platform"` // 注册平台

@@ -1,4 +1,4 @@
-package po
+package mpo
 
 const (
 	MONGO_COLLECTION_USER_LOCATIONS = "user_locations"

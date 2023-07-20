@@ -9,13 +9,37 @@ import (
 	"lark/pkg/utils"
 )
 
-/*
-db.user_locations.ensureIndex({ location: "2dsphere"});
-db.user_locations.createIndex( { "uid": 1 }, { unique: true } )
-db.user_locations.createIndex({"gender":1})
-db.user_locations.createIndex({"birth_ts":1})
-db.user_locations.createIndex({"online_ts":1})
-*/
+func (s *lbsService) ReportLngLat(ctx context.Context, req *pb_lbs.ReportLngLatReq) (resp *pb_lbs.ReportLngLatResp, _ error) {
+	resp = &pb_lbs.ReportLngLatResp{}
+	var (
+		user *pb_user.BasicUserInfo
+		loc  *po.UserLocation
+		err  error
+	)
+	user, err = cr_user.GetBasicUserInfo(s.userCache, s.userRepo, req.Uid)
+	if err != nil {
+		resp.Set(ERROR_CODE_LBS_QUERY_DB_FAILED, ERROR_LBS_QUERY_DB_FAILED)
+		return
+	}
+	if user.Uid == 0 {
+		resp.Set(ERROR_CODE_LBS_QUERY_DB_FAILED, ERROR_LBS_QUERY_DB_FAILED)
+		return
+	}
+	loc = &po.UserLocation{
+		Uid:       user.Uid,
+		Longitude: req.Longitude,
+		Latitude:  req.Latitude,
+		OnlineTs:  utils.NowMilli(),
+	}
+	err = s.locRepo.Save(loc)
+	if err != nil {
+		resp.Set(ERROR_CODE_LBS_UPDATE_VALUE_FAILED, ERROR_LBS_UPDATE_VALUE_FAILED)
+		return
+	}
+	return
+}
+
+/* 弃用 入库mysql通过flink同步到mongodb
 func (s *lbsService) ReportLngLat(ctx context.Context, req *pb_lbs.ReportLngLatReq) (resp *pb_lbs.ReportLngLatResp, _ error) {
 	resp = &pb_lbs.ReportLngLatResp{}
 	var (
@@ -50,3 +74,4 @@ func (s *lbsService) ReportLngLat(ctx context.Context, req *pb_lbs.ReportLngLatR
 	}
 	return
 }
+*/

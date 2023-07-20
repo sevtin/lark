@@ -18,9 +18,10 @@ type lbsService struct {
 	cfg       *config.Config
 	lbsRepo   mrepo.LbsRepository
 	userRepo  repo.UserRepository
+	locRepo   repo.UserLocationRepository
 	userCache cache.UserCache
 }
 
-func NewLbsService(cfg *config.Config, lbsRepo mrepo.LbsRepository, userRepo repo.UserRepository, userCache cache.UserCache) LbsService {
-	return &lbsService{cfg: cfg, lbsRepo: lbsRepo, userRepo: userRepo, userCache: userCache}
+func NewLbsService(cfg *config.Config, lbsRepo mrepo.LbsRepository, userRepo repo.UserRepository, locRepo repo.UserLocationRepository, userCache cache.UserCache) LbsService {
+	return &lbsService{cfg: cfg, lbsRepo: lbsRepo, userRepo: userRepo, locRepo: locRepo, userCache: userCache}
 }

@@ -20,6 +20,7 @@ func init() {
 	container.Provide(service.NewLbsService)
 	container.Provide(mrepo.NewLbsRepository)
 	container.Provide(repo.NewUserRepository)
+	container.Provide(repo.NewUserLocationRepository)
 	container.Provide(cache.NewUserCache)
 }
 
