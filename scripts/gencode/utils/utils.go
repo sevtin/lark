@@ -21,10 +21,10 @@ func GenCode(tpl *template.Template, conf *config.GenConfig) (err error) {
 		}
 	}()
 	var (
-		wr              = new(bytes.Buffer)
-		path            = conf.Path + "/" + conf.Prefix + conf.PackageName + conf.Suffix
-		exists          bool
-		formattedOutput []byte
+		wr            = new(bytes.Buffer)
+		path          = conf.Path + "/" + conf.Prefix + conf.PackageName + conf.Suffix
+		exists        bool
+		formattedCode []byte
 	)
 	switch conf.FileType {
 	case config.FILE_TYPE_GO:
@@ -50,10 +50,10 @@ func GenCode(tpl *template.Template, conf *config.GenConfig) (err error) {
 	}
 	switch conf.FileType {
 	case config.FILE_TYPE_GO:
-		if formattedOutput, err = format.Source(wr.Bytes()); err != nil {
+		if formattedCode, err = format.Source(wr.Bytes()); err != nil {
 			return
 		}
-		wr = bytes.NewBuffer(formattedOutput)
+		wr = bytes.NewBuffer(formattedCode)
 	}
 	err = os.WriteFile(path, wr.Bytes(), MODE_PERM_0776)
 	return

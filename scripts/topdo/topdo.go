@@ -32,7 +32,8 @@ func init() {
 }
 
 func main() {
-	sql := `SELECT m.chat_id,
+	sql := `
+SELECT m.chat_id,
 IF(m.chat_id%2=0,'双号','单号') AS flag,
 CASE m.chat_type WHEN 1 THEN '私聊' WHEN 2 THEN '群聊' ELSE '未知' END AS chat_type,
 SUM(m.uid) AS total,
@@ -40,7 +41,7 @@ COUNT(u.gender=1 or null) AS male_count,
 COUNT(u.gender=2 or null) AS female_count
 FROM chat_members m
 LEFT JOIN users u ON u.uid=m.uid
-GROUP BY m.chat_id,m.chat_type;;
+GROUP BY m.chat_id,m.chat_type;
 `
 	_, err := SqlToPdo(db, sql, "MyUserInfo")
 	if err != nil {
@@ -162,7 +163,6 @@ func generateCode(obj string, columns []string, fields [][]string, cts map[strin
 // 创建文件
 func createFile(code string, filename string) (err error) {
 	var (
-		wr            = new(bytes.Buffer)
 		path          = "./domain/pdo/"
 		filePath      = path + "pdo_" + filename + ".go"
 		exists        bool
@@ -174,12 +174,11 @@ func createFile(code string, filename string) (err error) {
 	if exists, err = pathExists(path); exists == false {
 		mkdir(path)
 	}
-	wr = bytes.NewBuffer([]byte(code))
-	if formattedCode, err = format.Source(wr.Bytes()); err != nil {
+	formattedCode, err = format.Source([]byte(code))
+	if err != nil {
 		return
 	}
-	wr = bytes.NewBuffer(formattedCode)
-	err = os.WriteFile(filePath, wr.Bytes(), 0776)
+	err = os.WriteFile(filePath, formattedCode, 0776)
 	return
 }
 
