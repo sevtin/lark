@@ -41,6 +41,11 @@ func TTL(key string) time.Duration {
 	return Cli.Client.TTL(context.Background(), key).Val()
 }
 
+func Del(key string) error {
+	key = RealKey(key)
+	return Cli.Client.Del(context.Background(), key).Err()
+}
+
 //func Dels(keys ...string) error {
 //	return Cli.Client.Del(context.Background(), keys...).Err()
 //}

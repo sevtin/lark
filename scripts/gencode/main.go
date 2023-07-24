@@ -14,7 +14,7 @@ import (
 
 func main() {
 	var (
-		serviceName      = "Discover"
+		serviceName      = "RedPacket"
 		upperServiceName = toCamel(serviceName)
 		lowerServiceName = firstLower(upperServiceName)
 		packageName      = camelToSnake(upperServiceName)
@@ -49,6 +49,7 @@ func main() {
 	generateDomainPoCode(conf)
 
 	// interfaces
+	generateInterfacesDigCode(conf)
 	generateInterfacesCtrlCode(conf)
 	generateInterfacesDtoCode(conf)
 	generateInterfacesRouterCode(conf)
@@ -97,6 +98,7 @@ func camelToSnake(input string) string {
 // Apps
 func generateAppsClientCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/client", conf.PackageName)
+	conf.Filename = "client"
 	utils.GenCode(template.AppsClientTemplate, &conf)
 }
 
@@ -110,11 +112,13 @@ func generateAppsConfigCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/internal/config", conf.PackageName)
 	code := strings.ReplaceAll(template.AppsConfigCode, "\"yaml:", "`yaml:")
 	code = strings.ReplaceAll(code, "\"\"", "\"`")
+	conf.Filename = "config"
 	utils.GenCode(template.ParseTemplate(code), &conf)
 }
 
 func generateAppsDigCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/dig", conf.PackageName)
+	conf.Filename = "dig"
 	utils.GenCode(template.AppsDigTemplate, &conf)
 }
 
@@ -173,6 +177,12 @@ func generateDomainRepoCode(conf config.GenConfig) {
 	conf.Path = "./domain/repo"
 	conf.Prefix = "repo_"
 	utils.GenCode(template.DomainRepoTemplate, &conf)
+}
+
+func generateInterfacesDigCode(conf config.GenConfig) {
+	conf.Path = "./apps/interfaces/dig"
+	conf.Prefix = "dig_"
+	utils.GenCode(template.InterfacesDigTemplate, &conf)
 }
 
 func generateInterfacesCtrlCode(conf config.GenConfig) {

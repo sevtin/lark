@@ -5,6 +5,7 @@ type GenConfig struct {
 	Prefix      string // 前缀
 	Suffix      string // 后缀
 	PackageName string // 包名
+	Filename    string // 文件名
 	FileType    int
 	Dict        map[string]interface{}
 }

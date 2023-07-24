@@ -22,10 +22,17 @@ func GenCode(tpl *template.Template, conf *config.GenConfig) (err error) {
 	}()
 	var (
 		wr            = new(bytes.Buffer)
-		path          = conf.Path + "/" + conf.Prefix + conf.PackageName + conf.Suffix
+		path          string
+		filename      string
 		exists        bool
 		formattedCode []byte
 	)
+	if conf.Filename != "" {
+		filename = conf.Filename
+	} else {
+		filename = conf.PackageName
+	}
+	path = conf.Path + "/" + conf.Prefix + filename + conf.Suffix
 	switch conf.FileType {
 	case config.FILE_TYPE_GO:
 		path += ".go"
