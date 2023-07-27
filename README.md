@@ -97,3 +97,11 @@ Step 9
 
 ### 视频教程地址
 https://space.bilibili.com/178350755
+
+### 支持作者
+维护这个项目需要花费大量的时间和精力来保持其更新和改进。如果你愿意支持我们，你的捐款将帮助我们继续保持项目的活跃性。
+
+<img src="assets/images/WeChatPay.jpg" alt="WeChatPay" width="320" height="348" align="middle"/>
+
+<img src="assets/images/Alipay.jpg" alt="Alipay" width="320" height="348" align="middle"/>
+
