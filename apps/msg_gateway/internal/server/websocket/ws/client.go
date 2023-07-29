@@ -31,7 +31,7 @@ func newClient(hub *Hub, conn *websocket.Conn, uid int64, platform int32) *Clien
 		uid:       uid,
 		platform:  platform,
 		key:       clientKey(uid, platform),
-		onlineTs:  time.Now().UnixNano() / 1e6,
+		onlineTs:  time.Now().UnixMilli(),
 		sendChan:  make(chan []byte, WS_WRITE_MAX_MESSAGE_CHAN_SIZE),
 		closeChan: make(chan struct{}),
 	}
@@ -295,12 +295,9 @@ func (c *Client) Send(message []byte) {
 			//wsLog.Warn(r, string(debug.Stack()))
 		}
 	}()
-	c.lock.RLock()
 	if c.closed == true {
-		c.lock.RUnlock()
 		return
 	}
-	c.lock.RUnlock()
 	if len(c.sendChan) >= WS_WRITE_MESSAGE_THRESHOLD {
 		return
 	}
@@ -308,12 +305,14 @@ func (c *Client) Send(message []byte) {
 }
 
 func (c *Client) Close() (err error) {
-	c.lock.Lock()
+	defer func() {
+		if r := recover(); r != nil {
+			//wsLog.Warn(r, string(debug.Stack()))
+		}
+	}()
 	if c.closed == true {
-		c.lock.Unlock()
 		return
 	}
-	c.lock.Unlock()
 	err = c.conn.WriteMessage(websocket.CloseMessage, WS_MSG_BUF_CLOSE)
 	if err != nil {
 		wsLog.Warn(err.Error())
