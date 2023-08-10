@@ -84,7 +84,6 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 			c.Db)
 		if i == 0 {
 			dsn1 = dsn
-			continue
 		}
 		sources = append(sources, mysql.Open(dsn))
 	}
