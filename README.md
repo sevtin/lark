@@ -12,29 +12,30 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 | 1  | Go                   | 1.18.3          | 开发语言          | https://go.dev/                            |
 | 2  | Lua                  | 5.3             | Redis Lua 脚本  | http://www.lua.org/                        |
 | 3  | Mysql                | 8.0.29          | 关系型数据库        | https://www.mysql.com/                     |
-| 4  | MongoDB              | 5.0.9           | NoSql数据库 | https://www.mongodb.com                    |
+| 4  | MongoDB              | 5.0.9           | NoSql数据库【已弃用】 | https://www.mongodb.com                    |
 | 5  | Elasticsearch        | 7.17.6          | 搜索和分析引擎       | https://www.elastic.co/cn/elasticsearch/   |
 | 6  | Redis                | 6.2.7           | KV 数据库        | https://redis.io/                          |
-| 7  | Kafka                | 3.2.1           | 消息队列          | https://kafka.apache.org/                  |
-| 8  | ZooKeeper            | 3.7.1           | 分布式协调服务       | https://zookeeper.apache.org/              |
-| 9  | Docker               | 20.10.17        | 应用容器引擎        | https://www.docker.com                     |
-| 10 | MinIO                | 2022.12.12      | 对象存储          | https://min.io/                            |
-| 11 | Nginx                | 1.23.1          | Web/反向代理      | https://www.nginx.com/                     |
-| 12 | JWT                  | v4.4.2          | JWT登录支持       | https://github.com/golang-jwt/jwt          |
-| 13 | Validator            | v10.11.0        | 验证框架          | https://github.com/go-playground/validator |
-| 14 | Jaeger               | all-in-one:1.37 | 链路追踪          | https://www.jaegertracing.io               |
-| 15 | Prometheus           | 2.36.2          | 系统监控和报警系统     | https://prometheus.io/                     |
-| 16 | Grafana              | 8.2.6           | 指标数据的可视化展现    | https://grafana.com/                       |
-| 17 | ETCD                 | 3.5             | 服务发现          | https://etcd.io/                           |
-| 18 | Kibana               | 7.17.6          | 数据分析和可视化平台    | https://www.elastic.co/cn/kibana/          |
-| 19 | Logstash             | 7.17.6          | 数据收集引擎        | https://www.elastic.co/cn/logstash/        |
-| 20 | Filebeat             | 7.17.6          | 日志采集器         | https://www.elastic.co/cn/beats/filebeat   |
-| 21 | Flink                | 1.14.6          | 通用数据处理平台      | https://flink.apache.org/                  |
-| 22 | ShardingSphere-Proxy | 5.2.1           | 数据库中间件        | https://shardingsphere.apache.org/         |
-| 23 | Mycat                | 2.1.21          | 数据库中间件【已弃用】   | http://mycatone.top/                       |
-| 24 | Gin                  | v1.8.1          | Web 框架        | https://github.com/gin-gonic/gin           |
-| 25 | gRpc                 | v1.49.0         | 远程过程调用系统      | https://pkg.go.dev/google.golang.org/grpc  |
-| 26 | GORM                 | v1.23.8         | ORM           | https://gorm.io/                           |
+| 7  | Kafka                | 3.2.1           | 消息中间件         | https://kafka.apache.org/                  |
+| 8  | RabbitMQ             | 3.10.0          | 消息中间件         | https://www.rabbitmq.com/                  |
+| 9  | ZooKeeper            | 3.7.1           | 分布式协调服务       | https://zookeeper.apache.org/              |
+| 10 | Docker               | 20.10.17        | 应用容器引擎        | https://www.docker.com                     |
+| 11 | MinIO                | 2022.12.12      | 对象存储          | https://min.io/                            |
+| 12 | Nginx                | 1.23.1          | Web/反向代理      | https://www.nginx.com/                     |
+| 13 | JWT                  | v4.4.2          | JWT登录支持       | https://github.com/golang-jwt/jwt          |
+| 14 | Validator            | v10.11.0        | 验证框架          | https://github.com/go-playground/validator |
+| 15 | Jaeger               | all-in-one:1.37 | 链路追踪          | https://www.jaegertracing.io               |
+| 16 | Prometheus           | 2.36.2          | 系统监控和报警系统     | https://prometheus.io/                     |
+| 17 | Grafana              | 8.2.6           | 指标数据的可视化展现    | https://grafana.com/                       |
+| 18 | ETCD                 | 3.5             | 服务发现          | https://etcd.io/                           |
+| 19 | Kibana               | 7.17.6          | 数据分析和可视化平台    | https://www.elastic.co/cn/kibana/          |
+| 20 | Logstash             | 7.17.6          | 数据收集引擎        | https://www.elastic.co/cn/logstash/        |
+| 21 | Filebeat             | 7.17.6          | 日志采集器         | https://www.elastic.co/cn/beats/filebeat   |
+| 22 | Flink                | 1.14.6          | 通用数据处理平台      | https://flink.apache.org/                  |
+| 23 | ShardingSphere-Proxy | 5.2.1           | 数据库中间件        | https://shardingsphere.apache.org/         |
+| 24 | Mycat                | 2.1.21          | 数据库中间件【已弃用】   | http://mycatone.top/                       |
+| 25 | Gin                  | v1.8.1          | Web 框架        | https://github.com/gin-gonic/gin           |
+| 26 | gRpc                 | v1.49.0         | 远程过程调用系统      | https://pkg.go.dev/google.golang.org/grpc  |
+| 27 | GORM                 | v1.23.8         | ORM           | https://gorm.io/                           |
 
 
 ![](assets/images/lark-architecture-diagram.png)
