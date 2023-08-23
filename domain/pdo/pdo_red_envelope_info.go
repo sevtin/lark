@@ -18,9 +18,10 @@ type RedEnvelopeInfo struct {
 	Quantity     int32  `json:"quantity" field:"quantity"` // quantity
 	//RemainQuantity int    `json:"remain_quantity" field:"remain_quantity"` // 剩余红包数量
 	//RemainAmount   int    `json:"remain_amount" field:"remain_amount"`     // 剩余红包金额(分)
-	Message   string `json:"message" field:"message"`
-	ExpiredTs int64  `json:"expired_ts" field:"expired_ts"`
-	Receivers string `json:"receivers" field:"receivers"`
+	Message        string `json:"message" field:"message"`
+	ExpiredTs      int64  `json:"expired_ts" field:"expired_ts"`
+	Receivers      string `json:"receivers" field:"receivers"`
+	SenderPlatform int32  `json:"sender_platform" field:"sender_platform"` // 发红包平台
 }
 
 func (p *RedEnvelopeInfo) GetFields() string {

@@ -26,17 +26,18 @@ func GetRedEnvelopeInfo(redEnvCache cache.RedEnvelopeCache, redEnvRepo repo.RedE
 		return
 	}
 	info = &pb_red_env.RedEnvelopeInfo{
-		EnvId:        ifo.EnvId,
-		EnvType:      pb_enum.RED_ENVELOPE_TYPE(ifo.EnvType),
-		ReceiverType: pb_enum.RECEIVER_TYPE(ifo.ReceiverType),
-		TradeNo:      ifo.TradeNo,
-		ChatId:       ifo.ChatId,
-		SenderUid:    ifo.SenderUid,
-		Total:        ifo.Total,
-		Quantity:     ifo.Quantity,
-		Message:      ifo.Message,
-		ReceiverUids: nil,
-		ExpiredTs:    ifo.ExpiredTs,
+		EnvId:          ifo.EnvId,
+		EnvType:        pb_enum.RED_ENVELOPE_TYPE(ifo.EnvType),
+		ReceiverType:   pb_enum.RECEIVER_TYPE(ifo.ReceiverType),
+		TradeNo:        ifo.TradeNo,
+		ChatId:         ifo.ChatId,
+		SenderUid:      ifo.SenderUid,
+		Total:          ifo.Total,
+		Quantity:       ifo.Quantity,
+		Message:        ifo.Message,
+		ReceiverUids:   nil,
+		ExpiredTs:      ifo.ExpiredTs,
+		SenderPlatform: pb_enum.PLATFORM_TYPE(ifo.SenderPlatform),
 	}
 	if ifo.Receivers != "" {
 		info.ReceiverUids = utils.SplitToInt64List(ifo.Receivers, ",")

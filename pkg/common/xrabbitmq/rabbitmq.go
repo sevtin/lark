@@ -39,14 +39,15 @@ func NewRabbitClient(cfg *conf.Rabbitmq) (client *RabbitClient) {
 	return client
 }
 
-func getAMQPUrl(cfg *conf.Rabbitmq) string {
-	return fmt.Sprintf(
+func getAMQPUrl(cfg *conf.Rabbitmq) (url string) {
+	url = fmt.Sprintf(
 		"amqp://%s:%s@%s/%s",
 		cfg.Username,
 		cfg.Password,
 		strings.Join(cfg.Address, ","),
 		cfg.Vhost,
 	)
+	return
 }
 
 func (mq *RabbitClient) Send(msg []byte) (err error) {

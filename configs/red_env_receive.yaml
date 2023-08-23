@@ -57,3 +57,17 @@ msg_consumer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: ["receive_red_env"]
   group_id: receive_red_env
+message_server:
+  name: lark_message_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+jaeger:
+  host_port: "lark-jaeger:6831"
+  sampler_type: "const"
+  param: 1
+  log_spans: true
+  buffer_flush_interval: 1
+  max_packet_size: 0
+  enabled: false

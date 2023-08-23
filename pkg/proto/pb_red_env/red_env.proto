@@ -18,7 +18,8 @@ message RedEnvelopeInfo {
   repeated int64 receiver_uids = 12; // 接收者ID
   int64 expired_ts = 13; // 红包过期时间
   pb_enum.PAYMENT_STATUS pay_status = 14; // 支付状态 0-未支付 1-支付中 2-已支付 3-支付失败
-  pb_enum.RED_ENVELOPE_STATUS env_status = 15;// 状态 0-创建 1-已发放 2-已领完 3-已过期且退还剩余红包
+  pb_enum.RED_ENVELOPE_STATUS env_status = 15; // 状态 0-创建 1-已发放 2-已领完 3-已过期且退还剩余红包
+  pb_enum.PLATFORM_TYPE sender_platform = 16; // 发红包平台
 }
 
 message RedEnvelopeReturn {
@@ -55,16 +56,19 @@ message RedEnvelopePayCallbackResp {
   string msg = 2;
 }
 
-message RedEnvelopeDistribution {
-  int64 uid = 1;
-  int64 env_id = 2; // 红包ID
-  string status = 3; // 成功/失败
-  string desc = 4; // 描述
-  int64 remain_amount = 5; // 剩余红包金额(分)
-  int64 remain_quantity = 6; // 剩余红包数量
-  int64 dist_amount = 7; // 本次发红包金额(分)
-  int64 record_id = 8; // 领取记录ID
-  string trade_no = 9; // 交易编号
+message OpenRedEnvelope {
+  int64 env_id = 1; // 红包ID
+  string status = 2; // 成功/失败
+  string desc = 3; // 描述
+  int64 remain_amount = 4; // 剩余红包金额(分)
+  int64 remain_quantity = 5; // 剩余红包数量
+  int64 receive_amount = 6; // 领取红包金额(分)
+  int64 record_id = 7; // 领取记录ID
+  string trade_no = 8; // 交易编号
+  int64 sender_uid = 9; // 发红包用户ID
+  pb_enum.PLATFORM_TYPE sender_platform = 10; // 发红包平台
+  int64 receiver_uid = 11; // 接收者ID
+  int64 chat_id = 12; // 聊天ID
 }
 
 service RedEnv {
