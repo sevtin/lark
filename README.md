@@ -3,16 +3,13 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 
 <img src="assets/images/lark_logo.png" height="263" width="452"/>
 
-
-
-
 ### 技术选型及开发环境
 | 序号 | 技术                   | 版本              | 说明            | 官网                                         |
 |----|----------------------|-----------------|---------------|--------------------------------------------|
 | 1  | Go                   | 1.18.3          | 开发语言          | https://go.dev/                            |
 | 2  | Lua                  | 5.3             | Redis Lua 脚本  | http://www.lua.org/                        |
 | 3  | Mysql                | 8.0.29          | 关系型数据库        | https://www.mysql.com/                     |
-| 4  | MongoDB              | 5.0.9           | NoSql数据库【已弃用】 | https://www.mongodb.com                    |
+| 4  | MongoDB              | 5.0.9           | NoSql数据库 | https://www.mongodb.com                    |
 | 5  | Elasticsearch        | 7.17.6          | 搜索和分析引擎       | https://www.elastic.co/cn/elasticsearch/   |
 | 6  | Redis                | 6.2.7           | KV 数据库        | https://redis.io/                          |
 | 7  | Kafka                | 3.2.1           | 消息中间件         | https://kafka.apache.org/                  |
