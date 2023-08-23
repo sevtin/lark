@@ -85,3 +85,11 @@ elasticsearch:
   username: elastic
   password: lark2022
   ca_cert: ./configs/tls/elasticsearch/ca.crt
+rabbitmq:
+  address: ["127.0.0.1:5672"]
+  username: guest
+  password: guest
+  vhost: /
+  exchange: red_env_return_exchange
+  route_key: red_env_return_route
+  queue: red_env_return_queue

@@ -16,7 +16,7 @@ type ChatMemberRepository interface {
 	DistMemberList(w *entity.MysqlQuery) (list []*pb_chat_member.DistMember, err error)
 	ChatMember(w *entity.MysqlQuery) (member *pb_chat_member.ChatMemberInfo, err error)
 	ChatMemberCount(w *entity.MysqlQuery) (count int64, err error)
-	TxChatMemberList(tx *gorm.DB, w *entity.MysqlQuery) (members []*pb_chat_member.ChatMemberInfo, err error)
+	ChatMemberList(w *entity.MysqlQuery) (members []*pb_chat_member.ChatMemberInfo, err error)
 	UpdateChatMember(u *entity.MysqlUpdate) (err error)
 	TxUpdateChatMember(tx *gorm.DB, u *entity.MysqlUpdate) (err error)
 	TxQuitChatMember(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64, err error)
@@ -78,9 +78,10 @@ func (r *chatMemberRepository) ChatMemberCount(w *entity.MysqlQuery) (count int6
 	return
 }
 
-func (r *chatMemberRepository) TxChatMemberList(tx *gorm.DB, w *entity.MysqlQuery) (members []*pb_chat_member.ChatMemberInfo, err error) {
+func (r *chatMemberRepository) ChatMemberList(w *entity.MysqlQuery) (members []*pb_chat_member.ChatMemberInfo, err error) {
 	members = make([]*pb_chat_member.ChatMemberInfo, 0)
-	err = tx.Model(po.ChatMember{}).
+	db := xmysql.GetDB()
+	err = db.Model(po.ChatMember{}).
 		Select("chat_id,chat_type,uid,alias,member_avatar,role_id").
 		Where(w.Query, w.Args...).
 		Limit(w.Limit).

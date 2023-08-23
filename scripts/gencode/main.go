@@ -14,7 +14,7 @@ import (
 
 func main() {
 	var (
-		serviceName      = "RedPacket"
+		serviceName      = "Payment"
 		upperServiceName = toCamel(serviceName)
 		lowerServiceName = firstLower(upperServiceName)
 		packageName      = camelToSnake(upperServiceName)

@@ -5,5 +5,5 @@ import (
 )
 
 func provideChat() {
-	container.Provide(svc_chat.NewChatService)
+	Provide(svc_chat.NewChatService)
 }

@@ -53,7 +53,7 @@ func (s *lbsService) getLocations(req *pb_lbs.PeopleNearbyReq, resp *pb_lbs.Peop
 		now         = time.Now()
 		minTs       int64
 		maxTs       int64
-		minOnlineTs = now.UnixMilli() - constant.CONST_DURATION_LBS_QUERY_LAST_ONLINE_MILLISECOND
+		minOnlineTs = now.Unix() - constant.CONST_DURATION_LBS_QUERY_LAST_ONLINE_SECOND
 	)
 	q := entity.NewMongoQuery()
 	// q.SetSkip((req.Limit - 1) * req.Skip)

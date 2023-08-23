@@ -1,7 +1,7 @@
 package constant
 
 const (
-	CONST_MILLISECOND_10_MINUTES int64 = 10 * 60 * 1000
+	CONST_SECOND_10_MINUTES int64 = 10 * 60
 )
 
 const (

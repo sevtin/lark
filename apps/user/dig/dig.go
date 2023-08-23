@@ -8,22 +8,30 @@ import (
 	"lark/apps/user/internal/service"
 	"lark/domain/cache"
 	"lark/domain/repo"
+	"log"
 )
 
 var container = dig.New()
 
 func init() {
-	container.Provide(config.NewConfig)
-	container.Provide(server.NewServer)
-	container.Provide(user.NewUserServer)
-	container.Provide(service.NewUserService)
-	container.Provide(repo.NewUserRepository)
-	container.Provide(repo.NewAvatarRepository)
-	container.Provide(repo.NewChatMemberRepository)
-	container.Provide(cache.NewChatMemberCache)
-	container.Provide(cache.NewUserCache)
+	Provide(config.NewConfig)
+	Provide(server.NewServer)
+	Provide(user.NewUserServer)
+	Provide(service.NewUserService)
+	Provide(repo.NewUserRepository)
+	Provide(repo.NewAvatarRepository)
+	Provide(repo.NewChatMemberRepository)
+	Provide(cache.NewChatMemberCache)
+	Provide(cache.NewUserCache)
 }
 
 func Invoke(i interface{}) error {
 	return container.Invoke(i)
+}
+
+func Provide(constructor interface{}, opts ...dig.ProvideOption) {
+	err := container.Provide(constructor)
+	if err != nil {
+		log.Panic(err)
+	}
 }

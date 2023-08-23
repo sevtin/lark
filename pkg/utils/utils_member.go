@@ -31,15 +31,3 @@ func ChatStatus(in interface{}) (status pb_enum.CHAT_STATUS) {
 	}
 	return
 }
-
-func StrUidList(uidList []int64) (list []string) {
-	var (
-		i   int
-		uid int64
-	)
-	list = make([]string, len(uidList))
-	for i, uid = range uidList {
-		list[i] = Int64ToStr(uid)
-	}
-	return
-}

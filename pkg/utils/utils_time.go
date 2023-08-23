@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func NowMilli() int64 {
-	return time.Now().UnixMilli()
+func NowUnix() int64 {
+	return time.Now().Unix()
 }
 
 func MillisFromTime(t time.Time) int64 {

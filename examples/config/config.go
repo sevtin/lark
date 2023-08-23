@@ -22,6 +22,7 @@ type Config struct {
 	Platforms        []*conf.Platform    `yaml:"platforms"`
 	MsgConsumer      *conf.KafkaConsumer `yaml:"msg_consumer"`
 	Elasticsearch    *conf.Elasticsearch `yaml:"elasticsearch"`
+	Rabbit           *conf.Rabbitmq      `yaml:"rabbitmq"`
 }
 
 var (

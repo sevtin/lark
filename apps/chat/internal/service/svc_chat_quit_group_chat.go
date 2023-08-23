@@ -25,7 +25,7 @@ func (s *chatService) QuitGroupChat(ctx context.Context, req *pb_chat.QuitGroupC
 	u.SetFilter("uid=?", req.Uid)
 	u.SetFilter("deleted_ts=?", 0)
 	u.Set("status", int32(pb_enum.CHAT_STATUS_QUITTED))
-	u.Set("deleted_ts", utils.NowMilli())
+	u.Set("deleted_ts", utils.NowUnix())
 	_, err = s.removeChatMember(u, req.ChatId, []int64{req.Uid}, pb_enum.CHAT_TYPE_GROUP)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
@@ -47,7 +47,7 @@ func (s *chatService) QuitGroupChat(ctx context.Context, req *pb_chat.QuitGroupC
 func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTopic pb_enum.SUB_TOPIC, msgType pb_enum.MSG_TYPE) {
 	var (
 		seqId      int64
-		nowMilli   = utils.NowMilli()
+		nowTs      = utils.NowUnix()
 		w          = entity.NewNormalQuery()
 		memberList []*pb_chat_member.ChatMemberBasicInfo
 		msg        *pb_msg.SrvChatMessage
@@ -72,8 +72,8 @@ func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTop
 		MsgType:        msgType,
 		Body:           nil,
 		Status:         0,
-		SentTs:         nowMilli,
-		SrvTs:          nowMilli,
+		SentTs:         nowTs,
+		SrvTs:          nowTs,
 	}
 	w.SetFilter("chat_id=?", chatId)
 	w.SetFilter("uid IN(?)", uidList)

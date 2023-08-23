@@ -18,3 +18,21 @@ func RandIntFromRange(r Range) int {
 	}
 	return rand.Intn((r.End-r.Begin)+1) + r.Begin
 }
+
+/*
+ * amount:金额
+ * num:剩余红包个数
+ */
+func RandomRedEnvelope(amount, num int) int {
+	var (
+		minAmount = 1
+	)
+	if amount == 0 || num == 0 {
+		return 0
+	}
+	if num == 1 {
+		return amount
+	} else {
+		return rand.Intn(amount/num) + minAmount
+	}
+}

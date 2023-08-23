@@ -44,7 +44,7 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 		AvatarMedium: constant.CONST_AVATAR_MEDIUM,
 		AvatarLarge:  constant.CONST_AVATAR_LARGE,
 	}
-	// TODO:分布式锁 mobile 重复校验
+
 	err = s.RecheckMobile(-1, req.Mobile, resp)
 	if err != nil {
 		return
@@ -62,7 +62,7 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 	resp.Server = server
 
 	xants.Submit(func() {
-		terr := s.userCache.SetUserAndServer(resp.UserInfo, user.ServerId)
+		terr := s.userCache.SetUserServer(user.Uid, user.ServerId)
 		if terr != nil {
 			xlog.Warn(terr.Error())
 		}

@@ -16,15 +16,22 @@ import (
 var container = dig.New()
 
 func init() {
-	container.Provide(config.NewConfig)
-	container.Provide(server.NewServer)
-	container.Provide({{.PackageName}}.New{{.UpperServiceName}}Server)
-	container.Provide(service.New{{.UpperServiceName}}Service)
-	container.Provide(repo.New{{.UpperServiceName}}Repository)
-	container.Provide(cache.New{{.UpperServiceName}}Cache)
+	Provide(config.NewConfig)
+	Provide(server.NewServer)
+	Provide({{.PackageName}}.New{{.UpperServiceName}}Server)
+	Provide(service.New{{.UpperServiceName}}Service)
+	Provide(repo.New{{.UpperServiceName}}Repository)
+	Provide(cache.New{{.UpperServiceName}}Cache)
 }
 
 func Invoke(i interface{}) error {
 	return container.Invoke(i)
+}
+
+func Provide(constructor interface{}, opts ...dig.ProvideOption) {
+	err := container.Provide(constructor)
+	if err != nil {
+		log.Panic(err)
+	}
 }
 `)

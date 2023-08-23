@@ -34,9 +34,22 @@ const (
 )
 
 const (
+	CONST_DURATION_RED_ENVELOPE_EXPIRE_SECOND     = 60 * 60 * 48 * time.Second //红包缓存时间
+	CONST_DURATION_RED_ENVELOPE_KEY_EXPIRE_SECOND = 60 * 10 * time.Second      //红包Key缓存时间
+)
+
+const (
+	CONST_DURATION_24H_SECOND = 60 * 60 * 24
+)
+
+const (
 	CONST_DURATION_SERVER_MGR_SECOND    = 60 * 60 * 10 * time.Second
 	CONST_DURATION_REDSYNC_MUTEX_SECOND = 5 * time.Second
 	CONST_DURATION_REDIS_LOCK_EXPIRY    = 10 * time.Second
+)
+
+const (
+	CONST_DURATION_WALLET_ACCOUNT_INFO_SECOND = 60 * 60 * 24 * time.Second
 )
 
 const (
@@ -51,9 +64,13 @@ const (
 )
 
 const (
-	CONST_DURATION_LBS_QUERY_LAST_ONLINE_MILLISECOND = 60 * 60 * 24 * 14 * 1000
+	CONST_DURATION_LBS_QUERY_LAST_ONLINE_SECOND = 60 * 60 * 24 * 14
 )
 
 const (
 	CONST_DURATION_AWS_S3_EXPIRE_MINUTE = 10 * time.Minute
+)
+
+const (
+	CONST_DURATION_RED_ENVELOPE_DISTRIBUTED_LOCK_EXPIRY_IN_SECOND = 15 * time.Second
 )

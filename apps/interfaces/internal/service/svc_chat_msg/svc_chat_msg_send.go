@@ -21,7 +21,7 @@ func (s *chatMessageService) SendChatMessage(req *dto_chat_msg.SendChatMessageRe
 	reqArgs.Topic = pb_enum.TOPIC_CHAT
 	reqArgs.SubTopic = pb_enum.SUB_TOPIC_CHAT_MSG
 	reqArgs.Msg.CliMsgId = xsnowflake.NewSnowflakeID()
-	reqArgs.Msg.SentTs = utils.NowMilli()
+	reqArgs.Msg.SentTs = utils.NowUnix()
 	reqArgs.Msg.SenderId = uid
 	reqArgs.Msg.SenderPlatform = pb_enum.PLATFORM_TYPE(platform)
 	reply = s.msgClient.SendChatMessage(reqArgs)

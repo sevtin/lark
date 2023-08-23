@@ -2,6 +2,17 @@ package po
 
 import "lark/pkg/entity"
 
+type Wallet struct {
+	entity.GormEntityTs
+	WalletId     int64 `gorm:"column:wallet_id;primary_key" json:"wallet_id"`                // 钱包唯一ID
+	WalletType   int   `gorm:"column:wallet_type;default:0;NOT NULL" json:"wallet_type"`     // 钱包类型
+	Uid          int64 `gorm:"column:uid;default:0;NOT NULL" json:"uid"`                     // 用户UID
+	Balance      int64 `gorm:"column:balance;default:0;NOT NULL" json:"balance"`             // 可用余额(balance+frozen_amount=总额)(分)
+	FrozenAmount int64 `gorm:"column:frozen_amount;default:0;NOT NULL" json:"frozen_amount"` // 冻结金额(分)
+	Status       int   `gorm:"column:status;default:0;NOT NULL" json:"status"`               // 钱包状态
+}
+
+/*
 type TransRecord struct {
 	entity.GormEntityTs
 	Tsn          int64  `gorm:"column:tsn;primary_key;default:0" json:"tsn"`                // 交易序列号 Transaction Number
@@ -26,3 +37,4 @@ type TransRecord struct {
 	NotifyResult string `gorm:"column:notify_result;NOT NULL" json:"notify_result"`         // 回调内容
 	NotifyTs     int64  `gorm:"column:notify_ts;default:0;NOT NULL" json:"notify_ts"`       // 回调时间
 }
+*/

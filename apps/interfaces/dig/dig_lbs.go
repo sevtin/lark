@@ -5,5 +5,5 @@ import (
 )
 
 func provideLbs() {
-	container.Provide(svc_lbs.NewLbsService)
+	Provide(svc_lbs.NewLbsService)
 }

@@ -108,6 +108,23 @@ func CSet(keys []string, values []interface{}, expire time.Duration) (err error)
 	return
 }
 
+func CSets(keys []string, values []interface{}, expires []time.Duration) (err error) {
+	if len(keys) != len(values) || len(values) != len(expires) {
+		return
+	}
+	var (
+		i    int
+		key  string
+		pipe = Cli.Client.Pipeline()
+	)
+	for i, key = range keys {
+		key = RealKey(key)
+		pipe.Set(context.Background(), key, values[i], expires[i])
+	}
+	_, err = pipe.Exec(context.Background())
+	return
+}
+
 func Expire(key string, expire time.Duration) error {
 	key = RealKey(key)
 	return Cli.Client.Expire(context.Background(), key, expire).Err()
@@ -187,9 +204,13 @@ func Decr(key string) (int64, error) {
 	return Cli.Client.Decr(context.Background(), key).Result()
 }
 
-func GetUint64(key string) (uint64, error) {
+func GetUint64(key string) (val uint64, err error) {
 	key = RealKey(key)
-	return Cli.Client.Get(context.Background(), key).Uint64()
+	val, err = Cli.Client.Get(context.Background(), key).Uint64()
+	if err == redis.Nil {
+		err = nil
+	}
+	return
 }
 
 func GetInt(key string) (int, error) {

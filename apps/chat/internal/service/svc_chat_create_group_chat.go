@@ -99,7 +99,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
 			return
 		}
-		// 7 构建邀请信息
+		// 6 构建邀请信息
 		invitationMsg = creator.Nickname + CONST_CHAT_INVITE_TITLE_CONJUNCTION + chat.Name
 		for _, uid = range req.UidList {
 			if uid == req.CreatorUid {
@@ -118,7 +118,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		if len(inviteList) == 0 {
 			return
 		}
-		// 8 邀请信息入库
+		// 7 邀请信息入库
 		err = s.chatInviteRepo.TxCreateChatInvites(tx, inviteList)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INSERT_VALUE_FAILED, ERROR_CHAT_INSERT_VALUE_FAILED)
@@ -134,7 +134,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 		var (
 			err error
 		)
-		// 6 缓存成员hash
+		// 8 缓存成员hash
 		err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d", creator.ServerId, member.Status))
 		if err != nil {
 			xlog.Warn(err.Error())
@@ -146,9 +146,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 				xlog.Warn(err.Error())
 			}
 		}
-		// 9 缓存
-		s.cacheChatInfo(chat)
-		// 10 邀请推送
+		// 9 邀请推送
 		inviteReq := &pb_invite.InitiateChatInviteReq{
 			ChatId:        chat.ChatId,
 			ChatType:      pb_enum.CHAT_TYPE(chat.ChatType),

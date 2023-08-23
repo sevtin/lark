@@ -15,6 +15,7 @@ enum TOPIC
   UNKNOWN_TOPIC = 0;
   CHAT = 1; // 聊天
   CHAT_INVITE = 2; // 聊天邀请
+  RED_ENVELOPE = 3; // 红包
 }
 
 enum SUB_TOPIC
@@ -30,6 +31,10 @@ enum SUB_TOPIC
   // 2000~2999
   CHAT_INVITE_REQUEST = 2000; // 加入Chat邀请
   // CHAT_INVITE_ADDED_CONTACT = 2001; // 成为联系人
+
+  // 3000~3999
+  CHAT_GIVE_RED_ENVELOPE = 3000; // 发红包
+  CHAT_RECEIVE_RED_ENVELOPE = 3001; // 收红包
 }
 
 enum MESSAGE_TYPE
@@ -79,7 +84,9 @@ enum MSG_TYPE
   ACCEPTED_CHAT_INVITE = 12; // 同意邀请
   JOINED_GROUP_CHAT = 13; // 加入群聊
   QUIT_GROUP_CHAT = 14; // 退出群聊
-  REMOVE_CHAT_MEMBER = 15; // 移除群
+  REMOVE_CHAT_MEMBER = 15; // 将成员移除群
+  GIVE_RED_ENV = 16; // 派红包
+  RECEIVE_RED_ENV = 17; // 收红包
 }
 
 enum CHAT_STATUS
@@ -140,4 +147,81 @@ enum GENDER {
 enum LOGIN_CHANNEL {
     UNKNOWN_CHANNEL = 0;
     GITHUB = 1;
+}
+
+enum RED_ENVELOPE_TYPE {
+  UNKNOWN_ENVELOPE_TYPE  = 0;
+  AVERAGE = 1; // 均分红包
+  RANDOM = 2; // 碰运气红包
+  FIXED = 3; // 红包固定金额
+}
+
+enum RECEIVER_TYPE {
+  UNKNOWN_RECEIVER_TYPE = 0;
+  PRIVATE_CHAT_DESIGNATED = 1; // 私聊指定人
+  GROUP_CHAT_ALL_MEMBER = 2; // 群聊所有人
+  GROUP_CHAT_DESIGNATED = 3; // 群聊指定人
+}
+
+enum WALLET_TYPE
+{
+  UNKNOWN_WALLET_TYPE = 0;
+  CURRENCY = 1; // 货币 单位(分)
+  DIAMOND = 2; // 钻石
+  GOLD_COIN = 3; // 金币
+  SILVER_COIN = 4; // 银币
+  BRONZE_COIN = 5; // 铜币
+  POINT = 6; // 积分
+}
+
+enum WALLET_STATUS
+{
+  UNKNOWN_WALLET_STATUS = 0;
+  ACTIVE = 1; // 激活状态
+  INACTIVE = 2; // 非活动状态
+  FROZEN = 3; // 冻结状态
+  CLOSED  = 4; // 关闭状态
+}
+
+enum RED_ENVELOPE_STATUS {
+  CREATED_ENVELOPE  = 0;
+  ISSUED = 1; // 已发放
+  RECEIVED = 2; // 已领完
+  EXPIRED = 3; // 已过期且退还剩余红包
+}
+
+enum PAYMENT_STATUS {
+  CREATED_UNPAID  = 0; // 未支付
+  PAYING = 1; // 支付中
+  PAID = 2; // 已支付
+  FAILED = 3; // 支付失败
+}
+
+enum TRADE_TYPE {
+  UNKNOWN_TRADE_TYPE = 0;
+  INCOME = 1; // 收入
+  EXPENSE = 2; // 支出
+}
+
+enum TRADE_TYPE_ID {
+  UNKNOWN_TRADE_TYPE_ID = 0;
+  RED_ENVELOPE_SEND_ID = 1; // 发放红包
+  RED_ENVELOPE_RECEIVE_ID = 2; // 收红包
+  RED_ENVELOPE_RETURN_ID = 3; // 红包余额退还
+}
+
+enum GRAB_RESULT {
+  GRAB_FAILED = 0; // 失败
+  GRAB_SUCCESS = 1;  // 成功
+}
+
+enum OPEN_RESULT {
+  OPEN_FAILED = 0; // 失败
+  OPEN_SUCCESS = 1;  // 成功
+}
+
+enum RED_ENVELOPE_RECEIVE_STATUS {
+  RECEIVING = 0;
+  RECEIVE_SUCCESS = 1;
+  RECEIVE_FAILED = 2;
 }

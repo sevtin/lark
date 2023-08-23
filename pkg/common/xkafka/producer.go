@@ -78,3 +78,7 @@ func (p *Producer) Close() {
 		xlog.Warn(err.Error())
 	}
 }
+
+func (p *Producer) GetProducer() sarama.SyncProducer {
+	return p.producer
+}

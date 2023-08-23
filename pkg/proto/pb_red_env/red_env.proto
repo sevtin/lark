@@ -1,0 +1,72 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_red_env;
+option go_package = "./pb_red_env;pb_red_env";
+
+message RedEnvelopeInfo {
+  int64 env_id = 1; // 红包ID
+  pb_enum.RED_ENVELOPE_TYPE env_type = 2; // 红包类型 1-均分红包 2-碰运气红包
+  pb_enum.RECEIVER_TYPE receiver_type = 3; // 接收者类型 1-私聊对方 2-群聊所有人 3-群聊指定人
+  string trade_no = 4; // 交易编号
+  int64 chat_id = 5; // 聊天ID
+  int64 sender_uid = 6; // 发红包用户ID
+  int64 total = 7; // 红包总金额(分)
+  int32 quantity = 8; // 红包数量
+  int32 remain_quantity = 9; // 剩余红包数量
+  int64 remain_amount = 10; // 剩余红包金额(分)
+  string message = 11; // 祝福语
+  repeated int64 receiver_uids = 12; // 接收者ID
+  int64 expired_ts = 13; // 红包过期时间
+  pb_enum.PAYMENT_STATUS pay_status = 14; // 支付状态 0-未支付 1-支付中 2-已支付 3-支付失败
+  pb_enum.RED_ENVELOPE_STATUS env_status = 15;// 状态 0-创建 1-已发放 2-已领完 3-已过期且退还剩余红包
+}
+
+message RedEnvelopeReturn {
+  int64 env_id = 1; // 红包ID
+  int64 expired_ts = 2; // 红包过期时间
+}
+
+message GiveRedEnvelopeReq {
+  pb_enum.RED_ENVELOPE_TYPE env_type = 1; // 红包类型 1-均分红包 2-碰运气红包
+  pb_enum.RECEIVER_TYPE receiver_type = 2; // 接收者类型 1-私聊对方 2-群聊所有人 3-群聊指定人
+  int64 chat_id = 3; // 聊天ID
+  int64 sender_uid = 4; // 发红包用户ID
+  pb_enum.PLATFORM_TYPE sender_platform = 5; // 发红包平台
+  int64 total = 6; // 红包总金额(分)
+  int32 quantity = 7; // 红包数量
+  string message = 8; // 祝福语
+  repeated int64 receiver_uids = 9; // 接收者ID
+}
+
+message GiveRedEnvelopeResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message RedEnvelopePayCallbackReq {
+  int64 env_id = 1; // 红包ID
+  string trade_no = 2; // 交易编号
+  int64 payment_amount = 3; // 支付金额
+  pb_enum.PAYMENT_STATUS pay_status = 4; // 支付状态 0-未支付 1-支付中 2-已支付 3-支付失败
+}
+
+message RedEnvelopePayCallbackResp {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message RedEnvelopeDistribution {
+  int64 uid = 1;
+  int64 env_id = 2; // 红包ID
+  string status = 3; // 成功/失败
+  string desc = 4; // 描述
+  int64 remain_amount = 5; // 剩余红包金额(分)
+  int64 remain_quantity = 6; // 剩余红包数量
+  int64 dist_amount = 7; // 本次发红包金额(分)
+  int64 record_id = 8; // 领取记录ID
+  string trade_no = 9; // 交易编号
+}
+
+service RedEnv {
+  rpc GiveRedEnvelope(GiveRedEnvelopeReq) returns(GiveRedEnvelopeResp);
+}

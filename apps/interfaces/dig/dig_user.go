@@ -5,5 +5,5 @@ import (
 )
 
 func provideUser() {
-	container.Provide(svc_user.NewUserService)
+	Provide(svc_user.NewUserService)
 }

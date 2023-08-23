@@ -36,11 +36,13 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/shimingyah/pool v1.0.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/streadway/amqp v1.1.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	go.etcd.io/etcd/api/v3 v3.5.4
 	go.etcd.io/etcd/client/v3 v3.5.4
 	go.mongodb.org/mongo-driver v1.10.2
 	go.uber.org/dig v1.15.0
+	go.uber.org/ratelimit v0.3.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539
 	golang.org/x/net v0.10.0
@@ -51,12 +53,13 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.4.7
-	gorm.io/gorm v1.24.3
+	gorm.io/gorm v1.25.3
 	gorm.io/plugin/dbresolver v1.4.1
 )
 
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
+	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect

@@ -38,7 +38,6 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
 		return
 	}
-	// TODO:待优化
 	// 2、重复消息校验
 	result, ok = s.chatMessageCache.RepeatMessageVerify(s.cfg.Redis.Prefix, req.Msg.ChatId, req.Msg.CliMsgId)
 	if ok == false {
@@ -73,7 +72,7 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	inbox.Msg.SrvMsgId = xsnowflake.NewSnowflakeID()
 	inbox.Msg.ChatType = senderInfo.ChatType
 	inbox.Msg.SeqId = seqId
-	inbox.Msg.SrvTs = utils.NowMilli()
+	inbox.Msg.SrvTs = utils.NowUnix()
 	inbox.Msg.MsgFrom = pb_enum.MSG_FROM_USER
 	inbox.Msg.SenderName = senderInfo.Alias
 	inbox.Msg.SenderAvatar = senderInfo.MemberAvatar

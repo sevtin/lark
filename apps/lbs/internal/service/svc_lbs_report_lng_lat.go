@@ -29,7 +29,7 @@ func (s *lbsService) ReportLngLat(ctx context.Context, req *pb_lbs.ReportLngLatR
 		Uid:       user.Uid,
 		Longitude: req.Longitude,
 		Latitude:  req.Latitude,
-		OnlineTs:  utils.NowMilli(),
+		OnlineTs:  utils.NowUnix(),
 	}
 	err = s.locRepo.Save(loc)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *lbsService) ReportLngLat(ctx context.Context, req *pb_lbs.ReportLngLatR
 		BirthTs:  user.BirthTs,
 		Nickname: user.Nickname,
 		Avatar:   user.Avatar,
-		OnlineTs: utils.NowMilli(),
+		OnlineTs: utils.NowUnix(),
 		Location: &po.Location{
 			Type:        "Point",
 			Coordinates: []float64{req.Longitude, req.Latitude},

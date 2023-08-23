@@ -5,5 +5,5 @@ import (
 )
 
 func provideUpload() {
-	container.Provide(service.NewUploadService)
+	Provide(service.NewUploadService)
 }

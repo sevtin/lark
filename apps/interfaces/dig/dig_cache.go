@@ -5,5 +5,5 @@ import (
 )
 
 func provideCache() {
-	container.Provide(cache.NewServerMgrCache)
+	Provide(cache.NewServerMgrCache)
 }

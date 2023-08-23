@@ -46,6 +46,18 @@ func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (err erro
 		)
 		proto.Unmarshal(req.Msg.Body, body)
 		err = s.validate.Struct(body)
+	case pb_enum.MSG_TYPE_GIVE_RED_ENV:
+		var (
+			body = new(pb_msg.GiveRedEnvelope)
+		)
+		proto.Unmarshal(req.Msg.Body, body)
+		err = s.validate.Struct(body)
+	case pb_enum.MSG_TYPE_RECEIVE_RED_ENV:
+		var (
+			body = new(pb_msg.ReceiveRedEnvelope)
+		)
+		proto.Unmarshal(req.Msg.Body, body)
+		err = s.validate.Struct(body)
 	}
 	return
 }

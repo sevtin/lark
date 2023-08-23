@@ -30,16 +30,13 @@ func NewChatMemberCache() ChatMemberCache {
 
 func (c *chatMemberCache) GetChatMemberInfo(chatId int64, uid int64) (info *pb_chat_member.ChatMemberInfo, err error) {
 	var (
-		key    = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.GetHashTagKey(chatId)
-		values []interface{}
+		key   = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.GetHashTagKey(chatId)
+		value string
 	)
 	info = new(pb_chat_member.ChatMemberInfo)
-	values = xredis.HMGet(key, utils.Int64ToStr(uid))
-	if len(values) == 1 && values[0] != nil {
-		switch values[0].(type) {
-		case string:
-			err = utils.Unmarshal(values[0].(string), info)
-		}
+	value = xredis.HGet(key, utils.Int64ToStr(uid))
+	if value != "" {
+		err = utils.Unmarshal(value, info)
 	}
 	return
 }

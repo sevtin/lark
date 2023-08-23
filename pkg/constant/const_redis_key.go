@@ -25,9 +25,22 @@ const (
 	RK_SYNC_CONVO_LIST                    = "CONVO:LIST:"
 	RK_SYNC_SERVER_MGR                    = "SERVER_MGR:"
 	RK_SYNC_SERVER_REDSYNC_MUTEX          = "SERVER_REDSYNC_MUTEX:"
+	RK_SYNC_RED_REMAIN_QUANTITY           = "RED_ENV:REMAIN_QUANTITY:" // 剩余红包数量
+	RK_SYNC_RED_REMAIN_AMOUNT             = "RED_ENV:REMAIN_AMOUNT:"   // 剩余红包金额
+	RK_SYNC_RED_ENV_STATUS                = "RED_ENV:STATUS:"          // 红包状态
+	RK_SYNC_RED_ENV_RECORD                = "RED_ENV:RECORD:"          // 红包领取记录
+	RK_SYNC_RED_ENV_INFO                  = "RED_ENV:INFO:"            // 红包信息
+	RK_SYNC_RED_ENV_LOCK                  = "RED_ENV:LOCK:"            // 红包分布式锁
+	RK_SYNC_WALLET_ACCOUNT_INFO           = "WALLET:ACCOUNT_INFO:"     // 钱包账户信息
+	RK_SYNC_RED_ENV_KEY                   = "RED_ENV:KEY:"             // 红包Key
 )
 
 // 弃用key
 const (
 	RK_SYNC_GROUP_CHAT_DETAILS = "CHAT:GROUP_CHAT_DETAILS:"
+)
+
+const (
+	RK_FIELD_RED_ENV_TOTAL_NUM    = "total_num"    // 红包总数
+	RK_FIELD_RED_ENV_RECEIVED_NUM = "received_num" // 已领红包数
 )

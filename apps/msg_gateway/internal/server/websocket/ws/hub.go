@@ -57,6 +57,7 @@ func (h *Hub) registerClient(client *Client) {
 		cli.Close()
 		return
 	}
+	// TODO:踢出消息
 	client.Close()
 }
 

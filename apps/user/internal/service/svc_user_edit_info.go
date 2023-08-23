@@ -8,7 +8,6 @@ import (
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_user"
-	"lark/pkg/protocol"
 )
 
 func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInfoReq) (resp *pb_user.EditUserInfoResp, _ error) {
@@ -19,7 +18,6 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 		mobile   interface{}
 		nickname interface{}
 		ok       bool
-		result   *protocol.Result
 		err      error
 	)
 
@@ -97,11 +95,6 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 			resp.Set(ERROR_CODE_USER_UPDATE_VALUE_FAILED, ERROR_USER_UPDATE_VALUE_FAILED)
 			return
 		}
-		result, err = s.updateChatMemberCacheInfo(tx, req.Uid)
-		if err != nil {
-			resp.Set(result.Code, result.Msg)
-			return
-		}
 		return
 	})
 	if err != nil {
@@ -113,6 +106,9 @@ func (s *userService) EditUserInfo(ctx context.Context, req *pb_user.EditUserInf
 		resp.Set(ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED, ERROR_USER_UPDATE_USER_CACHE_FAILED)
 		return
 	}
+
+	// 更新缓存
+	go s.updateChatMemberCacheInfo(req.Uid)
 	return
 }
 

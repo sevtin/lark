@@ -8,7 +8,7 @@ import (
 )
 
 func provide{{.UpperServiceName}}() {
-	container.Provide(svc_{{.PackageName}}.New{{.UpperServiceName}}Service)
+	Provide(svc_{{.PackageName}}.New{{.UpperServiceName}}Service)
 }
 
 `)

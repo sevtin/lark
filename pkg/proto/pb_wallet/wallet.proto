@@ -3,16 +3,6 @@ import "pb_enum/enum.proto";
 package pb_wallet;
 option go_package = "./pb_wallet;pb_wallet";
 
-enum WALLET_TYPE
-{
-  UNKNOWN_WALLET_TYPE = 0;
-  CURRENCY = 1; // 货币 单位(分)
-  DIAMOND = 2; // 钻石
-  GOLD_COIN = 3; // 金币
-  SILVER_COIN = 4; // 银币
-  BRONZE_COIN = 5; // 铜币
-  POINT = 6; // 积分
-}
 
 enum PAY_CHANNEL
 {
@@ -40,15 +30,15 @@ message GetBalancesResp {
 
 message WalletBalance {
   int64 account_id = 1;
-  WALLET_TYPE wallet_type = 2;
+  pb_enum.WALLET_TYPE wallet_type = 2;
   int64 balances = 3;
 }
 
 //兑换
 message ExchangeReq {
   int64 uid = 1;
-  WALLET_TYPE from = 2;
-  WALLET_TYPE to = 3;
+  pb_enum.WALLET_TYPE from = 2;
+  pb_enum.WALLET_TYPE to = 3;
   int64 amount = 4; // from的数量
 }
 
@@ -77,7 +67,7 @@ message TransferResp {
 //充值
 message RechargeReq {
   int64 uid = 1;
-  WALLET_TYPE wallet_type = 2;
+  pb_enum.WALLET_TYPE wallet_type = 2;
   int64 amount = 3; // 金额
   PAY_CHANNEL pay_channel = 4;
 }
@@ -113,6 +103,15 @@ message WithdrawResp {
 //  string sign = 8; // 签名
 //  string notify_url = 9;//回调URL
 //}
+
+message AccountInfo {
+  int64 wallet_id = 1; // 钱包唯一ID
+  pb_enum.WALLET_TYPE wallet_type = 2; // 钱包类型
+  int64 uid = 3; // 用户UID
+  int64 balance = 4; // 可用余额(balance+frozen_amount=总额)(分)
+  int64 frozen_amount = 5; // 冻结金额(分)
+  pb_enum.WALLET_STATUS status = 6; // 钱包状态
+}
 
 service Wallet {
   rpc GetBalances(GetBalancesReq) returns(GetBalancesResp);

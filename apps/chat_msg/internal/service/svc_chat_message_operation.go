@@ -16,9 +16,9 @@ import (
 func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_msg.MessageOperationReq) (resp *pb_chat_msg.MessageOperationResp, err error) {
 	resp = new(pb_chat_msg.MessageOperationResp)
 	var (
-		message  *po.Message
-		nowMilli = utils.NowMilli()
-		opnReq   = &pb_msg.MessageOperationReq{
+		message *po.Message
+		nowTs   = utils.NowUnix()
+		opnReq  = &pb_msg.MessageOperationReq{
 			Topic:     pb_enum.TOPIC_CHAT,
 			SubTopic:  pb_enum.SUB_TOPIC_CHAT_OPERATION,
 			Operation: &pb_msg.MessageOperation{},
@@ -30,7 +30,7 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 		return
 	}
 	// 1、超过10分钟无法测回
-	if nowMilli-message.SrvTs > constant.CONST_MILLISECOND_10_MINUTES {
+	if nowTs-message.SrvTs > constant.CONST_SECOND_10_MINUTES {
 		resp.Set(ERROR_CODE_CHAT_MSG_BEYOND_OPERABLE_TIME, ERROR_CHAT_MSG_BEYOND_OPERABLE_TIME)
 		xlog.Warn(ERROR_CODE_CHAT_MSG_BEYOND_OPERABLE_TIME, ERROR_CHAT_MSG_BEYOND_OPERABLE_TIME)
 		return

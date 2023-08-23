@@ -40,5 +40,7 @@ func (s *chatService) GroupChatDetails(ctx context.Context, req *pb_chat.GroupCh
 	}
 	copier.Copy(resp.Details, chat)
 	copier.Copy(resp.Details.Creator, user)
+
+	//TODO:添加缓存
 	return
 }

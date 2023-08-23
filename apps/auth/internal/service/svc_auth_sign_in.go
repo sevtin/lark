@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/jinzhu/copier"
 	"lark/domain/do"
-	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
@@ -51,9 +50,6 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 	resp.AccessToken = signIn.AccessToken
 	resp.RefreshToken = signIn.RefreshToken
 	resp.Server = server
-	xants.Submit(func() {
-		s.userCache.SetUserInfo(resp.UserInfo)
-	})
 	return
 }
 

@@ -85,6 +85,57 @@ message Media {
   int32 duration = 4;
 }
 
+message GiveRedEnvelope {
+  // @inject_tag: validate:"required,gt=0"
+  int64 env_id = 1; // 红包ID
+  // @inject_tag: validate:"required,gt=0"
+  pb_enum.RED_ENVELOPE_TYPE env_type = 2; // 红包类型 1-均分红包 2-碰运气红包
+  // @inject_tag: validate:"required,gt=0"
+  pb_enum.RECEIVER_TYPE receiver_type = 3; // 接收者类型 1-私聊对方 2-群聊所有人 3-群聊指定人
+  // @inject_tag: validate:"required"
+  string trade_no = 4; // 交易编号
+  // @inject_tag: validate:"required,gt=0"
+  int64 sender_uid = 5; // 发红包用户ID
+  // @inject_tag: validate:"required,gt=0"
+  int64 total = 6; // 红包总金额(分)
+  // @inject_tag: validate:"required,gt=0"
+  int32 quantity = 7; // 红包数量
+  // @inject_tag: validate:"required"
+  string message = 8; // 祝福语
+  repeated int64 receiver_uids = 9; // 接收者ID
+  // @inject_tag: validate:"required,gt=0"
+  int64 expired_ts = 10; // 红包过期时间
+}
+
+message ReceiveRedEnvelope {
+  // @inject_tag: validate:"required,gt=0"
+  int64 env_id = 1; // 红包ID
+  // @inject_tag: validate:"required,gt=0"
+  int64 receiver_uid = 2; // 领取人UID
+  // @inject_tag: validate:"required"
+  string receiver_nickname = 3; // 领取人nickname
+  // @inject_tag: validate:"required,gt=0"
+  int64 receive_ts = 4; // 领取时间
+  // @inject_tag: validate:"required,gt=0"
+  int64 receive_amount = 5; // 领取金额
+  // @inject_tag: validate:"required,gt=0"
+  int64 sender_uid = 6; // 派发红包人UID
+  // @inject_tag: validate:"required"
+  string sender_nickname = 7;// 派发人nickname
+}
+
+message RedEnvelope {
+  int64 env_id = 1; // 红包ID
+  pb_enum.RED_ENVELOPE_TYPE env_type = 2; // 红包类型 1-均分红包 2-碰运气红包
+  pb_enum.RECEIVER_TYPE receiver_type = 3; // 接收者类型 1-私聊对方 2-群聊所有人 3-群聊指定人
+  string trade_no = 4; // 交易编号
+  int64 sender_uid = 5; // 发红包用户ID
+  int32 total = 6; // 红包总金额(分)
+  int32 quantity = 7; // 红包数量
+  int32 message = 8; // 祝福语
+  int64 expired_ts = 9; // 过期时间
+}
+
 message Sticker {
   // @inject_tag: validate:"required,min=32,max=50"
   string file_key = 1;

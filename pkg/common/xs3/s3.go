@@ -108,3 +108,10 @@ func (c *S3Client) GetPresignedURL(in *PresignedUrlInput) (out *PresignedUrlOutp
 	out.Filename = in.Filename
 	return
 }
+
+/*
+curl --location --request PUT 'https://gosportsbucket.s3.us-west-1.amazonaws.com/images/1a3a88e2-ff83-11ed-8226-b42e9910a730.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQNJTZPCIM2O26EJG/20230531/us-west-1/s3/aws4_request&X-Amz-Date=20230531T071646Z&X-Amz-Expires=900&X-Amz-SignedHeaders=content-type;host;x-amz-acl&X-Amz-Signature=b026a33a7cfd53736d0ab22365069f7bafe100bf5b6741aa72b0c7d391994fe3' \
+--header 'Content-Type: image/png' \
+--header 'X-Amz-Acl: public-read' \
+--data-binary '@/Users/saeipi/Desktop/99d28d55-12c9-4d98-ad0a-eb26aede2f62.png'
+*/

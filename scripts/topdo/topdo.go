@@ -33,17 +33,10 @@ func init() {
 
 func main() {
 	sql := `
-SELECT m.chat_id,
-IF(m.chat_id%2=0,'双号','单号') AS flag,
-CASE m.chat_type WHEN 1 THEN '私聊' WHEN 2 THEN '群聊' ELSE '未知' END AS chat_type,
-SUM(m.uid) AS total,
-COUNT(u.gender=1 or null) AS male_count,
-COUNT(u.gender=2 or null) AS female_count
-FROM chat_members m
-LEFT JOIN users u ON u.uid=m.uid
-GROUP BY m.chat_id,m.chat_type;
+SELECT w.wallet_id,w.balance
+FROM wallets w
 `
-	_, err := SqlToPdo(db, sql, "MyUserInfo")
+	_, err := SqlToPdo(db, sql, "AccountBalance")
 	if err != nil {
 		log.Println(err)
 	}
@@ -285,30 +278,32 @@ func camelToUnderscore(word string) string {
 
 var (
 	columnTypes = map[string]string{
-		"tinyint":         "int32",
-		"smallint":        "int32",
-		"mediumint":       "int32",
-		"int":             "int32",
-		"integer":         "int64",
-		"bigint":          "int64",
-		"float":           "float64",
-		"double":          "float64",
-		"decimal":         "float64",
-		"date":            "string",
-		"time":            "string",
-		"year":            "string",
-		"datetime":        "time.Time",
-		"timestamp":       "time.Time",
-		"char":            "string",
-		"varchar":         "string",
-		"tinyblob":        "string",
-		"tinytext":        "string",
-		"blob":            "string",
-		"text":            "string",
-		"mediumblob":      "string",
-		"mediumtext":      "string",
-		"longblob":        "string",
-		"longtext":        "string",
-		"unsigned bigint": "int64",
+		"tinyint":          "int32",
+		"smallint":         "int32",
+		"mediumint":        "int32",
+		"int":              "int32",
+		"integer":          "int64",
+		"bigint":           "int64",
+		"float":            "float64",
+		"double":           "float64",
+		"decimal":          "float64",
+		"date":             "string",
+		"time":             "string",
+		"year":             "string",
+		"datetime":         "time.Time",
+		"timestamp":        "time.Time",
+		"char":             "string",
+		"varchar":          "string",
+		"tinyblob":         "string",
+		"tinytext":         "string",
+		"blob":             "string",
+		"text":             "string",
+		"mediumblob":       "string",
+		"mediumtext":       "string",
+		"longblob":         "string",
+		"longtext":         "string",
+		"unsigned bigint":  "int64",
+		"unsigned int":     "int",
+		"unsigned tinyint": "int32",
 	}
 )

@@ -23,7 +23,7 @@ type UserCache interface {
 	SignOut(uid int64, platform pb_enum.PLATFORM_TYPE) (err error)
 	GetServerId(uid int64) (serverId string, err error)
 	SetServerId(uid int64, serverId int64) (err error)
-	SetUserAndServer(info *pb_user.UserInfo, serverId int64) (err error)
+	SetUserServer(uid int64, serverId int64) (err error)
 }
 
 type userCache struct {
@@ -223,18 +223,26 @@ func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error
 	return
 }
 
-func (c *userCache) SetUserAndServer(info *pb_user.UserInfo, serverId int64) (err error) {
+//func (c *userCache) SetUserAndServer(info *pb_user.UserInfo, serverId int64) (err error) {
+//	var (
+//		val string
+//		htk = utils.GetHashTagKey(info.Uid)
+//	)
+//	val, err = utils.Marshal(info)
+//	if err != nil {
+//		xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
+//		return
+//	}
+//	err = xredis.CSet([]string{constant.RK_SYNC_USER_INFO + htk, constant.RK_SYNC_USER_SERVER + htk},
+//		[]interface{}{val, serverId},
+//		constant.CONST_DURATION_USER_INFO_SECOND)
+//	return
+//}
+
+func (c *userCache) SetUserServer(uid int64, serverId int64) (err error) {
 	var (
-		val string
-		htk = utils.GetHashTagKey(info.Uid)
+		key = constant.RK_SYNC_USER_SERVER + utils.GetHashTagKey(uid)
 	)
-	val, err = utils.Marshal(info)
-	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_PROTOCOL_MARSHAL_ERR, ERROR_CACHE_PROTOCOL_MARSHAL_ERR, err.Error())
-		return
-	}
-	err = xredis.CSet([]string{constant.RK_SYNC_USER_INFO + htk, constant.RK_SYNC_USER_SERVER + htk},
-		[]interface{}{val, serverId},
-		constant.CONST_DURATION_USER_INFO_SECOND)
+	Set(key, serverId, constant.CONST_DURATION_USER_INFO_SECOND)
 	return
 }

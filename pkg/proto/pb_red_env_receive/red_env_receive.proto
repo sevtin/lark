@@ -1,0 +1,49 @@
+syntax ="proto3";
+import "pb_enum/enum.proto";
+package pb_red_env_receive;
+option go_package = "./pb_red_env_receive;pb_red_env_receive";
+
+message GrabRedEnvelopeReq {
+  int64 env_id = 1; // 红包ID
+  int64 uid = 2; // 用户ID
+}
+
+message GrabRedEnvelopeResp {
+  int32 code = 1;
+  string msg = 2;
+  GrabResult result = 3;
+}
+
+message GrabResult {
+  pb_enum.GRAB_RESULT code = 1; // 结果代码
+  int64 env_id = 2; // 红包ID
+  string red_env_key = 3; // 红包key
+}
+
+message OpenRedEnvelopeReq {
+  int64 env_id = 1; // 红包ID
+  int64 uid = 2; // 用户ID
+  string red_env_key = 3; // 红包key
+}
+
+message OpenRedEnvelopeResp {
+  int32 code = 1;
+  string msg = 2;
+  OpenResult result = 3;
+}
+
+message OpenResult {
+  pb_enum.OPEN_RESULT code = 1; // 结果代码
+  int64 env_id = 2; // 红包ID
+  int64 receive_amount = 3; // 领取金额
+}
+
+message RedEnvelopeReceive {
+  int64 env_id = 1; // 红包ID
+  int64 uid = 2; // 用户ID
+}
+
+service RedEnvReceive {
+  rpc GrabRedEnvelope(GrabRedEnvelopeReq) returns(GrabRedEnvelopeResp);
+  rpc OpenRedEnvelope(OpenRedEnvelopeReq) returns(OpenRedEnvelopeResp);
+}

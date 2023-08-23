@@ -19,7 +19,7 @@ func (s *chatService) DeleteContact(ctx context.Context, req *pb_chat.DeleteCont
 	u.SetFilter("owner_id=?", req.Uid)
 	u.SetFilter("deleted_ts=?", 0)
 	u.Set("status", int32(pb_enum.CHAT_STATUS_DELETED))
-	u.Set("deleted_ts", utils.NowMilli())
+	u.Set("deleted_ts", utils.NowUnix())
 	_, err = s.removeChatMember(u, req.ChatId, []int64{req.Uid, req.ContactId}, pb_enum.CHAT_TYPE_PRIVATE)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)

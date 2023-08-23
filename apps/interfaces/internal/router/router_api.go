@@ -31,6 +31,8 @@ func registerPrivateRouter(group *gin.RouterGroup) {
 	registerChatRouter(group)
 	registerConvoRouter(group)
 	registerLbsRouter(group)
+	registerRedEnvRouter(group)
+	registerRedEnvReceiveRouter(group)
 }
 
 // 开放式api无需验证会话id

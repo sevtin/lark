@@ -66,6 +66,15 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	return
 }
 
+func spliceDsn(c *conf.Db) (dsn string) {
+	dsn = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
+		c.Username,
+		c.Password,
+		c.Address,
+		c.Db)
+	return
+}
+
 func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 	var (
 		opts     *gorm.Config
@@ -73,26 +82,18 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		sources  = make([]gorm.Dialector, 0)
 		replicas = make([]gorm.Dialector, 0)
 		dsn      string
-		dsn1     string
+		master   string
 	)
 
 	for i, c := range cfg.Sources {
-		dsn = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
-			c.Username,
-			c.Password,
-			c.Address,
-			c.Db)
+		dsn = spliceDsn(c)
 		if i == 0 {
-			dsn1 = dsn
+			master = dsn
 		}
 		sources = append(sources, mysql.Open(dsn))
 	}
 	for _, c := range cfg.Replicas {
-		dsn = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
-			c.Username,
-			c.Password,
-			c.Address,
-			c.Db)
+		dsn = spliceDsn(c)
 		replicas = append(replicas, mysql.Open(dsn))
 	}
 
@@ -100,7 +101,7 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		SkipDefaultTransaction: false, // 禁用默认事务(true: Error 1295: This command is not supported in the prepared statement protocol yet)
 		PrepareStmt:            false, // 创建并缓存预编译语句(true: Error 1295)
 	}
-	db, err = gorm.Open(mysql.Open(dsn1), opts)
+	db, err = gorm.Open(mysql.Open(master), opts)
 	if err != nil {
 		xlog.Error(err.Error())
 		return
@@ -109,7 +110,8 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		Sources:  sources,
 		Replicas: replicas,
 		// sources/replicas load balancing policy
-		Policy: dbresolver.RandomPolicy{},
+		Policy:            dbresolver.RandomPolicy{},
+		TraceResolverMode: true,
 	}).SetMaxIdleConns(cfg.MaxIdleConns).
 		SetMaxOpenConns(cfg.MaxOpenConns).
 		SetConnMaxLifetime(time.Duration(cfg.MaxLifetime) * time.Millisecond))

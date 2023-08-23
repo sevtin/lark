@@ -66,10 +66,10 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 
 func (s *messageHistoryService) MessageOperation(msg []byte) (err error) {
 	var (
-		req      = new(pb_msg.MessageOperationReq)
-		u        = entity.NewMysqlUpdate()
-		message  *po.Message
-		nowMilli = utils.NowMilli()
+		req     = new(pb_msg.MessageOperationReq)
+		u       = entity.NewMysqlUpdate()
+		message *po.Message
+		nowTs   = utils.NowUnix()
 	)
 	if err = proto.Unmarshal(msg, req); err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, err.Error())
@@ -85,7 +85,7 @@ func (s *messageHistoryService) MessageOperation(msg []byte) (err error) {
 
 	// 1、更新缓存
 	message.Status = int(req.Operation.Opn)
-	message.UpdatedTs = nowMilli
+	message.UpdatedTs = nowTs
 	err = s.chatMessageCache.SetChatMessage(message)
 	if err != nil {
 		return

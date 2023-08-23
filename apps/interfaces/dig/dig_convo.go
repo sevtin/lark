@@ -5,5 +5,5 @@ import (
 )
 
 func provideConvo() {
-	container.Provide(svc_convo.NewConvoService)
+	Provide(svc_convo.NewConvoService)
 }

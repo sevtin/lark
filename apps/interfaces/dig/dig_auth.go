@@ -5,5 +5,5 @@ import (
 )
 
 func provideAuth() {
-	container.Provide(svc_auth.NewAuthService)
+	Provide(svc_auth.NewAuthService)
 }

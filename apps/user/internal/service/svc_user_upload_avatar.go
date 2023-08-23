@@ -10,15 +10,13 @@ import (
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
-	"lark/pkg/protocol"
 )
 
 func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvatarReq) (resp *pb_user.UploadAvatarResp, _ error) {
 	resp = &pb_user.UploadAvatarResp{Avatar: &pb_user.AvatarInfo{}}
 	var (
-		u      = entity.NewMysqlUpdate()
-		result *protocol.Result
-		err    error
+		u   = entity.NewMysqlUpdate()
+		err error
 	)
 
 	defer func() {
@@ -58,18 +56,11 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 			resp.Set(ERROR_CODE_USER_SET_AVATAR_FAILED, ERROR_USER_SET_AVATAR_FAILED)
 			return
 		}
-
-		result, err = s.updateChatMemberCacheInfo(tx, req.OwnerId)
-		if err != nil {
-			resp.Set(result.Code, result.Msg)
-			return
-		}
 		return
 	})
 	if err != nil {
 		return
 	}
-
 	// 删除缓存
 	err = s.userCache.DelUserInfo(req.OwnerId)
 	if err != nil {
@@ -77,5 +68,8 @@ func (s *userService) UploadAvatar(ctx context.Context, req *pb_user.UploadAvata
 		return
 	}
 	copier.Copy(resp.Avatar, req)
+
+	// 更新缓存
+	go s.updateChatMemberCacheInfo(req.OwnerId)
 	return
 }

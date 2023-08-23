@@ -1,7 +1,7 @@
 package template
 
 var InterfacesDtoTemplate = ParseTemplate(`
-package {{.PackageName}}
+package dto_{{.PackageName}}
 
 type {{.UpperServiceName}}EditReq struct {
 

@@ -7,11 +7,11 @@ import (
 )
 
 type GormCreatedTs struct {
-	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime:milli;NOT NULL" json:"created_ts"`
+	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime;NOT NULL" json:"created_ts"`
 }
 
 type GormUpdatedTs struct {
-	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime:milli;NOT NULL" json:"updated_ts"`
+	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime;NOT NULL" json:"updated_ts"`
 }
 
 type GormDeletedTs struct {
@@ -19,14 +19,14 @@ type GormDeletedTs struct {
 }
 
 type GormEntityTs struct {
-	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime:milli;NOT NULL" json:"created_ts"`
-	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime:milli;NOT NULL" json:"updated_ts"`
+	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime;NOT NULL" json:"created_ts"`
+	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime;NOT NULL" json:"updated_ts"`
 	DeletedTs int64 `gorm:"column:deleted_ts;default:0;NOT NULL" json:"deleted_ts"`
 }
 
 type GormTs struct {
-	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime:milli;NOT NULL" json:"created_ts"`
-	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime:milli;NOT NULL" json:"updated_ts"`
+	CreatedTs int64 `gorm:"column:created_ts;autoCreateTime;NOT NULL" json:"created_ts"`
+	UpdatedTs int64 `gorm:"column:updated_ts;autoUpdateTime;NOT NULL" json:"updated_ts"`
 }
 
 func Deleted() (column string, value interface{}) {

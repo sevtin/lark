@@ -40,7 +40,7 @@ func (s *messageHotService) SaveMessage(msg []byte) (err error) {
 	// 消息入库
 	copier.Copy(message, req.Msg)
 	message.Body = utils.MsgBodyToStr(req.Msg.MsgType, req.Msg.Body)
-	message.UpdatedTs = utils.NowMilli()
+	message.UpdatedTs = utils.NowUnix()
 	if err = s.messageHotRepo.Create(message); err != nil {
 		xlog.Warn(err.Error())
 		switch err.(type) {

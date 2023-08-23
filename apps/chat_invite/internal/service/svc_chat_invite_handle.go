@@ -51,7 +51,7 @@ func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite
 	u.Set("handler_uid", req.HandlerUid)
 	u.Set("handle_result", req.HandleResult)
 	u.Set("handle_msg", req.HandleMsg)
-	u.Set("handled_ts", utils.NowMilli())
+	u.Set("handled_ts", utils.NowUnix())
 
 	tx = xmysql.GetTX()
 	defer func() {
@@ -282,12 +282,12 @@ func (s *chatInviteService) chatInviteHandleMessage(chat *po.Chat, invite *po.Ch
 
 func (s *chatInviteService) addedContactMessage(chat *po.Chat, invite *po.ChatInvite, members []*po.ChatMember) {
 	var (
-		member   *po.ChatMember
-		index    int
-		m        *po.ChatMember
-		seqId    int64
-		nowMilli = utils.NowMilli()
-		err      error
+		member *po.ChatMember
+		index  int
+		m      *po.ChatMember
+		seqId  int64
+		nowTs  = utils.NowUnix()
+		err    error
 	)
 	for index, member = range members {
 		var (
@@ -319,13 +319,13 @@ func (s *chatInviteService) addedContactMessage(chat *po.Chat, invite *po.ChatIn
 			SrvTs:          0,
 		}
 		if member.OwnerId == chat.CreatorUid {
-			msg.SentTs = nowMilli
-			msg.SrvTs = nowMilli
+			msg.SentTs = nowTs
+			msg.SrvTs = nowTs
 			msg.Body = []byte(invite.InvitationMsg)
 			msg.MsgType = pb_enum.MSG_TYPE_CHAT_INVITE_MSG
 		} else {
-			msg.SentTs = nowMilli + 1
-			msg.SrvTs = nowMilli + 1
+			msg.SentTs = nowTs + 1
+			msg.SrvTs = nowTs + 1
 			msg.Body = []byte("I've accepted your friend request. Now let's chat!")
 			msg.MsgType = pb_enum.MSG_TYPE_ACCEPTED_CHAT_INVITE
 		}
@@ -347,7 +347,7 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 	var (
 		initiator *pb_chat_member.ChatMemberInfo
 		seqId     int64
-		nowMilli  = utils.NowMilli()
+		nowTs     = utils.NowUnix()
 		msg       *pb_msg.SrvChatMessage
 		joinedMsg *pb_msg.JoinedGroupChatMessage
 		inbox     *pb_mq.InboxMessage
@@ -391,8 +391,8 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 		MsgType:        pb_enum.MSG_TYPE_JOINED_GROUP_CHAT,
 		Body:           nil,
 		Status:         0,
-		SentTs:         nowMilli,
-		SrvTs:          nowMilli,
+		SentTs:         nowTs,
+		SrvTs:          nowTs,
 	}
 	joinedMsg = &pb_msg.JoinedGroupChatMessage{
 		Inviter: &pb_chat_member.ChatMemberBasicInfo{

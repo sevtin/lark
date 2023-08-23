@@ -58,7 +58,7 @@ func (s *chatService) RemoveGroupChatMember(ctx context.Context, req *pb_chat.Re
 	u.SetFilter("role_id < ?", member.RoleId)
 	u.SetFilter("deleted_ts=?", 0)
 	u.Set("status", int32(pb_enum.CHAT_STATUS_REMOVED))
-	u.Set("deleted_ts", utils.NowMilli())
+	u.Set("deleted_ts", utils.NowUnix())
 
 	_, err = s.removeChatMember(u, req.ChatId, req.MemberList, pb_enum.CHAT_TYPE_GROUP)
 	if err != nil {

@@ -319,7 +319,7 @@ func (c *Client) SendMsg(chatId int64) (err error) {
 		ChatId:   chatId,
 		MsgType:  1,
 		Body:     utils.Str2Bytes("文本聊天消息" + utils.Int64ToStr(c.uid)),
-		SentTs:   time.Now().UnixMilli(),
+		SentTs:   utils.NowUnix(),
 	}
 	msgBuf, _ = proto.Marshal(msgBody)
 	msgBuf, _ = utils.EncodeCliMessage(int32(pb_enum.TOPIC_CHAT), int32(pb_enum.SUB_TOPIC_CHAT_MSG), msgBody.CliMsgId, msgBuf)

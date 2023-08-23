@@ -7,7 +7,6 @@ import (
 	"lark/domain/do"
 	"lark/domain/pdo"
 	"lark/domain/po"
-	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/common/xsnowflake"
@@ -107,9 +106,6 @@ func (s *authService) GithubOAuth2Callback(ctx context.Context, req *pb_auth.Git
 		resp.RefreshToken = signUp.RefreshToken
 	}
 	resp.Server = server
-	xants.Submit(func() {
-		s.userCache.SetUserInfo(resp.UserInfo)
-	})
 	return
 }
 

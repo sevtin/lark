@@ -16,7 +16,7 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 	resp = &pb_chat_msg.GetChatMessageListResp{Msgs: &pb_chat_msg.ChatMessages{List: make([]*pb_msg.SrvChatMessage, 0)}}
 	var (
 		length    = len(req.SeqIds)
-		nowTs     = utils.NowMilli()
+		nowTs     = utils.NowUnix()
 		list      []*po.Message
 		cacheList []*po.Message
 		maxSeqId  uint64
@@ -79,7 +79,7 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 //func (s *chatMessageService) GetChatMessages(_ context.Context, req *pb_chat_msg.GetChatMessagesReq) (resp *pb_chat_msg.GetChatMessagesResp, _ error) {
 //	resp = &pb_chat_msg.GetChatMessagesResp{List: make([]*pb_msg.SrvChatMessage, 0)}
 //	var (
-//		nowTs     = utils.NowMilli()
+//		nowTs     = utils.NowUnix()
 //		list      = make([]*po.Message, 0)
 //		cacheList []*po.Message
 //		//hotList     []*po.Message
