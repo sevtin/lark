@@ -34,7 +34,10 @@ func (c *chatMemberCache) GetChatMemberInfo(chatId int64, uid int64) (info *pb_c
 		value string
 	)
 	info = new(pb_chat_member.ChatMemberInfo)
-	value = xredis.HGet(key, utils.Int64ToStr(uid))
+	value, err = xredis.HGet(key, utils.Int64ToStr(uid))
+	if err != nil {
+		return
+	}
 	if value != "" {
 		err = utils.Unmarshal(value, info)
 	}

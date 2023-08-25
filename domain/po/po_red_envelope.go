@@ -5,7 +5,7 @@ import "lark/pkg/entity"
 type RedEnvelope struct {
 	entity.GormEntityTs
 	EnvId          int64  `gorm:"column:env_id;primary_key" json:"env_id"`                          // 红包ID
-	EnvType        int    `gorm:"column:env_type;default:0;NOT NULL" json:"env_type"`               // 红包类型 1-均分红包 2-碰运气红包
+	EnvType        int    `gorm:"column:env_type;default:0;NOT NULL" json:"env_type"`               // 红包类型 1-均分红包 2-碰运气红包 3-固定金额(单例)
 	WalletId       int64  `gorm:"column:wallet_id;default:0;NOT NULL" json:"wallet_id"`             // 红包支出钱包ID
 	ReceiverType   int    `gorm:"column:receiver_type;default:0;NOT NULL" json:"receiver_type"`     // 接收者类型 1-私聊对方 2-群聊所有人 3-群聊指定人
 	TradeNo        string `gorm:"column:trade_no;NOT NULL" json:"trade_no"`                         // 交易编号

@@ -49,6 +49,15 @@ local IncrResult = {
     Failed = 'Failed'
 }
 
+--AVERAGE = 1; 均分红包
+--RANDOM = 2; 碰运气红包
+--FIXED = 3; 固定金额(单聊)
+local RedEnvType = {
+    Average = '1',
+    Random = '2',
+    Fixed = '3'
+}
+
 local function Get(key)
     local result = redis.call('GET', key)
     if result == false then
@@ -185,6 +194,7 @@ end
 
 local red_env_key = KEYS[1]
 local uid = ARGV[1]
+local red_env_type = ARGV[2]
 local remain_quantity_key = 'LK:RED_ENV:REMAIN_QUANTITY:'..red_env_key
 local remain_amount_key = 'LK:RED_ENV:REMAIN_AMOUNT:'..red_env_key
 local status_key = 'LK:RED_ENV:STATUS:'..red_env_key
@@ -233,7 +243,13 @@ if remain_quantity < 0 then
 end
 
 -- 5、更新红包余额
-local red_env_amount = getRandomAmount(remain_amount, remain_quantity + 1)
+local red_env_amount = remain_amount
+if red_env_type == RedEnvType.Average then
+    red_env_amount = math.floor(remain_amount/(remain_quantity+1))
+elseif red_env_type == RedEnvType.Random then
+    red_env_amount = getRandomAmount(remain_amount, remain_quantity + 1)
+end
+
 local new_remain_amount = remain_amount - red_env_amount
 local result = Set(remain_amount_key, new_remain_amount, 0)
 if result == SetResult.Failed then
@@ -249,7 +265,7 @@ if result == HSetnxResult.Failed then
     return response('FAILED','HSETNX_RECORD_FAILED',remain_quantity+1,remain_amount,0)
 end
 
-if remain_quantity == 0 then
+if new_remain_amount == 0 then
     -- 5、红包已领完
     local result = Set(status_key, received_status, 0)
     if result == SetResult.Failed then

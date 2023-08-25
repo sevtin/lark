@@ -15,10 +15,11 @@ type RedEnvelopeCache interface {
 	GetRedEnvelopeInfo(envId int64) (info *pb_red_env.RedEnvelopeInfo, err error)
 	SetRedEnvelopeStatus(envId int64, status int32) (err error)
 	GetRedEnvelopeStatus(envId int64) (int, error)
-	GetOpenRedEnvelope(envId int64, uid int64) (open *pb_red_env.OpenRedEnvelope, err error)
+	GetOpenRedEnvelope(envId int64, uid int64, redEnvType int32) (open *pb_red_env.OpenRedEnvelope, err error)
 	RollbackOpenRedEnvelope(open *pb_red_env.OpenRedEnvelope) (err error)
-	SetRedEnvelopeSign(envId int64, redEnvKey string, signature string) (err error)
-	GetRedEnvelopeSign(envId int64, redEnvKey string) (signature string, err error)
+	SetRedEnvelopeSign(envId int64, uid int64, sign string) (err error)
+	GetRedEnvelopeSign(envId int64, uid int64) (sign string, err error)
+	GetReceiveAmount(envId int64, uid int64) (receiveAmount string, err error)
 }
 
 type redEnvelopeCache struct {
@@ -62,11 +63,11 @@ func (c *redEnvelopeCache) SetRedEnvelope(envId int64, info *pb_red_env.RedEnvel
 	return
 }
 
-func (c *redEnvelopeCache) GetOpenRedEnvelope(envId int64, uid int64) (open *pb_red_env.OpenRedEnvelope, err error) {
+func (c *redEnvelopeCache) GetOpenRedEnvelope(envId int64, uid int64, redEnvType int32) (open *pb_red_env.OpenRedEnvelope, err error) {
 	var (
 		value interface{}
 		keys  = []string{utils.GetHashTagKey(envId)}
-		args  = []interface{}{uid}
+		args  = []interface{}{uid, redEnvType}
 	)
 	open = new(pb_red_env.OpenRedEnvelope)
 	value, err = xredis.EvalShaResult(xredis.SHA_DISTRIBUTION_RED_ENVELOPE, keys, args)
@@ -123,18 +124,26 @@ func (c *redEnvelopeCache) GetRedEnvelopeStatus(envId int64) (int, error) {
 	return xredis.GetInt(key)
 }
 
-func (c *redEnvelopeCache) SetRedEnvelopeSign(envId int64, redEnvKey string, signature string) (err error) {
+func (c *redEnvelopeCache) SetRedEnvelopeSign(envId int64, uid int64, sign string) (err error) {
 	var (
-		key = constant.RK_SYNC_RED_ENV_KEY + utils.GetHashTagKey(envId) + ":" + redEnvKey
+		key = constant.RK_SYNC_RED_ENV_KEY + utils.GetHashTagKey(envId) + ":" + utils.ToString(uid)
 	)
-	err = Set(key, signature, constant.CONST_DURATION_RED_ENVELOPE_KEY_EXPIRE_SECOND)
+	err = Set(key, sign, constant.CONST_DURATION_RED_ENVELOPE_KEY_EXPIRE_SECOND)
 	return
 }
 
-func (c *redEnvelopeCache) GetRedEnvelopeSign(envId int64, redEnvKey string) (signature string, err error) {
+func (c *redEnvelopeCache) GetRedEnvelopeSign(envId int64, uid int64) (sign string, err error) {
 	var (
-		key = constant.RK_SYNC_RED_ENV_KEY + utils.GetHashTagKey(envId) + ":" + redEnvKey
+		key = constant.RK_SYNC_RED_ENV_KEY + utils.GetHashTagKey(envId) + ":" + utils.ToString(uid)
 	)
-	signature, err = xredis.Get(key)
+	sign, err = xredis.Get(key)
 	return
+}
+
+func (c *redEnvelopeCache) GetReceiveAmount(envId int64, uid int64) (receiveAmount string, err error) {
+	var (
+		key   = constant.RK_SYNC_RED_ENV_RECORD + utils.GetHashTagKey(envId)
+		field = utils.ToString(uid)
+	)
+	return xredis.HGet(key, field)
 }

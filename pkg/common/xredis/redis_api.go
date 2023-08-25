@@ -298,9 +298,13 @@ func HMGet(key string, fields ...string) []interface{} {
 	return Cli.Client.HMGet(context.Background(), key, fields...).Val()
 }
 
-func HGet(key string, field string) string {
+func HGet(key string, field string) (val string, err error) {
 	key = RealKey(key)
-	return Cli.Client.HGet(context.Background(), key, field).Val()
+	val, err = Cli.Client.HGet(context.Background(), key, field).Result()
+	if err == redis.Nil {
+		err = nil
+	}
+	return
 }
 
 func CHDel(keys []string, fields []string) (err error) {

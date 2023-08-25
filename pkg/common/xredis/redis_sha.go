@@ -7,7 +7,7 @@ const (
 	// set_message_id.lua
 	SHA_SET_MESSAGE_ID = "a88869032333fa66526b7d8dd7a7d0ad3a829002"
 	// red_envelope_receive_2.1.lua
-	SHA_DISTRIBUTION_RED_ENVELOPE = "26907a8e87e11e8ddd6166caa47ca0fcb1d39937" // 红包发放
+	SHA_DISTRIBUTION_RED_ENVELOPE = "7e4103d6569a822a646dda3f8819dc0d6eedc6d9" // 红包发放
 	// red_envelope_receive_rollback_2.1.lua
 	SHA_ROLLBACK_RED_ENVELOPE = "8c288ba1d7816636b06e2c72e7fce7029ce843b0" // 发放失败回滚
 
