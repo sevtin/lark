@@ -53,6 +53,7 @@ message SrvChatMessage {
   int32 status = 13; // 消息状态
   int64 sent_ts = 14; // 客户端本地发送时间
   int64 srv_ts = 15; // 服务端接收消息的时间
+  int64 assoc_id = 16; // 关联ID
 }
 
 message Image {

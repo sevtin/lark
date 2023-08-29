@@ -6,7 +6,7 @@ import (
 	"lark/pkg/proto/pb_msg"
 )
 
-func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (err error) {
+func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (assocId int64,err error) {
 	switch req.Msg.MsgType {
 	case pb_enum.MSG_TYPE_TEXT:
 		if len(req.Msg.Body) > MAX_MESSAGE_LENGTH {
@@ -51,6 +51,7 @@ func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (err erro
 			body = new(pb_msg.GiveRedEnvelope)
 		)
 		proto.Unmarshal(req.Msg.Body, body)
+		assocId = body.EnvId
 		err = s.validate.Struct(body)
 	case pb_enum.MSG_TYPE_RECEIVE_RED_ENV:
 		var (
