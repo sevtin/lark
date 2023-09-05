@@ -16,7 +16,8 @@ const (
 	CONST_MSG_KEY_CHAT_INVITE    = "msg_key_chat_invite"    // 聊天邀请
 	CONST_MSG_KEY_ADDED_CONTACT  = "msg_key_added_contact"  // 添加联系人
 	CONST_MSG_KEY_CONVO_CACHE    = "msg_key_convo_cache"    // 会话缓存
-	CONST_MSG_KEY_RED_ENV_DIST   = "msg_key_red_env_dist"   // 红包发放
+	CONST_MSG_KEY_RED_ENV_GIVE   = "msg_key_red_env_give"   // 红包派发
+	CONST_MSG_KEY_RED_ENV_OPEN   = "msg_key_red_env_open"   // 开红包
 )
 
 const (

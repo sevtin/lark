@@ -14,6 +14,6 @@ CREATE TABLE `chat_invites` (
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`invite_id`),
-  KEY `id_initiatorUid_handleResult_deletedTs` (`initiator_uid`,`handle_result`,`deleted_ts`),
-  KEY `id_inviteeUid_handleResult_deletedTs` (`invitee_uid`,`handle_result`,`deleted_ts`)
+  KEY `id_initiatorUid` (`initiator_uid`),
+  KEY `id_inviteeUid` (`invitee_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

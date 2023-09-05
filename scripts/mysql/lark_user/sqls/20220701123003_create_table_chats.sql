@@ -10,7 +10,6 @@ CREATE TABLE `chats` (
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`chat_id`),
-  KEY `idx_deletedTs` (`deleted_ts`),
   KEY `idx_creatorUid` (`creator_uid`),
   KEY `idx_chatType` (`chat_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

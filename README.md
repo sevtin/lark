@@ -15,7 +15,7 @@ Golang千万级IM服务端，支持集群和水平扩展，万人群消息秒达
 | 7  | Kafka                | 3.2.1           | 消息中间件         | https://kafka.apache.org/                  |
 | 8  | RabbitMQ             | 3.10.0          | 消息中间件         | https://www.rabbitmq.com/                  |
 | 9  | ZooKeeper            | 3.7.1           | 分布式协调服务       | https://zookeeper.apache.org/              |
-| 10 | Docker               | 20.10.17        | 应用容器引擎        | https://www.docker.com/                     |
+| 10 | Docker               | 20.10.17        | 应用容器引擎        | https://www.docker.com                     |
 | 11 | MinIO                | 2022.12.12      | 对象存储          | https://min.io/                            |
 | 12 | Nginx                | 1.23.1          | Web/反向代理      | https://www.nginx.com/                     |
 | 13 | JWT                  | v4.4.2          | JWT登录支持       | https://github.com/golang-jwt/jwt          |
