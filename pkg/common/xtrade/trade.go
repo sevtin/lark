@@ -10,7 +10,7 @@ import (
 const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
 const base = 64
 
-func GenerateTradeNo(channel string) string {
+func GenerateSn(channel string) string {
 	builder := &strings.Builder{}
 	// 渠道前缀
 	builder.WriteString(channel)

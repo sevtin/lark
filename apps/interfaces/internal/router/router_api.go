@@ -33,6 +33,7 @@ func registerPrivateRouter(group *gin.RouterGroup) {
 	registerLbsRouter(group)
 	registerRedEnvRouter(group)
 	registerRedEnvReceiveRouter(group)
+	registerOrderRouter(group)
 }
 
 // 开放式api无需验证会话id

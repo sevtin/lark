@@ -225,3 +225,11 @@ enum RED_ENVELOPE_RECEIVE_STATUS {
   RECEIVE_SUCCESS = 1;
   RECEIVE_FAILED = 2;
 }
+
+enum PAY_TYPE {
+  UNKNOWN_PAY_TYPE = 0;
+  ALIPAY = 1; // 阿里支付
+  WXPAY = 2; // 微信支付
+  UNIONPAY = 3; // 银联支付
+  PAYPAL = 4; // PayPal
+}

@@ -13,6 +13,6 @@ type paymentService struct {
 }
 
 func NewPaymentService(conf *config.Config) PaymentService {
-	paymentClient := payment_client.NewPaymentClient(conf.Etcd, nil, conf.Jaeger, conf.Name)
+	paymentClient := payment_client.NewPaymentClient(conf.Etcd, conf.PaymentServer, conf.Jaeger, conf.Name)
 	return &paymentService{paymentClient: paymentClient}
 }

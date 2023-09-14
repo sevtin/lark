@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	SYSTEM_ACCOUNT_AVATAR_CONTACT_INVITE = "http://lark-minio.com:19000/photos/b11883ba-f3d7-4164-a593-700c177c37c8"
+	SYSTEM_ACCOUNT_AVATAR_CONTACT_INVITE = "http://lark-minio.com:19000/photos/b11883ba-f3d7-4164-a593-700c177c37c8.png"
 )
 
 func init() {

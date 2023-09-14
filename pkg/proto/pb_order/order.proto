@@ -1,20 +1,22 @@
 syntax ="proto3";
+import "pb_enum/enum.proto";
 package pb_order;
 option go_package = "./pb_order;pb_order";
 
-message OrderReq {
-  int64 uid = 1;
-  int64 token = 2; // 防重令牌
-  int64 goods_id = 3; // 商品ID
-  int64 quantity = 4; // 数量
-  int64 price = 5; // 单价(分) 不同用户价格可能存在差异
+message CreateRedEnvelopeOrderReq {
+  int64 uid = 1; // 用户ID
+  int64 env_id = 2; // 红包ID
+  int64 amount = 3; // 红包金额(分)
+  pb_enum.PLATFORM_TYPE platform = 4; // 平台
+  pb_enum.PAY_TYPE pay_type = 5; // PayType
 }
 
-message OrderResp {
+message CreateRedEnvelopeOrderResp {
   int32 code = 1;
   string msg = 2;
+  string pay_url = 3;
 }
 
 service Order {
-  rpc Order(OrderReq) returns(OrderResp);
+  rpc CreateRedEnvelopeOrder(CreateRedEnvelopeOrderReq) returns(CreateRedEnvelopeOrderResp);
 }

@@ -6,7 +6,7 @@ import (
 	"lark/pkg/proto/pb_msg"
 )
 
-func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (assocId int64,err error) {
+func (s *messageService) verifyMessage(req *pb_msg.SendChatMessageReq) (assocId int64, err error) {
 	switch req.Msg.MsgType {
 	case pb_enum.MSG_TYPE_TEXT:
 		if len(req.Msg.Body) > MAX_MESSAGE_LENGTH {

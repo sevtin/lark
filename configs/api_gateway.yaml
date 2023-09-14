@@ -93,6 +93,18 @@ red_env_receive_server:
     cert_file: ./configs/tls/grpc/server.pem
     enabled: true
     server_name_override: lark.com
+order_server:
+  name: lark_order_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
+payment_server:
+  name: lark_payment_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com
 minio:
   photo_directory: "/private/tmp/lark/photos/"
 jaeger:

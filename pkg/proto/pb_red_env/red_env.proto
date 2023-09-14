@@ -37,6 +37,7 @@ message GiveRedEnvelopeReq {
   int32 quantity = 7; // 红包数量
   string message = 8; // 祝福语
   repeated int64 receiver_uids = 9; // 接收者ID
+  string pay_password = 10; // 支付密码
 }
 
 message GiveRedEnvelopeResp {

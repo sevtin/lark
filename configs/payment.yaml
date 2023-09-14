@@ -1,10 +1,11 @@
 name: lark_payment_server
 server_id: 1
 log: "./configs/logger.yaml"
+pay_platform: "./configs/pay_platform.yaml"
 grpc_server:
   name: lark_payment_server
   server_id: 1
-  port: 8000
+  port: 8400
   max_connection_idle: 0
   max_connection_age: 0
   max_connection_age_grace: 0

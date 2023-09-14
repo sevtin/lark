@@ -1,5 +1,6 @@
 package constant
 
 const (
-	CHANNEL_PREFIX_LK = "LK"
+	TRADE_NO_LK = "NO"
+	ORDER_SN_LK = "SN"
 )

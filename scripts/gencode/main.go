@@ -1,23 +1,19 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"lark/scripts/gencode/config"
 	"lark/scripts/gencode/template"
 	"lark/scripts/gencode/utils"
 	"strings"
-	"unicode"
 )
 
 func main() {
 	var (
 		serviceName      = "Order"
-		upperServiceName = toCamel(serviceName)
-		lowerServiceName = firstLower(upperServiceName)
-		packageName      = camelToSnake(upperServiceName)
+		upperServiceName = utils.ToCamel(serviceName)
+		lowerServiceName = utils.FirstLower(upperServiceName)
+		packageName      = utils.CamelToSnake(upperServiceName)
 	)
 	conf := config.GenConfig{
 		Path:        "",
@@ -45,6 +41,8 @@ func main() {
 
 	// domain
 	generateDomainCacheCode(conf)
+	generateDomainCrConstCode(conf)
+	generateDomainCrReadCode(conf)
 	generateDomainRepoCode(conf)
 	generateDomainPoCode(conf)
 
@@ -59,40 +57,6 @@ func main() {
 	generatePkgProtoCode(conf)
 	generatePkgProtoGoCode(conf)
 	generatePkgProtoRespCode(conf)
-}
-
-func toCamel(s string) string {
-	c := cases.Title(language.English, cases.NoLower)
-	return c.String(s)
-}
-
-func firstUpper(s string) string {
-	if s == "" {
-		return ""
-	}
-	return strings.ToUpper(s[:1]) + s[1:]
-}
-
-func firstLower(s string) string {
-	if s == "" {
-		return ""
-	}
-	return strings.ToLower(s[:1]) + s[1:]
-}
-
-func camelToSnake(input string) string {
-	var buffer bytes.Buffer
-	for i, r := range input {
-		if unicode.IsUpper(r) {
-			if i > 0 {
-				buffer.WriteRune('_')
-			}
-			buffer.WriteRune(unicode.ToLower(r))
-		} else {
-			buffer.WriteRune(r)
-		}
-	}
-	return buffer.String()
 }
 
 // Apps
@@ -165,6 +129,19 @@ func generateDomainCacheCode(conf config.GenConfig) {
 	conf.Path = "./domain/cache"
 	conf.Prefix = "cache_"
 	utils.GenCode(template.DomainCacheTemplate, &conf)
+}
+
+func generateDomainCrConstCode(conf config.GenConfig) {
+	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.PackageName)
+	conf.Prefix = "cr_"
+	conf.Suffix = "_const"
+	utils.GenCode(template.DomainCrConstTemplate, &conf)
+}
+
+func generateDomainCrReadCode(conf config.GenConfig) {
+	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.PackageName)
+	conf.Prefix = "cr_"
+	utils.GenCode(template.DomainCrReadTemplate, &conf)
 }
 
 func generateDomainPoCode(conf config.GenConfig) {

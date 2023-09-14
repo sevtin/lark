@@ -10,4 +10,5 @@ type GiveRedEnvelopeReq struct {
 	Message        string  `json:"message"`         // 祝福语
 	ReceiverUids   []int64 `json:"receiver_uids"`   // 接收者ID
 	SenderPlatform int32   `json:"sender_platform"` // 发红包平台
+	PayPassword    string  `json:"pay_password"`    // 支付密码
 }

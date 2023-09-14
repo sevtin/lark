@@ -16,7 +16,7 @@
 # 删除目录及子目录下的所有.log文件: find . -name "*.log" | xargs rm
 #======================== 1 golang ========================#
 ## 源镜像
-FROM golang:1.18 as build
+FROM golang:1.21 as build
 
 ## 设置环境变量
 ENV GO111MODULE=on \

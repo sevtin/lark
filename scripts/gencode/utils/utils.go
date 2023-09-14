@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"lark/scripts/gencode/config"
+	"strings"
+	"unicode"
 
 	"os"
 	"text/template"
@@ -84,4 +88,38 @@ func mkdir(path string) (err error) {
 	}
 	err = os.Chmod(path, MODE_PERM_0776)
 	return
+}
+
+func ToCamel(s string) string {
+	c := cases.Title(language.English, cases.NoLower)
+	return c.String(s)
+}
+
+func FirstUpper(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func FirstLower(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToLower(s[:1]) + s[1:]
+}
+
+func CamelToSnake(input string) string {
+	var buffer bytes.Buffer
+	for i, r := range input {
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				buffer.WriteRune('_')
+			}
+			buffer.WriteRune(unicode.ToLower(r))
+		} else {
+			buffer.WriteRune(r)
+		}
+	}
+	return buffer.String()
 }

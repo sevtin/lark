@@ -28,6 +28,8 @@ type Config struct {
 	LbsServer           *conf.GrpcServer `yaml:"lbs_server"`
 	RedEnvServer        *conf.GrpcServer `yaml:"red_env_server"`
 	RedEnvReceiveServer *conf.GrpcServer `yaml:"red_env_receive_server"`
+	OrderServer         *conf.GrpcServer `yaml:"order_server"`
+	PaymentServer       *conf.GrpcServer `yaml:"payment_server"`
 	Jaeger              *conf.Jaeger     `yaml:"jaeger"`
 }
 

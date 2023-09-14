@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"lark/pkg/conf"
-	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 )
@@ -24,16 +24,16 @@ func NewRabbitClient(cfg *conf.Rabbitmq) (client *RabbitClient) {
 		err  error
 	)
 	if conn, err = amqp.Dial(getAMQPUrl(cfg)); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	if ch, err = conn.Channel(); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	client = &RabbitClient{cfg: cfg, conn: conn, ch: ch}
 	if err = client.declareExchange(); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	return client
@@ -92,15 +92,15 @@ func (mq *RabbitClient) Consume(callback Consumer) {
 		err   error
 	)
 	if queue, err = mq.declareQueue(mq.cfg.Queue, nil); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	if err = mq.bindQueue(queue.Name, mq.cfg.RouteKey, mq.cfg.Exchange); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	if err = mq.ch.Qos(1, 0, false); err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (mq *RabbitClient) Consume(callback Consumer) {
 		nil,
 	)
 	if err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 		return
 	}
 	go func() {

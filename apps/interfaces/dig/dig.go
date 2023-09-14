@@ -21,6 +21,7 @@ func init() {
 	provideLbs()
 	provideRedEnv()
 	provideRedEnvReceive()
+	provideOrder()
 }
 
 func Invoke(i interface{}) error {

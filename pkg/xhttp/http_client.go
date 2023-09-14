@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -59,7 +59,7 @@ func Get(url string, params map[string]interface{}, headerOptions ...*HeaderOpti
 		return
 	}
 	defer resp.Body.Close()
-	buf, err = ioutil.ReadAll(resp.Body)
+	buf, err = io.ReadAll(resp.Body)
 	return
 }
 
@@ -90,6 +90,6 @@ func Post(url string, params map[string]interface{}, headerOptions ...*HeaderOpt
 		return
 	}
 	defer resp.Body.Close()
-	buf, err = ioutil.ReadAll(resp.Body)
+	buf, err = io.ReadAll(resp.Body)
 	return
 }
