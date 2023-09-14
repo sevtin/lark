@@ -65,7 +65,13 @@ jaeger:
   max_packet_size: 0
   enabled: false
 github_oauth2:
-  client_id: "91207c9fb0fb556c0753"
-  client_secret: "61618bf55fa6127e8d2701a62a308fdfea99c844"
-  redirect_url: "http://localhost:8088/open/auth/oauth2/github/callback"
-
+  client_id: "Iv1.4a3ecfaf2c5e4f1a"
+  client_secret: "05805d8d884ec2b2525b286e81f9ef4954e9622d"
+  redirect_url: "http://localhost:8088/open/auth/github/callback"
+google_oauth2:
+  client_id: "913029687366-om9n4ca3427i8sjpf831dcfvs5itgtco.apps.googleusercontent.com"
+  client_secret: "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"
+  redirect_url: "http://localhost:8088/open/auth/google/callback"
+  scopes: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+  auth_url: "https://accounts.google.com/o/oauth2/auth"
+  token_url: "https://accounts.google.com/o/oauth2/token"

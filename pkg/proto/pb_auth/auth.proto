@@ -85,7 +85,7 @@ message GithubOAuth2CallbackReq {
   pb_enum.PLATFORM_TYPE platform = 2; // 平台
 }
 
-message GithubOAuth2CallbackResp {
+message AuthUserInfo {
   int32 code = 1;
   string msg = 2;
   pb_user.UserInfo user_info = 3;
@@ -94,10 +94,29 @@ message GithubOAuth2CallbackResp {
   ServerInfo Server = 6;
 }
 
+message GithubOAuth2CallbackResp {
+  int32 code = 1;
+  string msg = 2;
+  AuthUserInfo auth_user_info = 3;
+}
+
+message GoogleOAuth2CallbackReq {
+  string code = 1;
+  string state = 2;
+  pb_enum.PLATFORM_TYPE platform = 3; // 平台
+}
+
+message GoogleOAuth2CallbackResp {
+  int32 code = 1;
+  string msg = 2;
+  AuthUserInfo auth_user_info = 3;
+}
+
 service Auth {
   rpc SignUp(SignUpReq)  returns(SignUpResp);
   rpc SignIn(SignInReq)  returns(SignInResp);
   rpc RefreshToken(RefreshTokenReq) returns(RefreshTokenResp);
   rpc SignOut(SignOutReq) returns(SignOutResp);
   rpc GithubOAuth2Callback(GithubOAuth2CallbackReq) returns(GithubOAuth2CallbackResp);
+  rpc GoogleOAuth2Callback(GoogleOAuth2CallbackReq) returns(GoogleOAuth2CallbackResp);
 }

@@ -27,7 +27,7 @@ var (
 var (
 	confFile = flag.String("cfg", "./configs/chat_member.yaml", "config file")
 	serverId = flag.Int("sid", 1, "server id")
-	grpcPort = flag.Int("gp", 7000, "grpc server port")
+	grpcPort = flag.Int("gp", 7010, "grpc server port")
 )
 
 func init() {

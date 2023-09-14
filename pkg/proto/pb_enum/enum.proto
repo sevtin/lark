@@ -145,8 +145,9 @@ enum GENDER {
 }
 
 enum LOGIN_CHANNEL {
-    UNKNOWN_CHANNEL = 0;
-    GITHUB = 1;
+  UNKNOWN_CHANNEL = 0;
+  GITHUB = 1;
+  GOOGLE = 2;
 }
 
 enum RED_ENVELOPE_TYPE {

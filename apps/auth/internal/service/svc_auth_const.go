@@ -56,6 +56,9 @@ const (
 	API_GITHUB_OAUTH_ACCESS_TOKEN = "https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s"
 	API_GITHUB_USER               = "https://api.github.com/user"
 )
+const (
+	API_GOOGLE_USERINFO = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
+)
 
 const (
 	DEFAULT_LOGIN_PASSWORD = "EA405B607DE5E4F6797640AB81F1767D" // 密码 12345678

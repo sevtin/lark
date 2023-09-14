@@ -13,6 +13,7 @@ type AuthService interface {
 	RefreshToken(params *dto_auth.RefreshTokenReq) (resp *xhttp.Resp)
 	SignOut(params *dto_auth.SignOutReq) (resp *xhttp.Resp)
 	GithubOAuth2Callback(params *dto_auth.GithubOauthCallbackReq) (resp *xhttp.Resp)
+	GoogleOAuth2Callback(params *dto_auth.GoogleOauthCallbackReq) (resp *xhttp.Resp)
 }
 
 type authService struct {

@@ -17,6 +17,7 @@ type Config struct {
 	Mysql            *conf.Mysql        `yaml:"mysql"`
 	Redis            *conf.Redis        `yaml:"redis"`
 	Github           *conf.GithubOAuth2 `yaml:"github_oauth2"`
+	Google           *conf.GoogleOAuth2 `yaml:"google_oauth2"`
 	ChatMemberServer *conf.GrpcServer   `yaml:"chat_member_server"`
 	Jaeger           *conf.Jaeger       `yaml:"jaeger"`
 }

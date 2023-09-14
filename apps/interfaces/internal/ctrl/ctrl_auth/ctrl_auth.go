@@ -1,13 +1,20 @@
 package ctrl_auth
 
 import (
+	"golang.org/x/oauth2"
+	"lark/apps/interfaces/internal/config"
 	"lark/apps/interfaces/internal/service/svc_auth"
+	"lark/pkg/common/xgoogle"
 )
 
 type AuthCtrl struct {
-	authService svc_auth.AuthService
+	authService       svc_auth.AuthService
+	googleOauthConfig *oauth2.Config
 }
 
 func NewAuthCtrl(authService svc_auth.AuthService) *AuthCtrl {
-	return &AuthCtrl{authService: authService}
+	srv := &AuthCtrl{authService: authService}
+	conf := config.GetConfig()
+	srv.googleOauthConfig = xgoogle.NewOauthConfig(conf.Google)
+	return srv
 }

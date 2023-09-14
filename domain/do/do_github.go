@@ -6,7 +6,7 @@ type GithubToken struct {
 	Scope       string `json:"scope"`
 }
 
-type GithubUser struct {
+type GithubUserInfo struct {
 	AvatarURL string `json:"avatar_url"`
 	Email     string `json:"email"`
 	ID        int    `json:"id"`

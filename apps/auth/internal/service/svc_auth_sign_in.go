@@ -45,8 +45,8 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 		xlog.Warn(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
 		return
 	}
-	copier.Copy(resp.UserInfo, signIn.User)
-	copier.Copy(resp.UserInfo.Avatar, signIn.Avatar)
+	_ = copier.Copy(resp.UserInfo, signIn.User)
+	_ = copier.Copy(resp.UserInfo.Avatar, signIn.Avatar)
 	resp.AccessToken = signIn.AccessToken
 	resp.RefreshToken = signIn.RefreshToken
 	resp.Server = server
@@ -67,7 +67,7 @@ func (s *authService) signInTransaction(q *entity.MysqlQuery, platform pb_enum.P
 		signIn.Msg = ERROR_AUTH_ACCOUNT_OR_PASSWORD_ERR
 		return
 	}
-	q.Reset()
+	q.Normal()
 	q.SetFilter("owner_id=?", signIn.User.Uid)
 	q.SetFilter("owner_type=?", int32(pb_enum.AVATAR_OWNER_USER_AVATAR))
 	signIn.Avatar, signIn.Err = s.avatarRepo.Avatar(q)

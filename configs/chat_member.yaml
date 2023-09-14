@@ -4,7 +4,7 @@ log: "./configs/logger.yaml"
 grpc_server:
   name: lark_chat_member_server
   server_id: 1
-  port: 7000
+  port: 7010
   max_connection_idle: 0
   max_connection_age: 0
   max_connection_age_grace: 0

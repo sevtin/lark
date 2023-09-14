@@ -30,7 +30,7 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 		signUp *do.SignUp
 	)
 	server = s.getWsServer()
-	copier.Copy(user, req)
+	_ = copier.Copy(user, req)
 	user.Avatar = constant.CONST_AVATAR_SMALL
 	user.Password = utils.MD5(user.Password)
 	user.ServerId = utils.NewServerId(0, int64(server.ServerId), req.RegPlatform)
@@ -55,13 +55,13 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 		return
 	}
 
-	copier.Copy(resp.UserInfo, user)
-	copier.Copy(resp.UserInfo.Avatar, avatar)
+	_ = copier.Copy(resp.UserInfo, user)
+	_ = copier.Copy(resp.UserInfo.Avatar, avatar)
 	resp.AccessToken = signUp.AccessToken
 	resp.RefreshToken = signUp.RefreshToken
 	resp.Server = server
 
-	xants.Submit(func() {
+	_ = xants.Submit(func() {
 		terr := s.userCache.SetUserServer(user.Uid, user.ServerId)
 		if terr != nil {
 			xlog.Warn(terr.Error())

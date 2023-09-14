@@ -24,3 +24,7 @@ func (s *authServer) SignOut(ctx context.Context, req *pb_auth.SignOutReq) (resp
 func (s *authServer) GithubOAuth2Callback(ctx context.Context, req *pb_auth.GithubOAuth2CallbackReq) (resp *pb_auth.GithubOAuth2CallbackResp, err error) {
 	return s.authService.GithubOAuth2Callback(ctx, req)
 }
+
+func (s *authServer) GoogleOAuth2Callback(ctx context.Context, req *pb_auth.GoogleOAuth2CallbackReq) (resp *pb_auth.GoogleOAuth2CallbackResp, err error) {
+	return s.authService.GoogleOAuth2Callback(ctx, req)
+}

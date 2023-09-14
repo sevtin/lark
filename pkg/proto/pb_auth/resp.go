@@ -24,3 +24,13 @@ func (r *GithubOAuth2CallbackResp) Set(code int32, msg string) {
 	r.Code = code
 	r.Msg = msg
 }
+
+func (r *GoogleOAuth2CallbackResp) Set(code int32, msg string) {
+	r.Code = code
+	r.Msg = msg
+}
+
+func (r *AuthUserInfo) Set(code int32, msg string) {
+	r.Code = code
+	r.Msg = msg
+}

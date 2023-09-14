@@ -8,14 +8,14 @@ import (
 	"lark/pkg/xhttp"
 )
 
-func (s *authService) GithubOAuth2Callback(params *dto_auth.GithubOauthCallbackReq) (resp *xhttp.Resp) {
+func (s *authService) GoogleOAuth2Callback(params *dto_auth.GoogleOauthCallbackReq) (resp *xhttp.Resp) {
 	resp = new(xhttp.Resp)
 	var (
-		req   = new(pb_auth.GithubOAuth2CallbackReq)
-		reply *pb_auth.GithubOAuth2CallbackResp
+		req   = new(pb_auth.GoogleOAuth2CallbackReq)
+		reply *pb_auth.GoogleOAuth2CallbackResp
 	)
 	_ = copier.Copy(req, params)
-	reply = s.authClient.GithubOAuth2Callback(req)
+	reply = s.authClient.GoogleOAuth2Callback(req)
 	if reply == nil {
 		resp.SetResult(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
 		xlog.Warn(xhttp.ERROR_CODE_HTTP_SERVICE_FAILURE, xhttp.ERROR_HTTP_SERVICE_FAILURE)
