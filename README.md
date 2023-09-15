@@ -1,10 +1,6 @@
 # lark
 Lark是一个开源的Golang千万级IM服务端项目，具有高性能和可扩展等特性。采用微服务架构设计，支持集群和水平扩展，能够满足高并发业务需求，并实现了万人群消息的秒达。
 
-除IM核心功能之外，Lark还实现了：<br>
-1、MySQL分库分表、数据同步(MySQL->Elasticsearch，MySQL->MongoDB)。<br>
-2、抢红包、订单与支付、LBS、Google登录。<br>
-
 <img src="assets/images/lark_logo.png" height="263" width="452"/>
 
 ### 技术选型及开发环境
