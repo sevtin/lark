@@ -107,7 +107,7 @@ func (s *authService) getGithubUserInfo(token *do.GithubToken) (oauthUser *po.Oa
 		Openid:       strconv.Itoa(info.ID),
 		Uid:          0,
 		Username:     info.Login,
-		Nickname:     info.Name,
+		Nickname:     info.Login,
 		Email:        info.Email,
 		AccessToken:  token.AccessToken,
 		RefreshToken: "",

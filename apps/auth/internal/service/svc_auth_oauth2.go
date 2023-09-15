@@ -87,6 +87,9 @@ func (s *authService) updateGithubUserInfo(user *po.OauthUser) (err error) {
 	u.SetFilter("channel=?", user.Channel)
 	u.SetFilter("openid=?", user.Openid)
 	u.Set("access_token", user.AccessToken)
+	if user.Expire > 0 {
+		u.Set("expire", user.Expire)
+	}
 	if user.RefreshToken != "" {
 		u.Set("refresh_token", user.RefreshToken)
 	}
