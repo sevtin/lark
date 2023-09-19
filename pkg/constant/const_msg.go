@@ -7,6 +7,8 @@ const (
 
 const (
 	CONST_MSG_KEY_MSG            = "msg_key_msg"
+	CONST_MSG_KEY_READ_RECEIPT   = "msg_key_read_receipt"
+	CONST_MSG_KEY_CHAT_SEQ       = "msg_key_chat_seq"
 	CONST_MSG_KEY_OPERATION      = "msg_key_operation"      // 消息操作 测回 加急
 	CONST_MSG_KEY_RECALL         = "msg_key_recall"         // 消息撤回
 	CONST_MSG_KEY_URGENT         = "msg_key_urgent"         // 消息加急

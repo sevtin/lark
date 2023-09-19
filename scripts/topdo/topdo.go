@@ -33,10 +33,11 @@ func init() {
 
 func main() {
 	sql := `
-SELECT w.wallet_id,w.balance
-FROM wallets w
+SELECT o.read_seq,c.chat_id,c.seq_id,c.srv_ts
+FROM chat_members o
+LEFT JOIN chats c ON c.chat_id=o.chat_id;
 `
-	_, err := SqlToPdo(db, sql, "AccountBalance")
+	_, err := SqlToPdo(db, sql, "ConvoChatSeq")
 	if err != nil {
 		log.Println(err)
 	}

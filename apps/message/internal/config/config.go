@@ -17,6 +17,7 @@ type Config struct {
 	Etcd             *conf.Etcd          `yaml:"etcd"`
 	Redis            *conf.Redis         `yaml:"redis"`
 	MsgProducer      *conf.KafkaProducer `yaml:"msg_producer"`
+	ChatSeqProducer  *conf.KafkaProducer `yaml:"chat_seq_producer"`
 	Jaeger           *conf.Jaeger        `yaml:"jaeger"`
 }
 
@@ -27,7 +28,7 @@ var (
 var (
 	confFile = flag.String("cfg", "./configs/message.yaml", "config file")
 	serverId = flag.Int("sid", 1, "server id")
-	grpcPort = flag.Int("gp", 7200, "grpc server port")
+	grpcPort = flag.Int("gp", 7210, "grpc server port")
 )
 
 func init() {

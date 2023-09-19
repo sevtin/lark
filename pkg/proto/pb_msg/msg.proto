@@ -56,6 +56,18 @@ message SrvChatMessage {
   int64 assoc_id = 16; // 关联ID
 }
 
+message ReadReceipt {
+  int64 uid = 1; // 用户ID
+  int64 chat_id = 2; // 会话ID
+  int64 seq_id = 3; // 消息唯一ID
+}
+
+message ChatSeq {
+  int64 chat_id = 1; // 会话ID
+  int64 seq_id = 2; // 消息唯一ID
+  int64 srv_ts = 3; // 服务端接收消息的时间
+}
+
 message Image {
   // @inject_tag: validate:"required,min=32,max=50"
   string image_key = 1;

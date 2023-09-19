@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/grpc"
 	"io"
 	"lark/apps/msg_gateway/internal/config"

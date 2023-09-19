@@ -15,8 +15,11 @@ message ConvoListResp {
 
 message ConvoChatSeqListReq {
   int64 uid = 1;
-  int64 timestamp = 2;
-  string chat_ids = 3; // chat_id 列表(base64(gzip(chat_id1,chat_id2)))
+  int64 last_cid = 2;
+  int64 last_ts = 3;
+  int32 limit = 4;
+  int64 timestamp = 5;//后面的已弃用
+  string chat_ids = 6; // chat_id 列表(base64(gzip(chat_id1,chat_id2)))
 }
 
 message ConvoChatSeqListResp {
@@ -29,6 +32,7 @@ message ConvoChatSeq {
   int64 chat_id = 1;
   int64 seq_id = 2;
   int64 srv_ts = 3;
+  int64 read_seq = 4;
 }
 
 message ConvoMessage {

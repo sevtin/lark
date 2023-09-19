@@ -1,7 +1,7 @@
 package xkafka
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/pkg/common/xlog"
 	"sync"
 )

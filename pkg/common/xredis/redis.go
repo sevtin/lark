@@ -3,10 +3,10 @@ package xredis
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v9"
 	"github.com/go-redsync/redsync/v4"
 	redsyncredis "github.com/go-redsync/redsync/v4/redis"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
+	"github.com/redis/go-redis/v9"
 	"lark/pkg/conf"
 )
 

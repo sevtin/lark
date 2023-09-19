@@ -1,7 +1,7 @@
 package xkafka
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 	"lark/pkg/common/xlog"
 	"lark/pkg/utils"
@@ -68,6 +68,19 @@ func (p *Producer) Push(m interface{}, key ...string) (int32, int64, error) {
 	if err != nil {
 		return -1, -1, err
 	}
+	msg.Value = sarama.ByteEncoder(buf)
+	return p.producer.SendMessage(msg)
+}
+
+func (p *Producer) PushBuffer(buf []byte, key string) (int32, int64, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			xlog.Warn(r, string(debug.Stack()))
+		}
+	}()
+	msg := &sarama.ProducerMessage{}
+	msg.Key = sarama.StringEncoder(key)
+	msg.Topic = p.topic
 	msg.Value = sarama.ByteEncoder(buf)
 	return p.producer.SendMessage(msg)
 }

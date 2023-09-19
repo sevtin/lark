@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/apps/msg_hot/internal/config"
 	"lark/domain/mrepo"
 	"lark/pkg/common/xkafka"

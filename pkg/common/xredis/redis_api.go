@@ -2,7 +2,7 @@ package xredis
 
 import (
 	"context"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 	"lark/pkg/constant"
 	"lark/pkg/utils"
 	"time"
@@ -370,30 +370,6 @@ func EvalShaResult(sha string, keys []string, args []interface{}) (interface{}, 
 	return Cli.Client.EvalSha(context.Background(), sha, keys, args).Result()
 }
 
-// 可能只删除部分
-//func DelKeysByMatch(match string, timeout time.Duration) (err error) {
-//	var (
-//		ctx    context.Context
-//		cancel context.CancelFunc
-//		iter   *redis.ScanIterator
-//	)
-//	match = RealKey(match)
-//	ctx, cancel = context.WithTimeout(context.Background(), timeout)
-//	defer cancel()
-//
-//	iter = Cli.Client.Scan(ctx, 0, match, 0).Iterator()
-//	for iter.Next(ctx) {
-//		err = Cli.Client.Del(ctx, iter.Val()).Err()
-//		if err != nil {
-//			return
-//		}
-//	}
-//	if err = iter.Err(); err != nil {
-//		return
-//	}
-//	return
-//}
-
 func ZAdd(key string, score float64, member string) (err error) {
 	key = RealKey(key)
 	z := redis.Z{
@@ -428,4 +404,13 @@ func ZRange(key string, start int64, stop int64) []string {
 func ZRank(key, member string) (int64, error) {
 	key = RealKey(key)
 	return Cli.Client.ZRank(context.Background(), key, member).Result()
+}
+
+func GeoAdd(key string, geoLocation ...*redis.GeoLocation) (err error) {
+	key = RealKey(key)
+	return Cli.Client.GeoAdd(context.Background(), key, geoLocation...).Err()
+}
+
+func GeoRadius(key string, longitude, latitude float64, query *redis.GeoRadiusQuery) []redis.GeoLocation {
+	return Cli.Client.GeoRadius(context.Background(), key, longitude, latitude, query).Val()
 }

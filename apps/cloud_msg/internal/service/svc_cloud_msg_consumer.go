@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 	"lark/pkg/proto/pb_cm"
 	"sync/atomic"

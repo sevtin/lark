@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/IBM/sarama"
 	chat_client "lark/apps/chat/client"
 	"lark/apps/chat/internal/config"
 	dist_client "lark/apps/dist/client"
@@ -9,6 +10,7 @@ import (
 	"lark/domain/cache"
 	"lark/domain/repo"
 	"lark/pkg/common/xkafka"
+	"lark/pkg/obj"
 	"lark/pkg/proto/pb_chat"
 )
 
@@ -39,6 +41,8 @@ type chatService struct {
 	distClient       dist_client.DistClient
 	producer         *xkafka.Producer
 	cacheProducer    *xkafka.Producer
+	msgHandle        map[string]obj.KafkaMessageHandler
+	consumerGroup    *xkafka.MConsumerGroup
 }
 
 func NewChatService(conf *config.Config,
@@ -67,5 +71,13 @@ func NewChatService(conf *config.Config,
 	svc.distClient = dist_client.NewDistClient(conf.Etcd, conf.DistServer, conf.Jaeger, conf.Name)
 	svc.producer = xkafka.NewKafkaProducer(conf.MsgProducer.Address, conf.MsgProducer.Topic)
 	svc.cacheProducer = xkafka.NewKafkaProducer(conf.CacheProducer.Address, conf.CacheProducer.Topic)
+
+	svc.msgHandle = make(map[string]obj.KafkaMessageHandler)
+	svc.msgHandle[conf.MsgConsumer.Topic[0]] = svc.MessageHandler
+	svc.consumerGroup = xkafka.NewMConsumerGroup(&xkafka.MConsumerGroupConfig{KafkaVersion: sarama.V3_2_1_0, OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false},
+		conf.MsgConsumer.Topic,
+		conf.MsgConsumer.Address,
+		conf.MsgConsumer.GroupID)
+	svc.consumerGroup.RegisterHandler(svc)
 	return svc
 }

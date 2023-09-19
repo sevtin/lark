@@ -1,7 +1,7 @@
 package okafka
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 	"lark/pkg/common/xlog"
 )

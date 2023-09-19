@@ -10,4 +10,3 @@ message InboxMessage {
   pb_enum.SUB_TOPIC sub_topic = 2;
   pb_msg.SrvChatMessage msg = 3;
 }
-

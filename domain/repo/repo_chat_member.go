@@ -7,6 +7,7 @@ import (
 	"lark/pkg/common/xmysql"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_member"
+	"lark/pkg/proto/pb_convo"
 )
 
 type ChatMemberRepository interface {
@@ -23,6 +24,7 @@ type ChatMemberRepository interface {
 	ChatMemberBasicInfoList(w *entity.MysqlQuery) (list []*pb_chat_member.ChatMemberBasicInfo, err error)
 	GroupChatBasicInfoList(w *entity.MysqlQuery) (list []*pb_chat_member.GroupChatBasicInfo, err error)
 	GroupChatMemberInfoList(w *entity.MysqlQuery) (list []*pb_chat_member.GroupChatMemberInfo, err error)
+	ConvoChatSeqList(q *entity.MysqlQuery) (list []*pb_convo.ConvoChatSeq, err error)
 }
 
 type chatMemberRepository struct {
@@ -136,6 +138,19 @@ func (r *chatMemberRepository) GroupChatBasicInfoList(w *entity.MysqlQuery) (lis
 		Where(w.Query, w.Args...).
 		Order(w.Sort).
 		Limit(w.Limit).
+		Find(&list).Error
+	return
+}
+
+func (r *chatMemberRepository) ConvoChatSeqList(q *entity.MysqlQuery) (list []*pb_convo.ConvoChatSeq, err error) {
+	list = make([]*pb_convo.ConvoChatSeq, 0)
+	db := xmysql.GetDB()
+	err = db.Table("chat_members m").
+		Select("m.read_seq,c.chat_id,c.seq_id,c.srv_ts").
+		Joins("LEFT JOIN chats c ON c.chat_id=m.chat_id").
+		Where(q.Query, q.Args...).
+		Order("c.srv_ts DESC").
+		Limit(q.Limit).
 		Find(&list).Error
 	return
 }

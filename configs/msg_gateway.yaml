@@ -67,9 +67,12 @@ redis:
 msg_producer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: "to_cloud_msg" # msg_gateway->cloud_msg
+msg_read_producer:
+  address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
+  topic: "chat_msg_seq"
 msg_consumer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: ["to_msg_gateway"] # dist->msg_gateway
-  group_id: online
+  group_id: "online"
 goroutine:
   limit: 500000

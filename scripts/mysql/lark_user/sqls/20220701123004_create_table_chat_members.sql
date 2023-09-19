@@ -13,6 +13,7 @@ CREATE TABLE `chat_members` (
   `sync` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '是否同步用户信息 0:同步 1:不同步',
   `status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT 'NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言',
   `join_source` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '加入源',
+  `read_seq` int unsigned NOT NULL DEFAULT '0' COMMENT '已读最后SEQ ID',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',

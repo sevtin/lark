@@ -4,7 +4,7 @@ log: "./configs/logger.yaml"
 grpc_server:
   name: lark_message_server
   server_id: 1
-  port: 7200
+  port: 7210
   max_connection_idle: 0
   max_connection_age: 0
   max_connection_age_grace: 0
@@ -47,3 +47,6 @@ redis:
 msg_producer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: "to_inbox"
+chat_seq_producer:
+  address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
+  topic: "chat_msg_seq"

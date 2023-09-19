@@ -22,6 +22,7 @@ type Config struct {
 	Jaeger        *conf.Jaeger        `yaml:"jaeger"`
 	MsgProducer   *conf.KafkaProducer `yaml:"msg_producer"`
 	CacheProducer *conf.KafkaProducer `yaml:"cache_producer"`
+	MsgConsumer   *conf.KafkaConsumer `yaml:"msg_consumer"`
 }
 
 var (

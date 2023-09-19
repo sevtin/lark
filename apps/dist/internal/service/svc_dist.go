@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/apps/chat_member/client"
 	"lark/apps/dist/internal/config"
 	gw_client "lark/apps/msg_gateway/client"

@@ -6,6 +6,7 @@ import (
 	"lark/pkg/utils"
 )
 
+// 弃用
 type ConvoCache interface {
 	MGetSeqIdTsList(chatIdList []string) (seqIdTsList []string, err error)
 }

@@ -17,4 +17,5 @@ type ChatMember struct {
 	Sync         int    `gorm:"column:sync;default:0;NOT NULL" json:"sync"`               // 是否同步用户信息 0:同步 1:不同步
 	Status       int    `gorm:"column:status;default:0;NOT NULL" json:"status"`           // NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言
 	JoinSource   int    `gorm:"column:join_source;default:0;NOT NULL" json:"join_source"` // 加入源
+	ReadSeq      int    `gorm:"column:read_seq;default:0;NOT NULL" json:"read_seq"`       // 已读最后SEQ ID
 }

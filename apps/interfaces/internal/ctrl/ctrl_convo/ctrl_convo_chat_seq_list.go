@@ -15,7 +15,7 @@ func (ctrl *ConvoCtrl) ConvoChatSeqList(ctx *gin.Context) {
 		resp   *xhttp.Resp
 		err    error
 	)
-	if err = xgin.BindJSON(ctx, params); err != nil {
+	if err = xgin.ShouldBindQuery(ctx, params); err != nil {
 		xlog.Warn(xhttp.ERROR_CODE_HTTP_REQ_PARAM_ERR, xhttp.ERROR_HTTP_REQ_PARAM_ERR, err.Error())
 		return
 	}

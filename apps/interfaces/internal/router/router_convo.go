@@ -15,5 +15,5 @@ func registerConvoRouter(group *gin.RouterGroup) {
 	ctrl := ctrl_convo.NewConvoCtrl(svc)
 	router := group.Group("convo")
 	router.POST("list", ctrl.ConvoList)
-	router.POST("chat_seq_list", ctrl.ConvoChatSeqList)
+	router.GET("chat_seq_list", ctrl.ConvoChatSeqList)
 }

@@ -18,6 +18,7 @@ type messageService struct {
 	cfg              *config.Config
 	validate         *validator.Validate
 	producer         *xkafka.Producer
+	seqProducer      *xkafka.Producer
 	chatMemberClient chat_member_client.ChatMemberClient
 	chatMemberCache  cache.ChatMemberCache
 	chatMessageCache cache.ChatMessageCache
@@ -35,5 +36,6 @@ func NewMessageService(
 		chatMemberCache:  chatMemberCache,
 		chatMessageCache: chatMessageCache}
 	svc.producer = xkafka.NewKafkaProducer(cfg.MsgProducer.Address, cfg.MsgProducer.Topic)
+	svc.seqProducer = xkafka.NewKafkaProducer(cfg.ChatSeqProducer.Address, cfg.ChatSeqProducer.Topic)
 	return svc
 }

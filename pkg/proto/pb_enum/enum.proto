@@ -16,6 +16,7 @@ enum TOPIC
   CHAT = 1; // 聊天
   CHAT_INVITE = 2; // 聊天邀请
   RED_ENVELOPE = 3; // 红包
+  READ_RECEIPT = 4; // 消息已读回执
 }
 
 enum SUB_TOPIC
@@ -23,10 +24,11 @@ enum SUB_TOPIC
   UNKNOWN_SUB_TOPIC = 0;
   // 1000~1999
   CHAT_MSG = 1000; // 聊天消息
-  CHAT_OPERATION = 1001; // 消息操作
-  CHAT_JOINED_GROUP_CHAT = 1002; // 加入群通知
-  CHAT_QUIT_GROUP_CHAT = 1003; // 退出群通知
-  CHAT_REMOVE_CHAT_MEMBER = 1004; // 移除群
+  CHAT_MSG_READ_RECEIPT = 1001; // 消息已读
+  CHAT_OPERATION = 1002; // 消息操作
+  CHAT_JOINED_GROUP_CHAT = 1003; // 加入群通知
+  CHAT_QUIT_GROUP_CHAT = 1004; // 退出群通知
+  CHAT_REMOVE_CHAT_MEMBER = 1005; // 移除群
 
   // 2000~2999
   CHAT_INVITE_REQUEST = 2000; // 加入Chat邀请

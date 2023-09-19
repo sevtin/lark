@@ -2,7 +2,7 @@ package xkafka
 
 import (
 	"context"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/pkg/common/xlog"
 	"os"
 	"os/signal"

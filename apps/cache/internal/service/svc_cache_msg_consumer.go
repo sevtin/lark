@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/domain/do"
 	"lark/pkg/constant"
 	"lark/pkg/utils"

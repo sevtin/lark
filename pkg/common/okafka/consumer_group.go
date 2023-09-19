@@ -2,7 +2,7 @@ package okafka
 
 import (
 	"context"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"lark/pkg/common/xlog"
 )
 

@@ -82,3 +82,7 @@ msg_producer:
 cache_producer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: "to_cache"
+msg_consumer:
+  address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
+  topic: ["chat_msg_seq"]
+  group_id: "chat_msg_seq"

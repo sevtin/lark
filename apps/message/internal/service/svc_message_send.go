@@ -89,6 +89,15 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		xlog.Warn(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED, err.Error())
 		return
 	}
+	chatSeq := &pb_msg.ChatSeq{
+		ChatId: inbox.Msg.ChatId,
+		SeqId:  seqId,
+		SrvTs:  inbox.Msg.SrvTs,
+	}
+	_, _, err = s.seqProducer.EnQueue(chatSeq, constant.CONST_MSG_KEY_CHAT_SEQ)
+	if err != nil {
+		xlog.Warn(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED, err.Error())
+	}
 	return
 }
 
