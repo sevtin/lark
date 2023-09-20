@@ -18,8 +18,10 @@ CREATE TABLE `messages` (
   `status` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '消息状态',
   `sent_ts` bigint NOT NULL DEFAULT '0' COMMENT '客户端本地发送时间',
   `srv_ts` bigint NOT NULL DEFAULT '0' COMMENT '服务端接收消息的时间',
+  `assoc_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联ID',
   `updated_ts` bigint NOT NULL DEFAULT '0' COMMENT '更新时间',
   `deleted_ts` bigint NOT NULL DEFAULT '0' COMMENT '删除时间',
   PRIMARY KEY (`chat_id`,`seq_id`),
-  UNIQUE KEY `srv_msg_id` (`srv_msg_id`)
+  UNIQUE KEY `uniq_srvMsgId` (`srv_msg_id`),
+  KEY `idx_assocId` (`assoc_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

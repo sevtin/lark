@@ -11,7 +11,6 @@ CREATE TABLE `wallets` (
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`wallet_id`),
   UNIQUE KEY `walletType_uid_deletedTs` (`wallet_type`,`uid`,`deleted_ts`),
-  KEY `idx_deletedTs` (`deleted_ts`),
   KEY `idx_walletType` (`wallet_type`),
   KEY `idx_uid` (`uid`),
   KEY `idx_status` (`status`)

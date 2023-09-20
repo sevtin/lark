@@ -12,7 +12,6 @@ CREATE TABLE `bank_cards` (
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`card_id`),
   UNIQUE KEY `uid_accountNumber_deletedTs` (`uid`,`account_number`,`deleted_ts`),
-  KEY `idx_deletedTs` (`deleted_ts`),
   KEY `idx_uid` (`uid`),
   KEY `idx_bankId` (`bank_id`),
   KEY `idx_status` (`status`)

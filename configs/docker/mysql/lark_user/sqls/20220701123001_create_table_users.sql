@@ -21,7 +21,7 @@ CREATE TABLE `users` (
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`uid`),
   UNIQUE KEY `uniq_larkId_deletedTs` (`lark_id`,`deleted_ts`),
-  UNIQUE KEY `uniq_mobile_deletedTs` (`mobile`,`deleted_ts`),
+  KEY `idx_mobile` (`mobile`),
   KEY `idx_gender` (`gender`),
   KEY `idx_cityId` (`city_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
