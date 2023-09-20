@@ -36,6 +36,7 @@ message GroupChatMemberInfo {
   string member_avatar = 3;
   int32 role_id = 4;
   int32 status = 5;
+  int64 read_seq = 6;
 }
 
 message ChatMemberInfo {

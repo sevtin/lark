@@ -123,7 +123,8 @@ func (r *chatMemberRepository) ChatMemberBasicInfoList(w *entity.MysqlQuery) (li
 func (r *chatMemberRepository) GroupChatMemberInfoList(w *entity.MysqlQuery) (list []*pb_chat_member.GroupChatMemberInfo, err error) {
 	list = make([]*pb_chat_member.GroupChatMemberInfo, 0)
 	db := xmysql.GetDB()
-	err = db.Model(po.ChatMember{}).Select("uid,alias,member_avatar,role_id,status").
+	err = db.Model(po.ChatMember{}).
+		Select("uid,alias,member_avatar,role_id,status,read_seq").
 		Where(w.Query, w.Args...).
 		Order(w.Sort).
 		Limit(w.Limit).

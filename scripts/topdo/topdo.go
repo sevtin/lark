@@ -33,9 +33,9 @@ func init() {
 
 func main() {
 	sql := `
-SELECT o.read_seq,c.chat_id,c.seq_id,c.srv_ts
-FROM chat_members o
-LEFT JOIN chats c ON c.chat_id=o.chat_id;
+SELECT m.read_seq,c.chat_id,c.seq_id,c.srv_ts
+FROM chat_members m
+LEFT JOIN chats c ON c.chat_id=m.chat_id;
 `
 	_, err := SqlToPdo(db, sql, "ConvoChatSeq")
 	if err != nil {

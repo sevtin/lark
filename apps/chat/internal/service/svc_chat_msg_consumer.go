@@ -67,6 +67,7 @@ func (s *chatService) updateReadReceiptSeq(msg []byte) (err error) {
 	}
 	u.SetFilter("chat_id=?", read.ChatId)
 	u.SetFilter("uid=?", read.Uid)
+	u.SetFilter("read_seq<?", read.SeqId)
 	u.Set("read_seq", read.SeqId)
 	s.chatMemberRepo.UpdateChatMember(u)
 	return
@@ -82,6 +83,7 @@ func (s *chatService) updateChatSeq(msg []byte) (err error) {
 		return
 	}
 	u.SetFilter("chat_id=?", read.ChatId)
+	u.SetFilter("seq_id<?", read.SeqId)
 	u.Set("seq_id", read.SeqId)
 	u.Set("srv_ts", read.SrvTs)
 	s.chatRepo.UpdateChat(u)
