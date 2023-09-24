@@ -30,7 +30,7 @@ type GormTs struct {
 }
 
 func Deleted() (column string, value interface{}) {
-	return "deleted_ts", time.Now().UnixNano() / 1e6
+	return "deleted_ts", time.Now().Unix()
 }
 
 type MysqlQuery struct {
