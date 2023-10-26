@@ -20,6 +20,7 @@ mysql:
   max_idle_time: 7200000
   charset: utf8
   address: "lark-mysql-user:13306"
+  db: lark_user
   username: root
   password: lark2022
 redis:

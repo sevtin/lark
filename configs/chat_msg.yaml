@@ -46,6 +46,7 @@ mysql:
   max_idle_time: 7200000
   charset: utf8
   address: "lark-mysql-msg-proxy:3307"
+  db: lark
   username: root
   password: lark2022
 mongo:
