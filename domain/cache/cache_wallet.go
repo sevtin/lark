@@ -14,6 +14,8 @@ type WalletCache interface {
 	GetAccountInfo(uid int64, walletType pb_enum.WALLET_TYPE) (info *pb_wallet.AccountInfo, err error)
 	SetAccountInfo(info *pb_wallet.AccountInfo, keyType int) (err error)
 	DeleteWallet(walletId int64, uid int64, walletType pb_enum.WALLET_TYPE) (err error)
+	GetUserWallets(uid int64) (wallets []*pb_wallet.WalletInfo, err error)
+	SetUserWallets(uid int64, wallets []*pb_wallet.WalletInfo) (err error)
 }
 
 type walletCache struct {
@@ -61,5 +63,21 @@ func (c *walletCache) DeleteWallet(walletId int64, uid int64, walletType pb_enum
 		key2 = constant.RK_SYNC_WALLET_ACCOUNT_INFO + utils.GetHashTagKey(uid) + "-" + strconv.Itoa(int(walletType))
 	)
 	err = xredis.CUnlink([]string{key1, key2})
+	return
+}
+
+func (c *walletCache) GetUserWallets(uid int64) (wallets []*pb_wallet.WalletInfo, err error) {
+	var (
+		key = constant.RK_SYNC_USER_WALLETS + utils.GetHashTagKey(uid)
+	)
+	err = Get(key, &wallets)
+	return
+}
+
+func (c *walletCache) SetUserWallets(uid int64, wallets []*pb_wallet.WalletInfo) (err error) {
+	var (
+		key = constant.RK_SYNC_USER_WALLETS + utils.GetHashTagKey(uid)
+	)
+	err = Set(key, wallets, constant.CONST_DURATION_USER_WALLETS_SECOND)
 	return
 }

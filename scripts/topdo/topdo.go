@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	db *gorm.DB
+	db        *gorm.DB
+	directory = "./domain/pdo/"
 )
 
 func init() {
@@ -25,19 +26,20 @@ func init() {
 		dsn = "root:lark2022@tcp(lark-mysql-user-01:13306)/lark_user?charset=utf8mb4&parseTime=True&loc=Local"
 		err error
 	)
+	dsn = "root:@tcp(127.0.0.1:3306)/canary?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
+	//directory = "./apps/apis/canary/internal/domain/pdo/"
 }
 
 func main() {
 	sql := `
-SELECT m.read_seq,c.chat_id,c.seq_id,c.srv_ts
-FROM chat_members m
-LEFT JOIN chats c ON c.chat_id=m.chat_id;
+SELECT openid,uid,access_token
+FROM oauth_users
 `
-	_, err := SqlToPdo(db, sql, "ConvoChatSeq")
+	_, err := SqlToPdo(db, sql, "OauthUserToken")
 	if err != nil {
 		log.Println(err)
 	}
@@ -157,7 +159,7 @@ func generateCode(obj string, columns []string, fields [][]string, cts map[strin
 // 创建文件
 func createFile(code string, filename string) (err error) {
 	var (
-		path          = "./domain/pdo/"
+		path          = directory
 		filePath      = path + "pdo_" + filename + ".go"
 		exists        bool
 		formattedCode []byte

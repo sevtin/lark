@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var (
-		serviceName      = "Payment"
+		serviceName      = "Canary"
 		upperServiceName = utils.ToCamel(serviceName)
 		lowerServiceName = utils.FirstLower(upperServiceName)
 		packageName      = utils.CamelToSnake(upperServiceName)

@@ -1,3 +1,4 @@
+```
 package xmysql
 
 import (
@@ -6,6 +7,7 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
 	"time"
@@ -65,28 +67,56 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 	return
 }
 
+func spliceDsn(c *conf.Db) (dsn string) {
+	dsn = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
+		c.Username,
+		c.Password,
+		c.Address,
+		c.Db)
+	return
+}
+
 func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 	var (
-		args  string
-		opts  *gorm.Config
-		sqlDB *sql.DB
+		opts     *gorm.Config
+		sqlDB    *sql.DB
+		sources  = make([]gorm.Dialector, 0)
+		replicas = make([]gorm.Dialector, 0)
+		dsn      string
+		master   string
 	)
-	args = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
-		cfg.Username,
-		cfg.Password,
-		cfg.Address,
-		cfg.Db)
+
+	for i, c := range cfg.Sources {
+		dsn = spliceDsn(c)
+		if i == 0 {
+			master = dsn
+		}
+		sources = append(sources, mysql.Open(dsn))
+	}
+	for _, c := range cfg.Replicas {
+		dsn = spliceDsn(c)
+		replicas = append(replicas, mysql.Open(dsn))
+	}
 
 	opts = &gorm.Config{
 		SkipDefaultTransaction: false, // 禁用默认事务(true: Error 1295: This command is not supported in the prepared statement protocol yet)
 		PrepareStmt:            false, // 创建并缓存预编译语句(true: Error 1295)
 	}
-
-	db, err = gorm.Open(mysql.Open(args), opts)
+	db, err = gorm.Open(mysql.Open(master), opts)
 	if err != nil {
 		xlog.Error(err.Error())
 		return
 	}
+	db.Use(dbresolver.Register(dbresolver.Config{
+		Sources:  sources,
+		Replicas: replicas,
+		// sources/replicas load balancing policy
+		Policy:            dbresolver.RandomPolicy{},
+		TraceResolverMode: true,
+	}).SetMaxIdleConns(cfg.MaxIdleConns).
+		SetMaxOpenConns(cfg.MaxOpenConns).
+		SetConnMaxLifetime(time.Duration(cfg.MaxLifetime) * time.Millisecond))
+
 	db = db.Debug()
 
 	sqlDB, err = db.DB()
@@ -106,3 +136,5 @@ SetMaxIdleConns：设置池中最大空闲连接数，默认值是2. 理论上�
 SetConnMaxIdleTime：设置池中连接在关闭之前可用空闲的最长时间，默认是不限制时间。如果设置为2小时，表示池中自上次使用以后在池中空闲了2小时的连接将标为过期被清理。
 SetConnMaxLifetime：设置池中连接关闭前可以保持打开的最长时间，默认是不限制时间。
 */
+
+```

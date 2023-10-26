@@ -94,3 +94,11 @@ func Set(key string, in interface{}, expire time.Duration) (err error) {
 	}
 	return
 }
+
+func Delete(key string) (err error) {
+	err = xredis.Del(key)
+	if err != nil {
+		xlog.Warn(ERROR_CODE_CACHE_REDIS_DELETE_FAILED, ERROR_CACHE_REDIS_DELETE_FAILED, key, err.Error())
+	}
+	return
+}

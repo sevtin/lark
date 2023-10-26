@@ -113,6 +113,12 @@ message AccountInfo {
   pb_enum.WALLET_STATUS status = 6; // 钱包状态
 }
 
+message WalletInfo {
+  int64 wallet_id = 1; // 钱包唯一ID
+  pb_enum.WALLET_TYPE wallet_type = 2; // 钱包类型
+  int64 uid = 3; // 用户UID
+}
+
 service Wallet {
   rpc GetBalances(GetBalancesReq) returns(GetBalancesResp);
   rpc Exchange(ExchangeReq) returns(ExchangeResp);

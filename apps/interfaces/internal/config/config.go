@@ -31,6 +31,7 @@ type Config struct {
 	OrderServer         *conf.GrpcServer   `yaml:"order_server"`
 	PaymentServer       *conf.GrpcServer   `yaml:"payment_server"`
 	Jaeger              *conf.Jaeger       `yaml:"jaeger"`
+	Github              *conf.GithubOAuth2 `yaml:"github_oauth2"`
 	Google              *conf.GoogleOAuth2 `yaml:"google_oauth2"`
 }
 

@@ -61,7 +61,7 @@ message Token {
   // @inject_tag: json:"token"
   string token = 1; // 用户token
   // @inject_tag: json:"expire"
-  int64  expire = 2; // token过期时间戳（秒）
+  int64 expire = 2; // token过期时间戳（秒）
 }
 
 message ServerInfo {

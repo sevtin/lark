@@ -200,6 +200,13 @@ enum PAYMENT_STATUS {
   FAILED = 3; // 支付失败
 }
 
+enum ORDER_STATUS {
+  CREATED_ORDER_UNPAID  = 0; // 未支付
+  ORDER_PAYING = 1; // 支付中
+  ORDER_PAID = 2; // 已支付
+  ORDER_FAILED = 3; // 支付失败
+}
+
 enum TRADE_TYPE {
   UNKNOWN_TRADE_TYPE = 0;
   INCOME = 1; // 收入
@@ -211,6 +218,9 @@ enum TRADE_TYPE_ID {
   RED_ENVELOPE_SEND_ID = 1; // 发放红包
   RED_ENVELOPE_RECEIVE_ID = 2; // 收红包
   RED_ENVELOPE_RETURN_ID = 3; // 红包余额退还
+  REPO_CREATE_TASK_ID = 4; // 创建任务
+  REPO_UPDATE_TASK_RETURN_ID = 5; // 更新任务返还
+  REPO_UPDATE_TASK_LAUNCH_ID = 6; // 更新任务上架
 }
 
 enum GRAB_RESULT {
@@ -235,4 +245,14 @@ enum PAY_TYPE {
   WXPAY = 2; // 微信支付
   UNIONPAY = 3; // 银联支付
   PAYPAL = 4; // PayPal
+}
+
+enum REPO_CHANNEL {
+  GITHUB_REPO = 0;
+}
+
+enum TASK_STATUS {
+  UNKNOWN_TASK_STATUS = 0;
+  TASK_ENABLED = 1; // 任务开启
+  TASK_DISABLED = 2; // 任务关闭
 }

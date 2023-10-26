@@ -66,6 +66,8 @@ message ChatSeq {
   int64 chat_id = 1; // 会话ID
   int64 seq_id = 2; // 消息唯一ID
   int64 srv_ts = 3; // 服务端接收消息的时间
+  int64 sender_id = 4; // 发送者uid
+  pb_enum.MSG_FROM msg_from = 10; // 消息来源
 }
 
 message Image {

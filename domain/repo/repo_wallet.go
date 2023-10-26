@@ -6,12 +6,15 @@ import (
 	"lark/domain/po"
 	"lark/pkg/common/xmysql"
 	"lark/pkg/entity"
+	"lark/pkg/proto/pb_wallet"
 )
 
 type WalletRepository interface {
+	TxCreateWallets(tx *gorm.DB, wallets []*po.Wallet) (err error)
 	TxChangeWalletBalance(tx *gorm.DB, q *entity.MysqlUpdate) (rowsAffected int64)
 	GetAccountInfo(q *entity.MysqlQuery) (info *pdo.AccountInfo, err error)
 	GetAccountBalance(q *entity.MysqlQuery) (balance *pdo.AccountBalance, err error)
+	UserWallets(q *entity.MysqlQuery) (wallets []*pb_wallet.WalletInfo, err error)
 }
 
 type walletRepository struct {
@@ -19,6 +22,10 @@ type walletRepository struct {
 
 func NewWalletRepository() WalletRepository {
 	return &walletRepository{}
+}
+
+func (r *walletRepository) TxCreateWallets(tx *gorm.DB, wallets []*po.Wallet) (err error) {
+	return tx.Create(wallets).Error
 }
 
 func (r *walletRepository) TxChangeWalletBalance(tx *gorm.DB, q *entity.MysqlUpdate) (rowsAffected int64) {
@@ -38,5 +45,11 @@ func (r *walletRepository) GetAccountBalance(q *entity.MysqlQuery) (balance *pdo
 	balance = new(pdo.AccountBalance)
 	db := xmysql.GetDB()
 	err = db.Model(new(po.Wallet)).Select(balance.GetFields()).Where(q.Query, q.Args...).Find(balance).Error
+	return
+}
+
+func (r *walletRepository) UserWallets(q *entity.MysqlQuery) (wallets []*pb_wallet.WalletInfo, err error) {
+	db := xmysql.GetDB()
+	err = db.Model(new(po.Wallet)).Where(q.Query, q.Args...).Find(&wallets).Error
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
+	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_msg"
 )
 
@@ -59,18 +60,24 @@ func (s *chatService) MessageHandler(msg []byte, msgKey string) (err error) {
 func (s *chatService) updateReadReceiptSeq(msg []byte) (err error) {
 	var (
 		read = new(pb_msg.ReadReceipt)
-		u    = entity.NewMysqlUpdate()
 	)
 	if err = proto.Unmarshal(msg, read); err != nil {
 		err = nil
 		return
 	}
+	s.updateReadSeq(read)
+	return
+}
+
+func (s *chatService) updateReadSeq(read *pb_msg.ReadReceipt) {
+	var (
+		u = entity.NewMysqlUpdate()
+	)
 	u.SetFilter("chat_id=?", read.ChatId)
 	u.SetFilter("uid=?", read.Uid)
 	u.SetFilter("read_seq<?", read.SeqId)
 	u.Set("read_seq", read.SeqId)
 	s.chatMemberRepo.UpdateChatMember(u)
-	return
 }
 
 func (s *chatService) updateChatSeq(msg []byte) (err error) {
@@ -87,5 +94,14 @@ func (s *chatService) updateChatSeq(msg []byte) (err error) {
 	u.Set("seq_id", read.SeqId)
 	u.Set("srv_ts", read.SrvTs)
 	s.chatRepo.UpdateChat(u)
+	if read.MsgFrom != pb_enum.MSG_FROM_USER {
+		return
+	}
+	r := &pb_msg.ReadReceipt{
+		Uid:    read.SenderId,
+		ChatId: read.ChatId,
+		SeqId:  read.SeqId,
+	}
+	s.updateReadSeq(r)
 	return
 }

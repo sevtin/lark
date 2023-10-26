@@ -15,5 +15,6 @@ type OauthUser struct {
 	RefreshToken string `gorm:"column:refresh_token;NOT NULL" json:"refresh_token"` // 第三方RefreshToke
 	Expire       int    `gorm:"column:expire;default:0;NOT NULL" json:"expire"`     // 过期时间 时间戳
 	AvatarUrl    string `gorm:"column:avatar_url;NOT NULL" json:"avatar_url"`       // 第三方头像url
+	Url          string `gorm:"column:url;NOT NULL" json:"url"`                     // 主页地址
 	Scope        string `gorm:"column:scope;NOT NULL" json:"scope"`                 // 用户授权的作用域，使用逗号（,）分隔
 }

@@ -41,3 +41,7 @@ func CalculateAge(birthday time.Time) int {
 	}
 	return age
 }
+
+func AddDuration(d time.Duration) int64 {
+	return time.Now().Add(d).Unix()
+}

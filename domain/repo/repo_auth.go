@@ -16,6 +16,7 @@ type AuthRepository interface {
 	TxCreateOauthUser(tx *gorm.DB, user *po.OauthUser) (err error)
 	GetOAuthUser(q *entity.MysqlQuery) (user *pdo.OauthUser, err error)
 	UpdateOauthUser(u *entity.MysqlUpdate) (err error)
+	GetUserToken(q *entity.MysqlQuery) (user *pdo.OauthUserToken, err error)
 }
 
 type authRepository struct {
@@ -61,6 +62,13 @@ func (r *authRepository) TxCreateOauthUser(tx *gorm.DB, user *po.OauthUser) (err
 
 func (r *authRepository) GetOAuthUser(q *entity.MysqlQuery) (user *pdo.OauthUser, err error) {
 	user = new(pdo.OauthUser)
+	db := xmysql.GetDB()
+	err = db.Model(&po.OauthUser{}).Select(user.GetFields()).Where(q.Query, q.Args...).Find(user).Error
+	return
+}
+
+func (r *authRepository) GetUserToken(q *entity.MysqlQuery) (user *pdo.OauthUserToken, err error) {
+	user = new(pdo.OauthUserToken)
 	db := xmysql.GetDB()
 	err = db.Model(&po.OauthUser{}).Select(user.GetFields()).Where(q.Query, q.Args...).Find(user).Error
 	return

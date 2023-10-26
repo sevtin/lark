@@ -213,9 +213,13 @@ func GetUint64(key string) (val uint64, err error) {
 	return
 }
 
-func GetInt(key string) (int, error) {
+func GetInt(key string) (val int, err error) {
 	key = RealKey(key)
-	return Cli.Client.Get(context.Background(), key).Int()
+	val, err = Cli.Client.Get(context.Background(), key).Int()
+	if err == redis.Nil {
+		err = nil
+	}
+	return
 }
 
 func HGetInt64(key, field string) (value int64, err error) {

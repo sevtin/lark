@@ -57,6 +57,18 @@ func NewNormalQuery() *MysqlQuery {
 	}
 }
 
+func (m *MysqlQuery) NotDeleted(alias string) {
+	m.Query += " AND " + alias + ".deleted_ts=0"
+}
+
+func (m *MysqlQuery) IsNull(field string) {
+	m.Query += " AND " + field + " IS NULL"
+}
+
+func (m *MysqlQuery) IsNotNull(field string) {
+	m.Query += " AND " + field + " IS NOT NULL"
+}
+
 func (m *MysqlQuery) SetFilter(query string, value ...interface{}) {
 	m.Query += " AND " + query
 	m.Args = append(m.Args, value...)
@@ -173,4 +185,8 @@ func (m *MysqlUpdate) Normal() {
 
 func (m *MysqlUpdate) Updates(db *gorm.DB, model interface{}) *gorm.DB {
 	return db.Model(model).Where(m.Query, m.Args...).Updates(m.Values)
+}
+
+func (m *MysqlUpdate) Delete(db *gorm.DB, model interface{}) *gorm.DB {
+	return db.Model(model).Where(m.Query, m.Args...).Update(Deleted())
 }

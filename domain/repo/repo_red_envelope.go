@@ -2,7 +2,6 @@ package repo
 
 import (
 	"gorm.io/gorm"
-	"gorm.io/plugin/dbresolver"
 	"lark/domain/pdo"
 	"lark/domain/po"
 	"lark/pkg/common/xmysql"
@@ -83,7 +82,8 @@ func (r *redEnvelopeRepository) TxRedEnvelopeReturn(tx *gorm.DB, q *entity.Mysql
 func (r *redEnvelopeRepository) GetRedEnvelopeStatus(q *entity.MysqlQuery) (status *pdo.RedEnvelopeStatus, err error) {
 	status = new(pdo.RedEnvelopeStatus)
 	db := xmysql.GetDB()
-	err = db.Clauses(dbresolver.Write).Model(po.RedEnvelope{}).Where(q.Query, q.Args...).Find(status).Error
+	//err = db.Clauses(dbresolver.Write).Model(po.RedEnvelope{}).Where(q.Query, q.Args...).Find(status).Error
+	err = db.Model(po.RedEnvelope{}).Where(q.Query, q.Args...).Find(status).Error
 	return
 }
 

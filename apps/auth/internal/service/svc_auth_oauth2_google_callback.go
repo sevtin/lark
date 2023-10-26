@@ -6,7 +6,6 @@ import (
 	"golang.org/x/oauth2"
 	"lark/domain/do"
 	"lark/domain/po"
-	"lark/pkg/constant"
 	"lark/pkg/proto/pb_auth"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/xhttp"
@@ -19,9 +18,6 @@ http://localhost:8088/open/auth/google/auth_code_url
 */
 func (s *authService) GoogleOAuth2Callback(ctx context.Context, req *pb_auth.GoogleOAuth2CallbackReq) (resp *pb_auth.GoogleOAuth2CallbackResp, _ error) {
 	resp = new(pb_auth.GoogleOAuth2CallbackResp)
-	if req.State != constant.GOOGLE_OAUTH_STATE {
-		return
-	}
 	var (
 		token *oauth2.Token
 		info  *po.OauthUser

@@ -16,6 +16,7 @@ const (
 	RK_SYNC_USER_ACCESS_TOKEN             = "USER:ACCESS_TOKEN:"             // {}
 	RK_SYNC_USER_INFO                     = "USER:INFO:"                     // 用户信息 {}
 	RK_SYNC_BASIC_USER_INFO               = "USER:BASIC_INFO:"               // 基础用户信息 {}
+	RK_SYNC_OAUTH_USER_TOKEN              = "OAUTH_USER:TOKEN:"              // 第三方登录token
 	RK_SYNC_USER_SERVER                   = "SRV:"                           // WS服务器ID {}
 	RK_SYNC_MSG_CACHE                     = "MSG:CACHE:"                     // 消息缓存 + ChatId + seqId {}
 	RK_SYNC_DIST_CHAT_MEMBER_HASH         = "CHAT:DIST_MEMBER_HASH:"         // 消息派发Chat成员列表 {}
@@ -32,7 +33,11 @@ const (
 	RK_SYNC_RED_ENV_INFO                  = "RED_ENV:INFO:"            // 红包信息
 	RK_SYNC_RED_ENV_LOCK                  = "RED_ENV:LOCK:"            // 红包分布式锁
 	RK_SYNC_WALLET_ACCOUNT_INFO           = "WALLET:ACCOUNT_INFO:"     // 钱包账户信息
+	RK_SYNC_USER_WALLETS                  = "USER_WALLETS:"            // 用户钱包
 	RK_SYNC_RED_ENV_KEY                   = "RED_ENV:KEY:"             // 红包Key
+	RK_SYNC_ORDER_STATUS                  = "ORDER:STATUS:"            // 订单狀態
+	RK_SYNC_REPO_INFO                     = "REPO:INFO:"               // 仓信息
+	RK_SYNC_TASK_REWARD                   = "TASK:REWARD:"             // 任务奖励
 )
 
 // 弃用key

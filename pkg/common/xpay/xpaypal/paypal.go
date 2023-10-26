@@ -43,7 +43,7 @@ func CreatePayment(order *po.Order) (result *paypal.Payment, err error) {
 	p.RedirectURLs.ReturnURL = pay.cfg.Server + pay.cfg.ReturnURL
 
 	var transaction = &paypal.Transaction{}
-	transaction.InvoiceNumber = order.OrderSn
+	transaction.InvoiceNumber = order.TradeNo
 	p.Transactions = []*paypal.Transaction{transaction}
 
 	transaction.Amount = &paypal.Amount{}

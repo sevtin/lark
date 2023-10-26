@@ -7,7 +7,7 @@ import (
 	chat_member_client "lark/apps/chat_member/client"
 	"lark/domain/cache"
 	"lark/domain/repo"
-	"lark/pkg/common/xgoogle"
+	"lark/pkg/common/xoauth2"
 	"lark/pkg/proto/pb_auth"
 )
 
@@ -31,6 +31,7 @@ type authService struct {
 	svrMgrCache       cache.ServerMgrCache
 	chatMemberClient  chat_member_client.ChatMemberClient
 	googleOauthConfig *oauth2.Config
+	githubOauthConfig *oauth2.Config
 }
 
 func NewAuthService(cfg *config.Config,
@@ -52,6 +53,7 @@ func NewAuthService(cfg *config.Config,
 		svrMgrCache:      svrMgrCache,
 		chatMemberClient: chatMemberClient,
 	}
-	svc.googleOauthConfig = xgoogle.NewOauthConfig(cfg.Google)
+	svc.googleOauthConfig = xoauth2.NewGoogleOauthConfig(cfg.Google)
+	svc.githubOauthConfig = xoauth2.NewGithubOauthConfig(cfg.Github)
 	return svc
 }

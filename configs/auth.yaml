@@ -39,12 +39,9 @@ mysql:
   max_lifetime: 120000
   max_idle_time: 7200000
   charset: utf8
-  sources:
-    - {address: "lark-mysql-user-01:13306",username: root,password: lark2022,db: lark_user}
-    - {address: "lark-mysql-user-02:13307",username: root,password: lark2022,db: lark_user}
-  replicas:
-    - {address: "lark-mysql-user-03:13308",username: root,password: lark2022,db: lark_user}
-    - {address: "lark-mysql-user-04:13309",username: root,password: lark2022,db: lark_user}
+  address: "lark-mysql-user:13306"
+  username: root
+  password: lark2022
 redis:
   address: ["lark-redis-01:7001","lark-redis-02:7002","lark-redis-03:7003","lark-redis-04:7004"]
   db: 0
@@ -65,9 +62,11 @@ jaeger:
   max_packet_size: 0
   enabled: false
 github_oauth2:
-  client_id: "Iv1.4a3ecfaf2c5e4f1a"
-  client_secret: "05805d8d884ec2b2525b286e81f9ef4954e9622d"
+  client_id: "0d913b42b82360544ba4"
+  client_secret: "afca54ad0c8d6e9975f820b884957437a531528f"
   redirect_url: "http://localhost:8088/open/auth/github/callback"
+  success_url: "http://localhost:8088/home?code=%s"
+  failed_url: "http://localhost:8088/login"
 google_oauth2:
   client_id: "913029687366-om9n4ca3427i8sjpf831dcfvs5itgtco.apps.googleusercontent.com"
   client_secret: "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"
@@ -75,3 +74,5 @@ google_oauth2:
   scopes: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
   auth_url: "https://accounts.google.com/o/oauth2/auth"
   token_url: "https://accounts.google.com/o/oauth2/token"
+  success_url: "http://localhost:8088/home?code=%s"
+  failed_url: "http://localhost:8088/login"

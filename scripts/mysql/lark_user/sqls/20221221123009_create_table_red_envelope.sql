@@ -83,7 +83,7 @@ CREATE TABLE `fund_flows` (
   `trade_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '收支类型 1-收入 2-支出',
   `trade_type_id` int unsigned NOT NULL DEFAULT '0' COMMENT '交易类型ID',
   `trade_amount` bigint unsigned NOT NULL DEFAULT '0' COMMENT '交易金额',
-  `balance` bigint unsigned NOT NULL DEFAULT '0' COMMENT '交易前账户余额',
+  `balance` bigint unsigned NOT NULL DEFAULT '0' COMMENT '交易前账户余额 暂时不用',
   `pay_status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '支付状态 0-未支付 1-支付中 2-已支付 3-支付失败',
   `description` varchar(500) NOT NULL DEFAULT '' COMMENT '描述信息',
   `created_ts` bigint NOT NULL DEFAULT '0',
@@ -91,8 +91,7 @@ CREATE TABLE `fund_flows` (
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`flow_id`),
   UNIQUE KEY `uniq_tradeNo` (`trade_no`),
-  KEY `idx_uid_tradeTypeId_assocId` (`uid`,`trade_type_id`,`assoc_id`),
-  KEY `idx_uid_tradeNo` (`uid`,`trade_no`)
+  KEY `idx_uid_tradeTypeId_assocId` (`uid`,`trade_type_id`,`assoc_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资金流水表';
 
 DROP TABLE IF EXISTS `trade_types`;
@@ -110,23 +109,25 @@ DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `order_id` bigint unsigned NOT NULL COMMENT 'order id',
   `order_sn` varchar(64) NOT NULL DEFAULT '' COMMENT '订单号',
+  `trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '自编唯一交易编号',
   `uid` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'uid',
   `time_expire` bigint unsigned NOT NULL DEFAULT '0' COMMENT '绝对超时时间',
   `amount` bigint unsigned NOT NULL DEFAULT '0' COMMENT '订单总金额',
   `pay_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '支付方式 1-支付宝 2-微信 3-银联 4-PayPal',
   `source_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '订单来源 1-IOS 2-ANDROID 3-MAC 4-WINDOWS 5-WEB',
-  `status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '订单状态 0-PENDING 1-PAID 2-CANCELLED 3-REFUNDED',
+  `order_status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '订单状态 0-PENDING 1-PAID 2-CANCELLED 3-REFUNDED',
   `integration` bigint unsigned NOT NULL DEFAULT '0' COMMENT '可以获得的积分',
   `growth` bigint unsigned NOT NULL DEFAULT '0' COMMENT '可以获得的成长值',
   `payment_ts` bigint unsigned NOT NULL DEFAULT '0' COMMENT '支付时间',
   `subject` varchar(256) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT '订单标题',
   `note` varchar(500) NOT NULL DEFAULT '' COMMENT '订单备注',
-  `tag_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'Tag ID',
+  `tag_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'Tag ID 用于取消',
   `created_ts` bigint unsigned NOT NULL DEFAULT '0',
   `updated_ts` bigint unsigned NOT NULL DEFAULT '0',
   `deleted_ts` bigint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`order_id`),
   UNIQUE KEY `uniq_orderSn` (`order_sn`),
+  UNIQUE KEY `uniq_tradeNo` (`trade_no`),
   UNIQUE KEY `uniq_tagId` (`tag_id`),
   KEY `idx_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单';
@@ -135,7 +136,6 @@ DROP TABLE IF EXISTS `order_items`;
 CREATE TABLE `order_items` (
   `order_item_id` bigint unsigned NOT NULL COMMENT 'order item id',
   `order_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'order id',
-  `order_sn` varchar(64) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT 'order sn',
   `spu_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'spu id',
   `spu_name` varchar(200) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT 'spu name',
   `spu_pic` varchar(160) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT '商品spu图片',
@@ -156,28 +156,31 @@ CREATE TABLE `order_items` (
   `updated_ts` bigint unsigned NOT NULL DEFAULT '0',
   `deleted_ts` bigint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`order_item_id`),
-  KEY `idx_orderSn` (`order_sn`)
+  KEY `idx_orderId` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单项信息';
 
 DROP TABLE IF EXISTS `payments`;
 CREATE TABLE `payments` (
   `pay_id` bigint unsigned NOT NULL COMMENT 'pay id',
+  `uid` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'uid',
   `seller_id` varchar(64) NOT NULL DEFAULT '' COMMENT '收款账号对应的第三方支付唯一用户号',
+  `buyer_id` varchar(64) NOT NULL DEFAULT '' COMMENT '支付人所在支付平台ID',
   `order_id` bigint NOT NULL DEFAULT '0' COMMENT '商户原始订单号',
-  `order_sn` varchar(64) NOT NULL DEFAULT '' COMMENT '系统内部唯一订单号，只能是数字、大小写字母_-*',
-  `payment_status` tinyint NOT NULL DEFAULT '0' COMMENT '支付状态 0-待支付 1-已支付/已完成 2-已取消 3-失败',
+  `trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '系统内部唯一订单号，只能是数字、大小写字母_-*',
+  `pay_status` tinyint NOT NULL DEFAULT '0' COMMENT '支付状态 0-待支付 1-已支付/已完成 2-已取消 3-失败',
   `currency` varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT '币种',
   `subject` varchar(256) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT '订单标题',
   `summary` varchar(256) NOT NULL DEFAULT '' COMMENT '摘要',
-  `trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '该交易在第三方支付系统中的交易流水号',
+  `th_trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '该交易在第三方支付系统中的交易流水号',
   `pay_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '支付方式 1-支付宝 2-微信 3-银联 4-Paypal',
   `return_content` varchar(4096) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT 'return内容',
   `notify_content` varchar(4096) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT 'notify内容',
+  `result_content` varchar(4096) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT '结果内容',
   `return_ts` bigint NOT NULL DEFAULT '0' COMMENT 'return时间',
   `notify_ts` bigint NOT NULL DEFAULT '0' COMMENT 'notify时间',
   `total_amount` bigint NOT NULL DEFAULT '0' COMMENT '订单金额',
   `actual_amount` bigint NOT NULL DEFAULT '0' COMMENT '实际入账金额',
-  `payment_ts` bigint NOT NULL DEFAULT '0' COMMENT '支付时间',
+  `pay_ts` bigint NOT NULL DEFAULT '0' COMMENT '支付时间',
   `tag_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'Tag ID 用于取消',
   `sale_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'Sale ID 用于退款',
   `created_ts` bigint NOT NULL DEFAULT '0',
@@ -187,5 +190,6 @@ CREATE TABLE `payments` (
   UNIQUE KEY `uniq_orderId` (`order_id`),
   KEY `idx_tagId` (`tag_id`),
   KEY `idx_saleId` (`sale_id`),
-  KEY `idx_tradeNo` (`trade_no`)
+  KEY `idx_tradeNo` (`trade_no`),
+  KEY `idx_uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付';

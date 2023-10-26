@@ -34,7 +34,7 @@ var (
 	// 群成员数量
 	gn = flag.Int64("gn", 10000, "Number of group members")
 	// 发送消息次数
-	tn = flag.Int64("tn", 20, "Number of tests")
+	tn = flag.Int64("tn", 1, "Number of tests")
 	// chat id
 	cid = flag.Int64("cid", 3333336666669999990, "Test Chat ID")
 	// 是否集群

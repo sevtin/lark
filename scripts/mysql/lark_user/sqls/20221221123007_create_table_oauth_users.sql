@@ -11,10 +11,12 @@ CREATE TABLE `oauth_users` (
   `refresh_token` varchar(500) NOT NULL COMMENT '第三方RefreshToke',
   `expire` int NOT NULL DEFAULT '0' COMMENT '过期时间 时间戳',
   `avatar_url` varchar(128) NOT NULL COMMENT '第三方头像url',
+  `url` varchar(500) NOT NULL COMMENT '主页地址',
   `scope` varchar(128) NOT NULL COMMENT '用户授权的作用域，使用逗号（,）分隔',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`oauth_id`),
-  KEY `idx_channel_openid_uid` (`channel`,`openid`,`uid`)
+  KEY `idx_channel_openid` (`channel`,`openid`),
+  KEY `idx_uid` (`channel`,`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

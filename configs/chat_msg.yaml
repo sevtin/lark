@@ -45,8 +45,9 @@ mysql:
   max_lifetime: 120000
   max_idle_time: 7200000
   charset: utf8
-  sources:
-    - {address: "lark-mysql-msg-proxy:3307",username: root,password: lark2022,db: lark}
+  address: "lark-mysql-msg-proxy:3307"
+  username: root
+  password: lark2022
 mongo:
   address: "lark-mongo-msg:27017"
   username: admin

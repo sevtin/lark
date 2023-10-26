@@ -25,12 +25,13 @@ func registerOpenAuthRouter(group *gin.RouterGroup) {
 func registerGithubRouter(group *gin.RouterGroup, ctrl *ctrl_auth.AuthCtrl) {
 	router := group.Group("github")
 	router.GET("callback", ctrl.GithubOAuth2Callback)
+	router.Any("auth_code_url", ctrl.GithubAuthCodeURL)
 }
 
 func registerGoogleRouter(group *gin.RouterGroup, ctrl *ctrl_auth.AuthCtrl) {
 	router := group.Group("google")
 	router.Any("callback", ctrl.GoogleOAuth2Callback)
-	router.Any("auth_code_url", ctrl.AuthCodeURL)
+	router.Any("auth_code_url", ctrl.GoogleAuthCodeURL)
 }
 
 func registerPrivateAuthRouter(group *gin.RouterGroup) {

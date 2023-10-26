@@ -2,11 +2,11 @@ package xredis
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-redsync/redsync/v4"
 	redsyncredis "github.com/go-redsync/redsync/v4/redis"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
 	"github.com/redis/go-redis/v9"
+	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
 )
 
@@ -34,7 +34,8 @@ func NewRedisClient(cfg *conf.Redis) *redis.ClusterClient {
 	// 判断是否能够链接到redis
 	_, err = client.Ping(context.Background()).Result()
 	if err != nil {
-		fmt.Println(err.Error())
+		xlog.Warn(err.Error())
+		return nil
 	}
 	// redis 锁
 	pool = goredis.NewPool(client)

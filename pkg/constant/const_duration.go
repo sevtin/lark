@@ -3,8 +3,9 @@ package constant
 import "time"
 
 const (
-	CONST_DURATION_BASIC_USER_INFO_SECOND = 60 * 60 * 24 * 7 * time.Second //用户基础信息缓存时间
-	CONST_DURATION_USER_INFO_SECOND       = 60 * 60 * 24 * 7 * time.Second //用户信息缓存时间
+	CONST_DURATION_BASIC_USER_INFO_SECOND  = 60 * 60 * 24 * 7 * time.Second //用户基础信息缓存时间
+	CONST_DURATION_USER_INFO_SECOND        = 60 * 60 * 24 * 7 * time.Second //用户信息缓存时间
+	CONST_DURATION_OAUTH_USER_TOKEN_SECOND = 60 * 60 * 24 * 7 * time.Second
 )
 
 const (
@@ -50,6 +51,7 @@ const (
 
 const (
 	CONST_DURATION_WALLET_ACCOUNT_INFO_SECOND = 60 * 60 * 24 * time.Second
+	CONST_DURATION_USER_WALLETS_SECOND        = 60 * 60 * 24 * time.Second
 )
 
 const (
@@ -73,4 +75,10 @@ const (
 
 const (
 	CONST_DURATION_RED_ENVELOPE_DISTRIBUTED_LOCK_EXPIRY_IN_SECOND = 15 * time.Second
+)
+
+const (
+	CONST_DURATION_ORDER_STATUS_SECOND = 60 * 60 * time.Second
+	CONST_DURATION_REPO_INFO_SECOND    = 60 * 60 * 24 * 7 * time.Second
+	CONST_DURATION_TASK_REWARD_SECOND  = 60 * 60 * 24 * time.Second
 )

@@ -45,12 +45,9 @@ mysql:
   max_lifetime: 120000
   max_idle_time: 7200000
   charset: utf8
-  sources:
-    - {address: "lark-mysql-user-01:13306",username: root,password: lark2022,db: lark_user}
-    - {address: "lark-mysql-user-02:13307",username: root,password: lark2022,db: lark_user}
-  replicas:
-    - {address: "lark-mysql-user-03:13308",username: root,password: lark2022,db: lark_user}
-    - {address: "lark-mysql-user-04:13309",username: root,password: lark2022,db: lark_user}
+  address: "lark-mysql-user:13306"
+  username: root
+  password: lark2022
 redis:
   address: ["lark-redis-01:7001","lark-redis-02:7002","lark-redis-03:7003","lark-redis-04:7004"]
   db: 0

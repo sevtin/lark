@@ -90,9 +90,11 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		return
 	}
 	chatSeq := &pb_msg.ChatSeq{
-		ChatId: inbox.Msg.ChatId,
-		SeqId:  seqId,
-		SrvTs:  inbox.Msg.SrvTs,
+		ChatId:   inbox.Msg.ChatId,
+		SeqId:    seqId,
+		SrvTs:    inbox.Msg.SrvTs,
+		SenderId: inbox.Msg.SenderId,
+		MsgFrom:  inbox.Msg.MsgFrom,
 	}
 	_, _, err = s.seqProducer.EnQueue(chatSeq, constant.CONST_MSG_KEY_CHAT_SEQ)
 	if err != nil {
