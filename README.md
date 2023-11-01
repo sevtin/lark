@@ -1,7 +1,7 @@
 # lark
 Lark是一个开源的Golang IM服务端项目，具有高性能和可扩展等特性。采用微服务架构设计，支持集群和水平扩展，能够满足高并发业务需求，并实现了万人群消息的秒达。
 
-<img src="assets/images/lark_logo.png" height="263" width="452"/>
+<img src="assets/images/lark-logo.png"/>
 
 ### 技术选型及开发环境
 | 序号 | 技术                   | 版本              | 说明            | 官网                                         |
