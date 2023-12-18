@@ -21,8 +21,8 @@ type Payment struct {
 	ResultContent string `gorm:"column:result_content;NOT NULL" json:"result_content"`         // 结果内容
 	ReturnTs      int64  `gorm:"column:return_ts;default:0;NOT NULL" json:"return_ts"`         // return时间
 	NotifyTs      int64  `gorm:"column:notify_ts;default:0;NOT NULL" json:"notify_ts"`         // notify时间
-	TotalAmount   int64  `gorm:"column:total_amount;default:0;NOT NULL" json:"total_amount"`   // 订单金额
-	ActualAmount  int64  `gorm:"column:actual_amount;default:0;NOT NULL" json:"actual_amount"` // 实际入账金额
+	TotalAmount   int64  `gorm:"column:total_amount;default:0;NOT NULL" json:"total_amount"`   // 订单金额(单位:分)
+	ActualAmount  int64  `gorm:"column:actual_amount;default:0;NOT NULL" json:"actual_amount"` // 实际入账金额(单位:分)
 	PayTs         int64  `gorm:"column:pay_ts;default:0;NOT NULL" json:"pay_ts"`               // 支付时间
 	TagId         string `gorm:"column:tag_id;NOT NULL" json:"tag_id"`                         // Tag ID 用于取消
 	SaleId        string `gorm:"column:sale_id;NOT NULL" json:"sale_id"`                       // Sale ID 用于退款

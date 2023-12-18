@@ -71,7 +71,7 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		opts  *gorm.Config
 		sqlDB *sql.DB
 	)
-	args = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true&loc=Local",
+	args = fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		cfg.Username,
 		cfg.Password,
 		cfg.Address,
@@ -87,8 +87,9 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		xlog.Error(err.Error())
 		return
 	}
-	db = db.Debug()
-
+	if cfg.Debug == true {
+		db = db.Debug()
+	}
 	sqlDB, err = db.DB()
 	if err != nil {
 		xlog.Error(err.Error())

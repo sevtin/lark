@@ -74,7 +74,7 @@ func (s *authService) signUpTransaction(tx *gorm.DB, user *po.User, avatar *po.A
 	signUp = new(do.SignUp)
 	signUp.User = user
 	signUp.Avatar = avatar
-	signUp.Err = s.authRepo.TxCreate(tx, user)
+	signUp.Err = s.userRepo.TxCreate(tx, user)
 	if signUp.Err != nil {
 		signUp.Code = ERROR_CODE_AUTH_REGISTER_ERR
 		signUp.Msg = ERROR_AUTH_REGISTER_TYPE_ERR

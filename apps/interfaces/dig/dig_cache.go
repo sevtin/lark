@@ -4,6 +4,6 @@ import (
 	"lark/domain/cache"
 )
 
-func provideCache() {
+func init() {
 	Provide(cache.NewServerMgrCache)
 }

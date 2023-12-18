@@ -50,8 +50,7 @@ func (r *chatRepository) Chat(w *entity.MysqlQuery) (chat *po.Chat, err error) {
 
 func (r *chatRepository) TxChat(tx *gorm.DB, w *entity.MysqlQuery) (chat *po.Chat, err error) {
 	chat = new(po.Chat)
-	db := xmysql.GetDB()
-	err = db.Where(w.Query, w.Args...).Find(chat).Error
+	err = tx.Where(w.Query, w.Args...).Find(chat).Error
 	return
 }
 

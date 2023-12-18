@@ -83,6 +83,7 @@ message SignOutResp {
 message GithubOAuth2CallbackReq {
   string code = 1;
   pb_enum.PLATFORM_TYPE platform = 2; // 平台
+  string invite_code = 3; // 邀请码
 }
 
 message AuthUserInfo {
@@ -92,6 +93,7 @@ message AuthUserInfo {
   Token access_token = 4;
   Token refresh_token = 5;
   ServerInfo Server = 6;
+  bool first_reg = 8;
 }
 
 message GithubOAuth2CallbackResp {

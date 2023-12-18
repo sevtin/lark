@@ -1,420 +1,220 @@
 package xredis
 
 import (
-	"context"
 	"github.com/redis/go-redis/v9"
-	"lark/pkg/constant"
-	"lark/pkg/utils"
 	"time"
 )
 
 func RealKey(key string) string {
-	if Cli != nil {
-		return Cli.Prefix + key
-	}
-	return key
+	return cli.RealKey(key)
 }
 
 func GetPrefix() string {
-	if Cli != nil {
-		return Cli.Prefix
-	}
-	return ""
+	return cli.GetPrefix()
 }
 
-func (r *RedisClient) RealKey(key string) string {
-	return r.Prefix + key
+// 集群版用 最好别用
+func GetClient() *redis.ClusterClient {
+	return cli.GetClient()
 }
 
-//func Del(key string) error {
-//	key = RealKey(key)
-//	return Cli.Client.Del(context.Background(), key).Err()
-//}
+func Pipeline() redis.Pipeliner {
+	return cli.Pipeline()
+}
 
 func Unlink(key string) error {
-	key = RealKey(key)
-	return Cli.Client.Unlink(context.Background(), key).Err()
+	return cli.Unlink(key)
 }
 
 func TTL(key string) time.Duration {
-	key = RealKey(key)
-	return Cli.Client.TTL(context.Background(), key).Val()
+	return cli.TTL(key)
 }
 
 func Del(key string) error {
-	key = RealKey(key)
-	return Cli.Client.Del(context.Background(), key).Err()
+	return cli.Del(key)
 }
 
-//func Dels(keys ...string) error {
-//	return Cli.Client.Del(context.Background(), keys...).Err()
-//}
-
-//func CDel(keys []string) (err error) {
-//	var (
-//		pipe = Cli.Client.Pipeline()
-//		key  string
-//	)
-//	for _, key = range keys {
-//		pipe.Del(context.Background(), RealKey(key))
-//	}
-//	_, err = pipe.Exec(context.Background())
-//	return
-//}
-
 func CUnlink(keys []string) (err error) {
-	var (
-		pipe = Cli.Client.Pipeline()
-		key  string
-	)
-	for _, key = range keys {
-		pipe.Unlink(context.Background(), RealKey(key))
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CUnlink(keys)
 }
 
 func KeyExists(key string) (ok bool) {
-	key = RealKey(key)
-	val := Cli.Client.Exists(context.Background(), key).Val()
-	if val == 1 {
-		ok = true
-	}
-	return
+	return cli.KeyExists(key)
 }
 
 func Set(key string, value interface{}, expire time.Duration) error {
-	key = RealKey(key)
-	if expire > 0 {
-		return Cli.Client.Set(context.Background(), key, value, expire).Err()
-	}
-	return Cli.Client.Set(context.Background(), key, value, 0).Err()
+	return cli.Set(key, value, expire)
 }
 
 func CSet(keys []string, values []interface{}, expire time.Duration) (err error) {
-	if len(keys) != len(values) {
-		return
-	}
-	var (
-		i    int
-		key  string
-		pipe = Cli.Client.Pipeline()
-	)
-	for i, key = range keys {
-		key = RealKey(key)
-		pipe.Set(context.Background(), key, values[i], expire)
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CSet(keys, values, expire)
 }
 
 func CSets(keys []string, values []interface{}, expires []time.Duration) (err error) {
-	if len(keys) != len(values) || len(values) != len(expires) {
-		return
-	}
-	var (
-		i    int
-		key  string
-		pipe = Cli.Client.Pipeline()
-	)
-	for i, key = range keys {
-		key = RealKey(key)
-		pipe.Set(context.Background(), key, values[i], expires[i])
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CSets(keys, values, expires)
 }
 
 func Expire(key string, expire time.Duration) error {
-	key = RealKey(key)
-	return Cli.Client.Expire(context.Background(), key, expire).Err()
+	return cli.Expire(key, expire)
 }
 
 func Get(key string) (val string, err error) {
-	key = RealKey(key)
-	val, err = Cli.Client.Get(context.Background(), key).Result()
-	if err == redis.Nil {
-		err = nil
-	}
-	return
+	return cli.Get(key)
 }
 
 func MGet(keys []string) ([]interface{}, error) {
-	return Cli.Client.MGet(context.Background(), keys...).Result()
+	return cli.MGet(keys)
 }
 
 func CMGet(keys []string) (list []string, err error) {
-	var (
-		key     string
-		cmdList = make([]*redis.StringCmd, len(keys))
-		i       int
-		c       *redis.StringCmd
-		pipe    = Cli.Client.Pipeline()
-	)
-	for i, key = range keys {
-		cmdList[i] = pipe.Get(context.Background(), RealKey(key))
-	}
-	_, err = pipe.Exec(context.Background())
-	if err != nil {
-		return
-	}
-	list = make([]string, len(keys))
-	for i, c = range cmdList {
-		list[i] = c.Val()
-	}
-	return
+	return cli.CMGet(keys)
 }
 
 func SlotMGet(maps map[uint16][]string) (list []interface{}, err error) {
-	var (
-		index   = -1
-		keys    []string
-		cmdList = make([]*redis.SliceCmd, len(maps))
-		c       *redis.SliceCmd
-		pipe    = Cli.Client.Pipeline()
-	)
-	for _, keys = range maps {
-		c = pipe.MGet(context.Background(), keys...)
-		index++
-		cmdList[index] = c
-	}
-	_, err = pipe.Exec(context.Background())
-	if err != nil {
-		return
-	}
-	list = make([]interface{}, 0)
-	for _, c = range cmdList {
-		list = append(list, c.Val()...)
-	}
-	return
+	return cli.SlotMGet(maps)
 }
 
 func MSet(values ...interface{}) error {
-	// MSET 是一个原子性(atomic)操作， 所有给定键都会在同一时间内被设置， 不会出现某些键被设置了但是另一些键没有被设置的情况。
-	return Cli.Client.MSet(context.Background(), values...).Err()
+	return cli.MSet(values)
 }
 
 func Incr(key string) (int64, error) {
-	key = RealKey(key)
-	return Cli.Client.Incr(context.Background(), key).Result()
+	return cli.Incr(key)
 }
 
 func Decr(key string) (int64, error) {
-	key = RealKey(key)
-	return Cli.Client.Decr(context.Background(), key).Result()
+	return cli.Decr(key)
 }
 
 func GetUint64(key string) (val uint64, err error) {
-	key = RealKey(key)
-	val, err = Cli.Client.Get(context.Background(), key).Uint64()
-	if err == redis.Nil {
-		err = nil
-	}
-	return
+	return cli.GetUint64(key)
 }
 
 func GetInt(key string) (val int, err error) {
-	key = RealKey(key)
-	val, err = Cli.Client.Get(context.Background(), key).Int()
-	if err == redis.Nil {
-		err = nil
-	}
-	return
+	return cli.GetInt(key)
 }
 
 func HGetInt64(key, field string) (value int64, err error) {
-	key = RealKey(key)
-	return Cli.Client.HGet(context.Background(), key, field).Int64()
+	return cli.HGetInt64(key, field)
 }
 
 func HGetAll(key string) map[string]string {
-	key = RealKey(key)
-	hash := Cli.Client.HGetAll(context.Background(), key).Val()
-	return hash
+	return cli.HGetAll(key)
 }
 
 func HLen(key string) int64 {
-	key = RealKey(key)
-	return Cli.Client.HLen(context.Background(), key).Val()
+	return cli.HLen(key)
 }
 
 func HScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error) {
-	key = RealKey(key)
-	return Cli.Client.HScan(context.Background(), key, cursor, match, count).Result()
+	return cli.HScan(key, cursor, match, count)
 }
 
 func HSet(key string, value interface{}) error {
-	key = RealKey(key)
-	return Cli.Client.HSet(context.Background(), key, value).Err()
+	return cli.HSet(key, value)
 }
 
 func HSetNX(key, field string, value interface{}) error {
-	key = RealKey(key)
-	return Cli.Client.HSetNX(context.Background(), key, field, value).Err()
+	return cli.HSetNX(key, field, value)
 }
 
 func HDels(key string, fields []string) error {
-	key = RealKey(key)
-	return Cli.Client.HDel(context.Background(), key, fields...).Err()
+	return cli.HDels(key, fields)
 }
 
 func HDel(key string, field string) error {
-	key = RealKey(key)
-	return Cli.Client.HDel(context.Background(), key, field).Err()
+	return cli.HDel(key, field)
 }
 
 func HMSet(key string, values map[string]string) error {
-	key = RealKey(key)
-	return Cli.Client.HMSet(context.Background(), key, values).Err()
+	return cli.HMSet(key, values)
 }
 
 func CHMSet(key string, values map[string]interface{}, expire time.Duration) (err error) {
-	var (
-		pipe = Cli.Client.Pipeline()
-	)
-	key = RealKey(key)
-	pipe.HMSet(context.Background(), key, values)
-	if expire > 0 {
-		pipe.Expire(context.Background(), key, expire)
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CHMSet(key, values, expire)
 }
 
 func CBatchHSet(keys []string, field string, values []string) (err error) {
-	if len(keys) != len(values) {
-		return
-	}
-	var (
-		i    int
-		key  string
-		pipe = Cli.Client.Pipeline()
-	)
-	for i, key = range keys {
-		pipe.HSet(context.Background(), RealKey(key), field, values[i])
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CBatchHSet(keys, field, values)
 }
 
 func HMGet(key string, fields ...string) []interface{} {
-	key = RealKey(key)
-	return Cli.Client.HMGet(context.Background(), key, fields...).Val()
+	return cli.HMGet(key, fields...)
 }
 
 func HGet(key string, field string) (val string, err error) {
-	key = RealKey(key)
-	val, err = Cli.Client.HGet(context.Background(), key, field).Result()
-	if err == redis.Nil {
-		err = nil
-	}
-	return
+	return cli.HGet(key, field)
 }
 
 func CHDel(keys []string, fields []string) (err error) {
-	if len(keys) == 0 || len(fields) == 0 {
-		return
-	}
-	if len(keys) != len(fields) {
-		return
-	}
-	var (
-		i    int
-		key  string
-		pipe = Cli.Client.Pipeline()
-	)
-	for i, key = range keys {
-		key = RealKey(key)
-		pipe.HDel(context.Background(), key, fields[i])
-	}
-	_, err = pipe.Exec(context.Background())
-	return
+	return cli.CHDel(keys, fields)
 }
 
 // Sequence ID
 func GetMaxSeqID(chatId int64) (seqId uint64, err error) {
-	key := constant.RK_MSG_SEQ_ID + utils.GetHashTagKey(chatId)
-	seqId, err = GetUint64(key)
-	if err == redis.Nil {
-		err = nil
-	}
-	return
+	return cli.GetMaxSeqID(chatId)
 }
 
 func IncrSeqID(chatId int64) (int64, error) {
-	key := constant.RK_MSG_SEQ_ID + utils.GetHashTagKey(chatId)
-	return Incr(key)
+	return cli.IncrSeqID(chatId)
 }
 
 func DecrSeqID(chatId int64) (int64, error) {
-	key := constant.RK_MSG_SEQ_ID + utils.GetHashTagKey(chatId)
-	return Decr(key)
+	return cli.DecrSeqID(chatId)
 }
 
 func SAdd(key string, members ...interface{}) (err error) {
-	key = RealKey(key)
-	return Cli.Client.SAdd(context.Background(), key, members).Err()
+	return cli.SAdd(key, members...)
 }
 
 func SRem(key string, members ...interface{}) (err error) {
-	key = RealKey(key)
-	return Cli.Client.SRem(context.Background(), key, members).Err()
+	return cli.SRem(key, members...)
 }
 
 func SMembers(key string) []string {
-	key = RealKey(key)
-	return Cli.Client.SMembers(context.Background(), key).Val()
+	return cli.SMembers(key)
 }
 
 func EvalSha(sha string, keys []string, args []interface{}) error {
-	return Cli.Client.EvalSha(context.Background(), sha, keys, args).Err()
+	return cli.EvalSha(sha, keys, args)
 }
 
 func EvalShaResult(sha string, keys []string, args []interface{}) (interface{}, error) {
-	return Cli.Client.EvalSha(context.Background(), sha, keys, args).Result()
+	return cli.EvalShaResult(sha, keys, args)
 }
 
 func ZAdd(key string, score float64, member string) (err error) {
-	key = RealKey(key)
-	z := redis.Z{
-		Score:  score,
-		Member: member,
-	}
-	err = Cli.Client.ZAdd(context.Background(), key, z).Err()
-	return
+	return cli.ZAdd(key, score, member)
 }
 
 func ZRem(key string, member string) (err error) {
-	key = RealKey(key)
-	err = Cli.Client.ZRem(context.Background(), key, member).Err()
-	return
+	return cli.ZRem(key, member)
 }
 
 func ZRevRange(key string, start int64, stop int64) []string {
-	key = RealKey(key)
-	return Cli.Client.ZRevRange(context.Background(), key, start, stop).Val()
+	return cli.ZRevRange(key, start, stop)
 }
 
 func ZMScore(key string, members ...string) []float64 {
-	key = RealKey(key)
-	return Cli.Client.ZMScore(context.Background(), key, members...).Val()
+	return cli.ZMScore(key, members...)
 }
 
 func ZRange(key string, start int64, stop int64) []string {
-	key = RealKey(key)
-	return Cli.Client.ZRange(context.Background(), key, start, stop).Val()
+	return cli.ZRange(key, start, stop)
 }
 
 func ZRank(key, member string) (int64, error) {
-	key = RealKey(key)
-	return Cli.Client.ZRank(context.Background(), key, member).Result()
+	return cli.ZRank(key, member)
 }
 
 func GeoAdd(key string, geoLocation ...*redis.GeoLocation) (err error) {
-	key = RealKey(key)
-	return Cli.Client.GeoAdd(context.Background(), key, geoLocation...).Err()
+	return cli.GeoAdd(key, geoLocation...)
 }
 
 func GeoRadius(key string, longitude, latitude float64, query *redis.GeoRadiusQuery) []redis.GeoLocation {
-	return Cli.Client.GeoRadius(context.Background(), key, longitude, latitude, query).Val()
+	return cli.GeoRadius(key, longitude, latitude, query)
+}
+
+func ZIncrBy(key string, increment float64, member string) (float64, error) {
+	return cli.ZIncrBy(key, increment, member)
 }

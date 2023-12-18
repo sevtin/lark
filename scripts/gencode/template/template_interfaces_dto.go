@@ -3,12 +3,11 @@ package template
 var InterfacesDtoTemplate = ParseTemplate(`
 package dto_{{.PackageName}}
 
-type {{.UpperServiceName}}EditReq struct {
-
+type {{.UpperApiName}}Req struct {
+	Uid int64
 }
 
-type {{.UpperServiceName}}InfoReq struct {
-
+type {{.UpperApiName}}Resp struct {
+	Uid int64
 }
-
 `)

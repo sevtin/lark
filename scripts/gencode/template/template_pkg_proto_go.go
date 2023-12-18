@@ -3,11 +3,11 @@ package template
 var PkgProtoGoTemplate = ParseTemplate(`
 package pb_{{.PackageName}}
 
-type Unimplemented{{.UpperServiceName}}Server struct {
+type Unimplemented{{.UpperPackageName}}Server struct {
 
 }
 
-func Register{{.UpperServiceName}}Server(s interface{}, srv interface{}) {
+func Register{{.UpperPackageName}}Server(s interface{}, srv interface{}) {
 
 }
 `)

@@ -53,7 +53,7 @@ func (c *redEnvelopeCache) SetRedEnvelope(envId int64, info *pb_red_env.RedEnvel
 		key4 = prefix + constant.RK_SYNC_RED_REMAIN_AMOUNT + tagKey
 		val4 = info.RemainAmount
 
-		pipe = xredis.Cli.Client.Pipeline()
+		pipe = xredis.Pipeline()
 	)
 	pipe.Set(context.Background(), key1, val1, constant.CONST_DURATION_RED_ENVELOPE_EXPIRE_SECOND)
 	pipe.Set(context.Background(), key2, val2, constant.CONST_DURATION_RED_ENVELOPE_EXPIRE_SECOND)

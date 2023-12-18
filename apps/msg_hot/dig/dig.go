@@ -7,6 +7,7 @@ import (
 	"lark/apps/msg_hot/internal/server/msg_hot"
 	"lark/apps/msg_hot/internal/service"
 	"lark/domain/mrepo"
+	"log/slog"
 )
 
 var container = dig.New()
@@ -26,6 +27,6 @@ func Invoke(i interface{}) error {
 func Provide(constructor interface{}, opts ...dig.ProvideOption) {
 	err := container.Provide(constructor)
 	if err != nil {
-		log.Panic(err)
+		slog.Warn(err.Error())
 	}
 }

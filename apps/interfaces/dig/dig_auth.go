@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_auth"
 )
 
-func provideAuth() {
+func init() {
 	Provide(svc_auth.NewAuthService)
 }

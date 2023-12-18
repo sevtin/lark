@@ -10,12 +10,12 @@ import (
 	"lark/apps/interfaces/internal/service/svc_{{.PackageName}}"
 )
 
-func register{{.UpperServiceName}}Router(group *gin.RouterGroup) {
-	var svc svc_{{.PackageName}}.{{.UpperServiceName}}Service
-	dig.Invoke(func(s svc_{{.PackageName}}.{{.UpperServiceName}}Service) {
+func register{{.UpperPackageName}}Router(group *gin.RouterGroup) {
+	var svc svc_{{.PackageName}}.{{.UpperPackageName}}Service
+	dig.Invoke(func(s svc_{{.PackageName}}.{{.UpperPackageName}}Service) {
 		svc = s
 	})
-	ctrl := ctrl_{{.PackageName}}.New{{.UpperServiceName}}Ctrl(svc)
+	ctrl := ctrl_{{.PackageName}}.New{{.UpperPackageName}}Ctrl(svc)
 	router := group.Group("{{.PackageName}}")
 	router.POST("edit", ctrl.Edit)
 	router.GET("info", ctrl.Info)

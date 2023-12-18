@@ -8,16 +8,16 @@ import (
 	"lark/apps/interfaces/internal/config"
 )
 
-type {{.UpperServiceName}}Service interface {
+type {{.UpperPackageName}}Service interface {
 
 }
 
-type {{.LowerServiceName}}Service struct {
-	{{.LowerServiceName}}Client {{.PackageName}}_client.{{.UpperServiceName}}Client
+type {{.LowerPackageName}}Service struct {
+	{{.LowerPackageName}}Client {{.PackageName}}_client.{{.UpperPackageName}}Client
 }
 
-func New{{.UpperServiceName}}Service(conf *config.Config) {{.UpperServiceName}}Service {
-	{{.LowerServiceName}}Client := {{.PackageName}}_client.New{{.UpperServiceName}}Client(conf.Etcd, nil, conf.Jaeger, conf.Name)
-	return &{{.LowerServiceName}}Service{ {{.LowerServiceName}}Client: {{.LowerServiceName}}Client }
+func New{{.UpperPackageName}}Service(conf *config.Config) {{.UpperPackageName}}Service {
+	{{.LowerPackageName}}Client := {{.PackageName}}_client.New{{.UpperPackageName}}Client(conf.Etcd, nil, conf.Jaeger, conf.Name)
+	return &{{.LowerPackageName}}Service{ {{.LowerPackageName}}Client: {{.LowerPackageName}}Client }
 }
 `)

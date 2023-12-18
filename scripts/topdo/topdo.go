@@ -36,10 +36,10 @@ func init() {
 
 func main() {
 	sql := `
-SELECT openid,uid,access_token
-FROM oauth_users
+SELECT wallet_id,wallet_type,uid,pay_password,balance
+FROM wallets
 `
-	_, err := SqlToPdo(db, sql, "OauthUserToken")
+	_, err := SqlToPdo(db, sql, "WithdrawVerify")
 	if err != nil {
 		log.Println(err)
 	}
@@ -49,6 +49,7 @@ func SqlToPdo(db *gorm.DB, sql string, obj string) (code string, err error) {
 	// 1、获取字段类型
 	var (
 		cts map[string]string
+		sel string
 	)
 	cts, err = getColumnTypes(db, sql)
 	if err != nil {
@@ -56,8 +57,8 @@ func SqlToPdo(db *gorm.DB, sql string, obj string) (code string, err error) {
 	}
 
 	// 2、格式化SQL
-	sql = formatSQL(sql)
-	if sql == "" {
+	sel = formatSQL(sql)
+	if sel == "" {
 		return
 	}
 
@@ -65,16 +66,16 @@ func SqlToPdo(db *gorm.DB, sql string, obj string) (code string, err error) {
 	var (
 		fields [][]string
 	)
-	fields, sql = processFields(sql)
+	fields, sel = processFields(sel)
 
 	// 4、处理列
 	var (
 		columns []string
 	)
-	columns = processColumns(sql)
+	columns = processColumns(sel)
 
 	// 5、生成代码
-	code = generateCode(obj, columns, fields, cts)
+	code = generateCode(obj, columns, fields, cts, sql)
 	err = createFile(code, camelToUnderscore(obj))
 	log.Println(code)
 	return
@@ -124,14 +125,13 @@ func processColumns(sql string) (columns []string) {
 }
 
 // 生成代码
-func generateCode(obj string, columns []string, fields [][]string, cts map[string]string) string {
+func generateCode(obj string, columns []string, fields [][]string, cts map[string]string, sql string) string {
 	var (
 		builder  strings.Builder
 		fieldTag = "field_tag_" + camelToUnderscore(obj)
 		column   string
 	)
-
-	builder.WriteString(fmt.Sprintf("package pdo\n\nimport \"lark/pkg/utils\"\n\nvar (\n\t%s string\n)\n\n", fieldTag))
+	builder.WriteString("package pdo\n\nimport \"lark/pkg/utils\"\n\n")
 	builder.WriteString(fmt.Sprintf("type %s struct {\n", obj))
 
 	// 生成列
@@ -150,7 +150,10 @@ func generateCode(obj string, columns []string, fields [][]string, cts map[strin
 		builder.WriteString(fmt.Sprintf("\t%s %s `json:\"%s\" field:\"%s\"`\n", toPropertyField(jsonTag), getFieldType(cts, jsonTag), jsonTag, strings.Join(splits, " AS ")))
 	}
 	builder.WriteString("}\n\n")
-
+	// 生成SQL
+	builder.WriteString(fmt.Sprintf("/*%s*/\n\n", sql))
+	// 字段
+	builder.WriteString(fmt.Sprintf("var (\n\t%s string\n)\n\n", fieldTag))
 	// 生成 GetFields 方法
 	builder.WriteString(fmt.Sprintf("func (p *%s) GetFields() string {\n\tif %s == \"\" {\n\t\t%s = utils.GetFields(*p)\n\t}\n\treturn %s\n}", obj, fieldTag, fieldTag, fieldTag))
 	return builder.String()

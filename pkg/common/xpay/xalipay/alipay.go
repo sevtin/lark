@@ -31,7 +31,7 @@ func NewAlipay(cfg *conf.Alipay) *Alipay {
 		return nil
 	}
 	cfg.AppPrivateKey = string(buf)
-	if client, err = alipay.New(cfg.Appid, cfg.AppPrivateKey, false); err != nil {
+	if client, err = alipay.New(cfg.Appid, cfg.AppPrivateKey, cfg.Release); err != nil {
 		slog.Warn(err.Error())
 		return nil
 	}
@@ -73,7 +73,7 @@ func TradePagePay(order *po.Order) (url *url.URL, err error) {
 	return
 }
 
-func TradePreCreate(tradeNo, amount, subject string) (result *alipay.TradePreCreateRsp, err error) {
+func TradePreCreate(tradeNo, amount, subject, body string) (result *alipay.TradePreCreateRsp, err error) {
 	if pay == nil {
 		return
 	}
@@ -84,6 +84,7 @@ func TradePreCreate(tradeNo, amount, subject string) (result *alipay.TradePreCre
 			TotalAmount: amount,
 			NotifyURL:   pay.cfg.Server + pay.cfg.NotifyURL,
 			ReturnURL:   pay.cfg.Server + pay.cfg.ReturnURL,
+			Body:        body,
 		},
 	}
 	return pay.client.TradePreCreate(tpc)
@@ -97,6 +98,7 @@ func TradeQuery(tradeNo string) (result *alipay.TradeQueryRsp, err error) {
 }
 
 func DecodeNotify(writer http.ResponseWriter, request *http.Request) (notify *alipay.Notification, err error) {
+	request.ParseForm()
 	notify, err = pay.client.DecodeNotification(request.Form)
 	if err != nil {
 		// 错误处理

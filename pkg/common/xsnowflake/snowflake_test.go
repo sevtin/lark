@@ -6,6 +6,8 @@ import (
 )
 
 func TestGetSnowflakeID(t *testing.T) {
-	id := NewSnowflakeID()
-	fmt.Println(id)
+	for i := 0; i < 10; i++ {
+		id := NewSnowflakeID()
+		fmt.Println(id)
+	}
 }

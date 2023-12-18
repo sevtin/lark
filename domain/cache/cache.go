@@ -76,7 +76,7 @@ func Set(key string, in interface{}, expire time.Duration) (err error) {
 		val interface{}
 	)
 	switch in.(type) {
-	case string, int64, int, int32:
+	case string, int64, int, int32, int8:
 		val = in
 	default:
 		val, err = utils.Marshal(in)

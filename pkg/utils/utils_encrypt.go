@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"crypto/rand"
+	"crypto/rc4"
 	"encoding/hex"
 	"io"
 )
@@ -59,4 +60,23 @@ func AesDecrypt(key, ciphertext []byte) (buf []byte, err error) {
 	cfb.XORKeyStream(ciphertext, ciphertext)
 	buf = ciphertext
 	return
+}
+
+func RC4Encrypt(str string, key []byte) string {
+	plaintext := []byte(str)
+	cipher, _ := rc4.NewCipher(key)
+	out := make([]byte, len(plaintext))
+	cipher.XORKeyStream(out, plaintext)
+	return hex.EncodeToString(out)
+}
+
+func RC4Decrypt(str string, key []byte) string {
+	ciphertext, _ := hex.DecodeString(str)
+	if len(ciphertext) == 0 {
+		return ""
+	}
+	cipher, _ := rc4.NewCipher(key)
+	out := make([]byte, len(ciphertext))
+	cipher.XORKeyStream(out, ciphertext)
+	return string(out)
 }

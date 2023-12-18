@@ -1,6 +1,10 @@
 package po
 
-import "lark/pkg/entity"
+import (
+	"lark/pkg/entity"
+	"lark/pkg/proto/pb_enum"
+	"strconv"
+)
 
 type RedEnvelope struct {
 	entity.GormEntityTs
@@ -29,6 +33,7 @@ type FundFlow struct {
 	FlowId      int64  `gorm:"column:flow_id;primary_key" json:"flow_id"`                    // 流水ID
 	Uid         int64  `gorm:"column:uid;default:0;NOT NULL" json:"uid"`                     // 用户UID
 	WalletId    int64  `gorm:"column:wallet_id;default:0;NOT NULL" json:"wallet_id"`         // 收/支钱包ID
+	WalletType  int    `gorm:"column:wallet_type;default:0;NOT NULL" json:"wallet_type"`     // 钱包类型 1-货币 单位(分) 2-钻石 3-金币 4-银币 5-铜币 6-积分
 	TradeNo     string `gorm:"column:trade_no;NOT NULL" json:"trade_no"`                     // 自编唯一交易编号
 	AssocId     int64  `gorm:"column:assoc_id;default:0;NOT NULL" json:"assoc_id"`           // 关联ID
 	TradeType   int    `gorm:"column:trade_type;default:0;NOT NULL" json:"trade_type"`       // 收支类型 1-收入 2-支出
@@ -37,6 +42,16 @@ type FundFlow struct {
 	Balance     int64  `gorm:"column:balance;default:0;NOT NULL" json:"balance"`             // 交易前账户余额
 	PayStatus   int    `gorm:"column:pay_status;default:0;NOT NULL" json:"pay_status"`       // 支付状态 0-未支付 1-支付中 2-已支付 3-支付失败
 	Description string `gorm:"column:description;NOT NULL" json:"description"`               // 描述信息
+}
+
+func (p *FundFlow) GetTradeAmount() string {
+	switch pb_enum.WALLET_TYPE(p.WalletType) {
+	case pb_enum.WALLET_TYPE_GOLD_COIN:
+		return strconv.FormatInt(p.TradeAmount/100, 10) + "金币"
+	case pb_enum.WALLET_TYPE_POINT:
+		return strconv.FormatInt(p.TradeAmount/100, 10) + "积分"
+	}
+	return ""
 }
 
 type RedEnvelopeReceiver struct {

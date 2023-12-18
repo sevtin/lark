@@ -27,7 +27,7 @@ func (s *authService) oauth2Logic(user *po.OauthUser, platform pb_enum.PLATFORM_
 	)
 	q.SetFilter("channel=?", user.Channel)
 	q.SetFilter("openid=?", user.Openid)
-	oauthUser, err = s.authRepo.GetOAuthUser(q)
+	oauthUser, err = s.oauthUserRepo.GetOAuthUser(q)
 	if err != nil {
 		aui.Set(ERROR_CODE_AUTH_OAUTH_USER_INFO_QUERY_FAILED, ERROR_AUTH_OAUTH_USER_INFO_QUERY_FAILED)
 		return
@@ -96,7 +96,7 @@ func (s *authService) updateGithubUserInfo(user *po.OauthUser) (err error) {
 	if user.Scope != "" {
 		u.Set("scope", user.Scope)
 	}
-	err = s.authRepo.UpdateOauthUser(u)
+	err = s.oauthUserRepo.UpdateOauthUser(u)
 	return
 }
 
@@ -133,7 +133,7 @@ func (s *authService) registerUser(oauthUser *po.OauthUser, platform pb_enum.PLA
 		AvatarLarge:  oauthUser.AvatarUrl,
 	}
 	tx := xmysql.GetTX()
-	err = s.authRepo.TxCreateOauthUser(tx, oauthUser)
+	err = s.oauthUserRepo.TxCreateOauthUser(tx, oauthUser)
 	if err != nil {
 		tx.Rollback()
 	}

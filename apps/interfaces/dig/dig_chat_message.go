@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_chat_msg"
 )
 
-func provideChatMessage() {
+func init() {
 	Provide(svc_chat_msg.NewChatMessageService)
 }

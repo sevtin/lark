@@ -10,20 +10,48 @@ import (
 
 func main() {
 	var (
-		serviceName      = "Order"
+		// 驼峰规则
+		packageName = "Shop"        // 程序包名
+		serviceName = "Order"       // 服务实现
+		apiName     = "PayCallback" // Api 接口
+		modelName   = "UserPay"     // 表模型
+
+		upperPackageName = utils.ToCamel(packageName)
+		lowerPackageName = utils.FirstLower(upperPackageName)
 		upperServiceName = utils.ToCamel(serviceName)
 		lowerServiceName = utils.FirstLower(upperServiceName)
-		packageName      = utils.CamelToSnake(upperServiceName)
+		upperApiName     = utils.ToCamel(apiName)
+		lowerApiName     = utils.FirstLower(upperApiName)
+		upperModelName   = utils.ToCamel(modelName)
+		lowerModelName   = utils.FirstLower(upperModelName)
 	)
 	conf := config.GenConfig{
 		Path:        "",
 		Prefix:      "",
-		PackageName: packageName,
+		PackageName: utils.CamelToSnake(upperPackageName),
+		ServiceName: utils.CamelToSnake(upperServiceName),
+		ApiName:     utils.CamelToSnake(upperApiName),
+		ModelName:   utils.CamelToSnake(upperModelName),
 		Dict: map[string]interface{}{
-			"UpperServiceName": upperServiceName,
-			"LowerServiceName": lowerServiceName,
-			"PackageName":      packageName,
+			"UpperPackageName":    upperPackageName,
+			"LowerPackageName":    lowerPackageName,
+			"UpperServiceName":    upperServiceName,
+			"LowerServiceName":    lowerServiceName,
+			"UpperApiName":        upperApiName,
+			"LowerApiName":        lowerApiName,
+			"UpperModelName":      upperModelName,
+			"LowerModelName":      lowerModelName,
+			"PackageName":         utils.CamelToSnake(upperPackageName),
+			"ServiceName":         utils.CamelToSnake(upperServiceName),
+			"ApiName":             utils.CamelToSnake(upperApiName),
+			"ModelName":           utils.CamelToSnake(upperModelName),
+			"AllUpperPackageName": strings.ToUpper(upperPackageName),
+			"AllUpperServiceName": strings.ToUpper(upperServiceName),
+			"AllUpperModelName":   strings.ToUpper(upperModelName),
 		},
+	}
+	if conf.PackageName == "" {
+		return
 	}
 	// apps
 	generateAppsClientCode(conf)
@@ -84,6 +112,13 @@ func generateAppsDigCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/dig", conf.PackageName)
 	conf.Filename = "dig"
 	utils.GenCode(template.AppsDigTemplate, &conf)
+
+	if conf.ModelName != "" {
+		conf.Path = fmt.Sprintf("./apps/%s/dig", conf.PackageName)
+		conf.ResetPrefSuf()
+		conf.Filename = "dig_" + conf.ModelName
+		utils.GenCode(template.AppsDigModelTemplate, &conf)
+	}
 }
 
 func generateAppsGrpcServerCode(conf config.GenConfig) {
@@ -101,6 +136,7 @@ func generateAppsGrpcServiceCode(conf config.GenConfig) {
 
 func generateAppsServerCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/internal/server", conf.PackageName)
+	conf.Filename = "server"
 	utils.GenCode(template.AppsServerTemplate, &conf)
 }
 
@@ -108,13 +144,18 @@ func generateAppsServiceCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/internal/service", conf.PackageName)
 	conf.Prefix = "svc_"
 	utils.GenCode(template.AppsServiceTemplate, &conf)
+	if conf.ServiceName != "" && conf.ApiName != "" {
+		conf.Path = fmt.Sprintf("./apps/%s/internal/service", conf.PackageName)
+		conf.ResetPrefSuf()
+		conf.Filename = "svc_" + conf.PackageName + "_" + utils.GetName(conf.ServiceName, conf.ApiName)
+		utils.GenCode(template.AppsServiceApiTemplate, &conf)
+	}
 }
 
 func generateAppsServiceConstCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/%s/internal/service", conf.PackageName)
 	conf.Prefix = "svc_"
 	conf.Suffix = "_const"
-	conf.Dict["AllUpperServiceName"] = strings.ToUpper(conf.PackageName)
 	utils.GenCode(template.AppsServiceConstTemplate, &conf)
 }
 
@@ -126,33 +167,47 @@ func generateConfigsYamlCode(conf config.GenConfig) {
 }
 
 func generateDomainCacheCode(conf config.GenConfig) {
+	if conf.ModelName == "" {
+		return
+	}
 	conf.Path = "./domain/cache"
-	conf.Prefix = "cache_"
+	conf.Filename = "cache_" + conf.ModelName
 	utils.GenCode(template.DomainCacheTemplate, &conf)
 }
 
 func generateDomainCrConstCode(conf config.GenConfig) {
-	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.PackageName)
-	conf.Prefix = "cr_"
-	conf.Suffix = "_const"
+	if conf.ModelName == "" {
+		return
+	}
+	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.ModelName)
+	conf.Filename = "cr_" + conf.ModelName + "_const"
 	utils.GenCode(template.DomainCrConstTemplate, &conf)
 }
 
 func generateDomainCrReadCode(conf config.GenConfig) {
-	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.PackageName)
-	conf.Prefix = "cr_"
+	if conf.ModelName == "" {
+		return
+	}
+	conf.Path = fmt.Sprintf("./domain/cr/cr_%s", conf.ModelName)
+	conf.Filename = "cr_" + conf.ModelName
 	utils.GenCode(template.DomainCrReadTemplate, &conf)
 }
 
 func generateDomainPoCode(conf config.GenConfig) {
+	if conf.ModelName == "" {
+		return
+	}
 	conf.Path = "./domain/po"
-	conf.Prefix = "po_"
+	conf.Filename = "po_" + conf.ModelName
 	utils.GenCode(template.DomainPoTemplate, &conf)
 }
 
 func generateDomainRepoCode(conf config.GenConfig) {
+	if conf.ModelName == "" {
+		return
+	}
 	conf.Path = "./domain/repo"
-	conf.Prefix = "repo_"
+	conf.Filename = "repo_" + conf.ModelName
 	utils.GenCode(template.DomainRepoTemplate, &conf)
 }
 
@@ -166,11 +221,21 @@ func generateInterfacesCtrlCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/interfaces/internal/ctrl/ctrl_%s", conf.PackageName)
 	conf.Prefix = "ctrl_"
 	utils.GenCode(template.InterfacesCtrlTemplate, &conf)
+
+	if conf.ApiName != "" {
+		conf.Path = fmt.Sprintf("./apps/interfaces/internal/ctrl/ctrl_%s", conf.PackageName)
+		conf.ResetPrefSuf()
+		conf.Filename = "ctrl_" + conf.PackageName + "_" + conf.ApiName
+		utils.GenCode(template.InternalCtrlApiTemplate, &conf)
+	}
 }
 
 func generateInterfacesDtoCode(conf config.GenConfig) {
+	if conf.ApiName == "" {
+		return
+	}
 	conf.Path = fmt.Sprintf("./apps/interfaces/internal/dto/dto_%s", conf.PackageName)
-	conf.Prefix = "dto_"
+	conf.Filename = "dto_" + conf.PackageName + "_" + conf.ApiName
 	utils.GenCode(template.InterfacesDtoTemplate, &conf)
 }
 
@@ -184,6 +249,13 @@ func generateInterfacesServiceCode(conf config.GenConfig) {
 	conf.Path = fmt.Sprintf("./apps/interfaces/internal/service/svc_%s", conf.PackageName)
 	conf.Prefix = "svc_"
 	utils.GenCode(template.InterfacesServiceTemplate, &conf)
+	if conf.ApiName == "" {
+		return
+	}
+	conf.Path = fmt.Sprintf("./apps/interfaces/internal/service/svc_%s", conf.PackageName)
+	conf.ResetPrefSuf()
+	conf.Filename = "svc_" + conf.PackageName + "_" + conf.ApiName
+	utils.GenCode(template.InterfacesServiceApiTemplate, &conf)
 }
 
 func generatePkgProtoCode(conf config.GenConfig) {

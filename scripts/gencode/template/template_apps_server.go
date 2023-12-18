@@ -9,11 +9,11 @@ import (
 )
 
 type server struct {
-	{{.LowerServiceName}}Server {{.PackageName}}.{{.UpperServiceName}}Server
+	{{.LowerPackageName}}Server {{.PackageName}}.{{.UpperPackageName}}Server
 }
 
-func NewServer({{.LowerServiceName}}Server {{.PackageName}}.{{.UpperServiceName}}Server) commands.MainInstance {
-	return &server{ {{.LowerServiceName}}Server: {{.LowerServiceName}}Server }
+func NewServer({{.LowerPackageName}}Server {{.PackageName}}.{{.UpperPackageName}}Server) commands.MainInstance {
+	return &server{ {{.LowerPackageName}}Server: {{.LowerPackageName}}Server }
 }
 
 func (s *server) Initialize() (err error) {
@@ -21,7 +21,7 @@ func (s *server) Initialize() (err error) {
 }
 
 func (s *server) RunLoop() {
-	s.{{.LowerServiceName}}Server.Run()
+	s.{{.LowerPackageName}}Server.Run()
 }
 
 func (s *server) Destroy() {

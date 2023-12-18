@@ -1,0 +1,9 @@
+package constant
+
+const (
+	EXCHANGE_RATE        = 100.0
+	WITHDRAW_FEE_RATE    = 0.05
+	WITHDRAW_ACTUAL_RATE = 1 - 0.05
+	TASK_FEE_RATE        = 0.15
+	TASK_ACTUAL_RATE     = 1 - TASK_FEE_RATE
+)

@@ -10,18 +10,6 @@ var container = dig.New()
 
 func init() {
 	Provide(config.NewConfig)
-	provideAuth()
-	provideUser()
-	provideChat()
-	provideChatMessage()
-	provideChatMember()
-	provideChatInvite()
-	provideCache()
-	provideConvo()
-	provideLbs()
-	provideRedEnv()
-	provideRedEnvReceive()
-	provideOrder()
 }
 
 func Invoke(i interface{}) error {

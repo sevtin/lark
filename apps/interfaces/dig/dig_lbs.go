@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_lbs"
 )
 
-func provideLbs() {
+func init() {
 	Provide(svc_lbs.NewLbsService)
 }

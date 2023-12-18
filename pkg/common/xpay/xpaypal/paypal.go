@@ -27,6 +27,7 @@ func NewPaypal(cfg *conf.Paypal) *Paypal {
 	token, err := client.GetAccessToken()
 	if err != nil {
 		slog.Warn(err.Error())
+		return nil
 	}
 	slog.Info(token.AccessToken)
 

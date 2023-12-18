@@ -5,4 +5,5 @@ type Redis struct {
 	Db       int      `yaml:"db"`
 	Password string   `yaml:"password"`
 	Prefix   string   `yaml:"prefix"`
+	Single   bool     `yaml:"single"`
 }

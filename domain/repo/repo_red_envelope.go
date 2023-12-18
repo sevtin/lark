@@ -11,16 +11,10 @@ import (
 type RedEnvelopeRepository interface {
 	TxCreateRedEnvelope(tx *gorm.DB, p *po.RedEnvelope) (err error)
 	TxUpdateRedEnvelope(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64)
-	TxCreateFundFlow(tx *gorm.DB, p *po.FundFlow) (err error)
-	CreateFundFlow(p *po.FundFlow) (err error)
-	TxCreateRedEnvelopeReceivers(tx *gorm.DB, list []*po.RedEnvelopeReceiver) (err error)
 	TxRedEnvelopeReturn(tx *gorm.DB, q *entity.MysqlQuery) (rt *pdo.RedEnvelopeReturn, err error)
 	GetRedEnvelopeStatus(q *entity.MysqlQuery) (status *pdo.RedEnvelopeStatus, err error)
 	GetRedEnvelopeInfo(q *entity.MysqlQuery) (info *pdo.RedEnvelopeInfo, err error)
 	GetRemainRedEnvelope(q *entity.MysqlQuery) (info *pdo.RemainRedEnvelopeInfo, err error)
-	CreateRedEnvelopeRecord(p *po.RedEnvelopeRecord) (err error)
-	TxCreateRedEnvelopeRecord(tx *gorm.DB, p *po.RedEnvelopeRecord) (err error)
-	TxUpdateRedEnvelopeRecord(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64)
 }
 
 type redEnvelopeRepository struct {
@@ -37,36 +31,6 @@ func (r *redEnvelopeRepository) TxCreateRedEnvelope(tx *gorm.DB, p *po.RedEnvelo
 
 func (r *redEnvelopeRepository) TxUpdateRedEnvelope(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64) {
 	rowsAffected = tx.Model(po.RedEnvelope{}).Where(u.Query, u.Args...).Updates(u.Values).RowsAffected
-	return
-}
-
-func (r *redEnvelopeRepository) TxCreateFundFlow(tx *gorm.DB, p *po.FundFlow) (err error) {
-	err = tx.Create(p).Error
-	return
-}
-
-func (r *redEnvelopeRepository) CreateFundFlow(p *po.FundFlow) (err error) {
-	db := xmysql.GetDB()
-	err = db.Create(p).Error
-	return
-}
-
-func (r *redEnvelopeRepository) CreateRedEnvelopeRecord(p *po.RedEnvelopeRecord) (err error) {
-	db := xmysql.GetDB()
-	err = db.Create(p).Error
-	return
-}
-
-func (r *redEnvelopeRepository) TxCreateRedEnvelopeRecord(tx *gorm.DB, p *po.RedEnvelopeRecord) (err error) {
-	err = tx.Create(p).Error
-	return
-}
-
-func (r *redEnvelopeRepository) TxCreateRedEnvelopeReceivers(tx *gorm.DB, list []*po.RedEnvelopeReceiver) (err error) {
-	if len(list) == 0 {
-		return
-	}
-	err = tx.Create(list).Error
 	return
 }
 
@@ -98,10 +62,5 @@ func (r *redEnvelopeRepository) GetRemainRedEnvelope(q *entity.MysqlQuery) (info
 	info = new(pdo.RemainRedEnvelopeInfo)
 	db := xmysql.GetDB()
 	err = db.Model(po.RedEnvelope{}).Select(info.GetFields()).Where(q.Query, q.Args...).Find(info).Error
-	return
-}
-
-func (r *redEnvelopeRepository) TxUpdateRedEnvelopeRecord(tx *gorm.DB, u *entity.MysqlUpdate) (rowsAffected int64) {
-	rowsAffected = tx.Model(po.RedEnvelopeRecord{}).Where(u.Query, u.Args...).Updates(u.Values).RowsAffected
 	return
 }

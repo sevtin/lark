@@ -7,8 +7,7 @@ import (
 	"lark/apps/interfaces/internal/service/svc_{{.PackageName}}"
 )
 
-func provide{{.UpperServiceName}}() {
-	Provide(svc_{{.PackageName}}.New{{.UpperServiceName}}Service)
+func init () {
+	Provide(svc_{{.PackageName}}.New{{.UpperPackageName}}Service)
 }
-
 `)

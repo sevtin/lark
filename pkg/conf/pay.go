@@ -15,6 +15,7 @@ type Alipay struct {
 	ReturnURL           string `yaml:"return_url"`
 	NotifyURL           string `yaml:"notify_url"`
 	Server              string `yaml:"server"`
+	Release             bool   `yaml:"release"`
 }
 
 type Paypal struct {

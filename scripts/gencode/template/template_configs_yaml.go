@@ -46,4 +46,11 @@ mysql:
   db: lark_user
   username: root
   password: lark2022
+  debug: false
+redis:
+  address: ["lark-redis-01:7001","lark-redis-02:7002","lark-redis-03:7003","lark-redis-04:7004"]
+  db: 0
+  password: lark2022
+  prefix: "LK:"
+  single: false
 `)

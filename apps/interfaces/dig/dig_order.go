@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_order"
 )
 
-func provideOrder() {
+func init() {
 	Provide(svc_order.NewOrderService)
 }

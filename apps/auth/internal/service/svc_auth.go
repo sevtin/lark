@@ -22,7 +22,7 @@ type AuthService interface {
 
 type authService struct {
 	cfg               *config.Config
-	authRepo          repo.AuthRepository
+	oauthUserRepo     repo.OauthUserRepository
 	userRepo          repo.UserRepository
 	avatarRepo        repo.AvatarRepository
 	chatMemberRepo    repo.ChatMemberRepository
@@ -35,7 +35,7 @@ type authService struct {
 }
 
 func NewAuthService(cfg *config.Config,
-	authRepo repo.AuthRepository,
+	oauthUserRepo repo.OauthUserRepository,
 	userRepo repo.UserRepository,
 	avatarRepo repo.AvatarRepository,
 	chatMemberRepo repo.ChatMemberRepository,
@@ -44,7 +44,7 @@ func NewAuthService(cfg *config.Config,
 	svrMgrCache cache.ServerMgrCache) AuthService {
 	chatMemberClient := chat_member_client.NewChatMemberClient(cfg.Etcd, cfg.ChatMemberServer, cfg.Jaeger, cfg.Name)
 	svc := &authService{cfg: cfg,
-		authRepo:         authRepo,
+		oauthUserRepo:    oauthUserRepo,
 		userRepo:         userRepo,
 		avatarRepo:       avatarRepo,
 		chatMemberRepo:   chatMemberRepo,

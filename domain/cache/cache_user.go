@@ -79,7 +79,7 @@ func (c *userCache) SetBasicUserInfoList(list []*pb_user.BasicUserInfo) (err err
 	var (
 		srv     *pb_user.BasicUserInfo
 		jsonStr string
-		pipe    = xredis.Cli.Client.Pipeline()
+		pipe    = xredis.Pipeline()
 	)
 	for _, srv = range list {
 		jsonStr, err = utils.Marshal(srv)
@@ -88,7 +88,7 @@ func (c *userCache) SetBasicUserInfoList(list []*pb_user.BasicUserInfo) (err err
 			return
 		}
 		pipe.Set(context.Background(),
-			xredis.Cli.RealKey(constant.RK_SYNC_BASIC_USER_INFO+utils.GetHashTagKey(srv.Uid)),
+			xredis.RealKey(constant.RK_SYNC_BASIC_USER_INFO+utils.GetHashTagKey(srv.Uid)),
 			jsonStr,
 			constant.CONST_DURATION_BASIC_USER_INFO_SECOND)
 	}
@@ -102,7 +102,7 @@ func (c *userCache) SetUserServerList(list []*pb_user.UserServerId) (err error) 
 	}
 	var (
 		srv  *pb_user.UserServerId
-		pipe = xredis.Cli.Client.Pipeline()
+		pipe = xredis.Pipeline()
 	)
 	for _, srv = range list {
 		pipe.Set(context.Background(),
@@ -207,7 +207,7 @@ func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error
 		keys    = make([]string, len(uidList))
 		cmdList = make([]*redis.StringCmd, len(uidList))
 		cmd     *redis.StringCmd
-		pipe    = xredis.Cli.Client.Pipeline()
+		pipe    = xredis.Pipeline()
 	)
 	for i, uid = range uidList {
 		cmdList[i] = pipe.Get(context.Background(), xredis.RealKey(constant.RK_SYNC_USER_SERVER+utils.GetHashTagKey(uid)))

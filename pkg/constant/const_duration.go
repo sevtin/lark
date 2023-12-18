@@ -6,6 +6,8 @@ const (
 	CONST_DURATION_BASIC_USER_INFO_SECOND  = 60 * 60 * 24 * 7 * time.Second //用户基础信息缓存时间
 	CONST_DURATION_USER_INFO_SECOND        = 60 * 60 * 24 * 7 * time.Second //用户信息缓存时间
 	CONST_DURATION_OAUTH_USER_TOKEN_SECOND = 60 * 60 * 24 * 7 * time.Second
+
+	CONST_DURATION_USER_OAUTH_USER_INFO_SECOND = 60 * 60 * 24 * 7 * time.Second //OAUTH_USER基础信息缓存时
 )
 
 const (
@@ -79,6 +81,15 @@ const (
 
 const (
 	CONST_DURATION_ORDER_STATUS_SECOND = 60 * 60 * time.Second
-	CONST_DURATION_REPO_INFO_SECOND    = 60 * 60 * 24 * 7 * time.Second
+	CONST_DURATION_REPO_INFO_SECOND    = 60 * 5 * time.Second
 	CONST_DURATION_TASK_REWARD_SECOND  = 60 * 60 * 24 * time.Second
+	CONST_DURATION_TASK_STATUS_SECOND  = 60 * 60 * time.Second
+)
+
+const (
+	CONST_DURATION_INVITATION_CODE_SECOND = 60 * 60 * 24 * 30 * time.Second
+)
+
+const (
+	CONST_DURATION_WALLET_RESET_PWD_CODE_SECOND = 60 * 30 * time.Second
 )

@@ -11,11 +11,10 @@ import (
 
 type UserRepository interface {
 	Create(user *po.User) (err error)
+	TxCreate(tx *gorm.DB, user *po.User) (err error)
 	VerifyUserIdentity(w *entity.MysqlQuery) (user *po.User, err error)
 	Exists(w *entity.MysqlQuery, uid int64) (exists bool, err error)
 	TxExists(tx *gorm.DB, w *entity.MysqlQuery, uid int64) (exists bool, err error)
-	//UserInfo(w *entity.MysqlQuery) (user *po.User, err error)
-	//BasicUserInfo(w *entity.MysqlQuery) (user *pb_user.BasicUserInfo, err error)
 	BasicUserInfoList(w *entity.MysqlQuery) (list []*pb_user.BasicUserInfo, err error)
 	UserList(w *entity.MysqlQuery) (list []*pb_user.UserInfo, err error)
 	TxUserList(tx *gorm.DB, w *entity.MysqlQuery) (list []*po.User, err error)
@@ -38,7 +37,8 @@ func NewUserRepository() UserRepository {
 
 /*
 存:传指针对象，Create时不需要&，同时会Out表中的数据
-读:返回指针对象，Find时不需要&，需要不为nil
+读:返回指针对象，Find时不需要&
+需要不为nil
 */
 
 func (r *userRepository) Create(user *po.User) (err error) {
@@ -48,6 +48,11 @@ func (r *userRepository) Create(user *po.User) (err error) {
 	}
 	db := xmysql.GetDB()
 	err = db.Create(user).Error
+	return
+}
+
+func (r *userRepository) TxCreate(tx *gorm.DB, user *po.User) (err error) {
+	err = tx.Create(user).Error
 	return
 }
 
@@ -155,5 +160,13 @@ func (r *userRepository) UserServerId(u *entity.MysqlQuery) (server *pb_user.Use
 	server = new(pb_user.UserServerId)
 	db := xmysql.GetDB()
 	err = db.Model(po.User{}).Select("uid,server_id").Where(u.Query, u.Args...).Find(server).Error
+	return
+}
+
+func (r *userRepository) QueryUser(q *entity.MysqlQuery, dist interface{}) (err error) {
+	db := xmysql.GetDB()
+	q.Model = new(po.User)
+	err = q.Find(db, dist)
+	//err = db.Model(po.User{}).Select(q.Fields).Where(q.Query, q.Args...).Find(dist).Error
 	return
 }

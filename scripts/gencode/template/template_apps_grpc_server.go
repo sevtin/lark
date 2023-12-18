@@ -12,22 +12,22 @@ import (
 	"lark/pkg/proto/pb_{{.PackageName}}"
 )
 
-type {{.UpperServiceName}}Server interface {
+type {{.UpperPackageName}}Server interface {
 	Run()
 }
 
-type {{.LowerServiceName}}Server struct {
-	pb_{{.PackageName}}.Unimplemented{{.UpperServiceName}}Server
+type {{.LowerPackageName}}Server struct {
+	pb_{{.PackageName}}.Unimplemented{{.UpperPackageName}}Server
 	cfg         *config.Config
-	{{.LowerServiceName}}Service service.{{.UpperServiceName}}Service
+	{{.LowerPackageName}}Service service.{{.UpperPackageName}}Service
 	grpcServer  *xgrpc.GrpcServer
 }
 
-func New{{.UpperServiceName}}Server(cfg *config.Config, {{.LowerServiceName}}Service service.{{.UpperServiceName}}Service) {{.UpperServiceName}}Server {
-	return &{{.LowerServiceName}}Server{cfg: cfg, {{.LowerServiceName}}Service: {{.LowerServiceName}}Service}
+func New{{.UpperPackageName}}Server(cfg *config.Config, {{.LowerPackageName}}Service service.{{.UpperPackageName}}Service) {{.UpperPackageName}}Server {
+	return &{{.LowerPackageName}}Server{cfg: cfg, {{.LowerPackageName}}Service: {{.LowerPackageName}}Service}
 }
 
-func (s *{{.LowerServiceName}}Server) Run() {
+func (s *{{.LowerPackageName}}Server) Run() {
 	var (
 		srv    *grpc.Server
 		closer io.Closer
@@ -39,7 +39,7 @@ func (s *{{.LowerServiceName}}Server) Run() {
 		}
 	}()
 
-	pb_{{.PackageName}}.Register{{.UpperServiceName}}Server(srv, s)
+	pb_{{.PackageName}}.Register{{.UpperPackageName}}Server(srv, s)
 	s.grpcServer = xgrpc.NewGrpcServer(s.cfg.GrpcServer, s.cfg.Etcd)
 	s.grpcServer.RunServer(srv)
 }

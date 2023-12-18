@@ -9,19 +9,19 @@ import (
 	"lark/pkg/xhttp"
 )
 
-type {{.UpperServiceName}}Ctrl struct {
-	{{.LowerServiceName}}Service svc_{{.PackageName}}.{{.UpperServiceName}}Service
+type {{.UpperPackageName}}Ctrl struct {
+	{{.LowerPackageName}}Service svc_{{.PackageName}}.{{.UpperPackageName}}Service
 }
 
-func New{{.UpperServiceName}}Ctrl({{.LowerServiceName}}Service svc_{{.PackageName}}.{{.UpperServiceName}}Service) *{{.UpperServiceName}}Ctrl {
-	return &{{.UpperServiceName}}Ctrl{ {{.LowerServiceName}}Service: {{.LowerServiceName}}Service }
+func New{{.UpperPackageName}}Ctrl({{.LowerPackageName}}Service svc_{{.PackageName}}.{{.UpperPackageName}}Service) *{{.UpperPackageName}}Ctrl {
+	return &{{.UpperPackageName}}Ctrl{ {{.LowerPackageName}}Service: {{.LowerPackageName}}Service }
 }
 
-func (ctrl *{{.UpperServiceName}}Ctrl) Edit(ctx *gin.Context) {
+func (ctrl *{{.UpperPackageName}}Ctrl) Edit(ctx *gin.Context) {
 	xhttp.Success(ctx, nil)
 }
 
-func (ctrl *{{.UpperServiceName}}Ctrl) Info(ctx *gin.Context) {
+func (ctrl *{{.UpperPackageName}}Ctrl) Info(ctx *gin.Context) {
 	xhttp.Success(ctx, nil)
 }
 `)

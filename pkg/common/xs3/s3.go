@@ -81,6 +81,27 @@ func (c *S3Client) Upload(fileHeader *multipart.FileHeader) (output *s3manager.U
 	return
 }
 
+func (c *S3Client) UploadFile(file *os.File, suffix string) (output *s3manager.UploadOutput, err error) {
+	var (
+		uploader    *s3manager.Uploader
+		uuid        = utils.NewUUID()
+		contentType string
+		key         string
+	)
+	defer file.Close()
+	contentType = utils.GetContentType(suffix)
+	key = uuid + suffix
+	uploader = s3manager.NewUploader(c.sess)
+	output, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(c.cfg.Bucket),
+		Key:         aws.String(key),
+		Body:        file,
+		ContentType: aws.String(contentType),
+		ACL:         aws.String(S3_ACL_PUBLIC_READ),
+	})
+	return
+}
+
 // https://docs.aws.amazon.com/zh_cn/sdk-for-go/v1/developer-guide/s3-example-presigned-urls.html
 func (c *S3Client) GetPresignedURL(in *PresignedUrlInput) (out *PresignedUrlOutput, err error) {
 	var (

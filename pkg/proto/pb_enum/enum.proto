@@ -1,4 +1,4 @@
-syntax ="proto3";
+syntax = "proto3";
 package pb_enum;
 option go_package = "lark/pkg/proto/pb_enum;pb_enum";
 
@@ -130,7 +130,7 @@ enum MSG_OPERATION {
 }
 
 enum CHAT_GROUP_ROLE {
-  ORDINARY_MEMBER  = 0; // 普通成员
+  ORDINARY_MEMBER = 0; // 普通成员
   ADMINISTRATOR = 8; // 管理员
   MASTER = 9; // 群主
 }
@@ -153,7 +153,7 @@ enum LOGIN_CHANNEL {
 }
 
 enum RED_ENVELOPE_TYPE {
-  UNKNOWN_ENVELOPE_TYPE  = 0;
+  UNKNOWN_ENVELOPE_TYPE = 0;
   AVERAGE = 1; // 均分红包
   RANDOM = 2; // 碰运气红包
   FIXED = 3; // 红包固定金额
@@ -183,28 +183,29 @@ enum WALLET_STATUS
   ACTIVE = 1; // 激活状态
   INACTIVE = 2; // 非活动状态
   FROZEN = 3; // 冻结状态
-  CLOSED  = 4; // 关闭状态
 }
 
 enum RED_ENVELOPE_STATUS {
-  CREATED_ENVELOPE  = 0;
+  CREATED_ENVELOPE = 0;
   ISSUED = 1; // 已发放
   RECEIVED = 2; // 已领完
   EXPIRED = 3; // 已过期且退还剩余红包
 }
 
 enum PAYMENT_STATUS {
-  CREATED_UNPAID  = 0; // 未支付
+  CREATED_UNPAID = 0; // 未支付
   PAYING = 1; // 支付中
   PAID = 2; // 已支付
   FAILED = 3; // 支付失败
+  CLOSED = 4;// 已关闭
 }
 
 enum ORDER_STATUS {
-  CREATED_ORDER_UNPAID  = 0; // 未支付
+  CREATED_ORDER_UNPAID = 0; // 未支付
   ORDER_PAYING = 1; // 支付中
   ORDER_PAID = 2; // 已支付
   ORDER_FAILED = 3; // 支付失败
+  ORDER_CLOSED = 4;// 已关闭
 }
 
 enum TRADE_TYPE {
@@ -218,9 +219,22 @@ enum TRADE_TYPE_ID {
   RED_ENVELOPE_SEND_ID = 1; // 发放红包
   RED_ENVELOPE_RECEIVE_ID = 2; // 收红包
   RED_ENVELOPE_RETURN_ID = 3; // 红包余额退还
-  REPO_CREATE_TASK_ID = 4; // 创建任务
-  REPO_UPDATE_TASK_RETURN_ID = 5; // 更新任务返还
-  REPO_UPDATE_TASK_LAUNCH_ID = 6; // 更新任务上架
+  SIGN_REWARD_ID = 4; // 注册奖励
+  REPO_CREATE_TASK_ID = 5; // 创建任务
+  REPO_UPDATE_TASK_RETURN_ID = 6; // 更新任务返还
+  REPO_UPDATE_TASK_LAUNCH_ID = 7; // 更新任务上架
+  REPO_TASK_REWARD_ID = 8; // 任务奖励
+  REGISTER_INVITATION_REWARD_ID = 9; // 注册邀请奖励
+  WITHDRAW_APPROVAL_REJECTED = 10; // 驳回提现
+  WITHDRAW_ID = 11; // 提现
+  WITHDRAW_FEE_ID = 12; // 提现手续费
+  DEPOSIT_ID = 13; // 充值
+  REPO_TASK_STAR_ID = 14;
+  REPO_TASK_FORK_ID = 15;
+  REPO_TASK_WATCH_ID = 16;
+  REPO_TASK_FOLLOW_ID = 17;
+  REPO_CLOSE_TASK_ID = 18;
+  REPO_DELETE_TASK_ID = 19;
 }
 
 enum GRAB_RESULT {
@@ -255,4 +269,18 @@ enum TASK_STATUS {
   UNKNOWN_TASK_STATUS = 0;
   TASK_ENABLED = 1; // 任务开启
   TASK_DISABLED = 2; // 任务关闭
+}
+
+enum VERIFICATION_STATUS {
+  UNKNOWN_VERIFICATION_STATUS = 0;
+  PENDING = 1; // 待核查
+  APPROVED = 2; // 已核查并通过
+  REJECTED = 3; // 已核查但未通过
+}
+
+enum ACTION {
+  UNKNOWN_ACTION = 0;
+  CREATE = 1; // 创建
+  UPDATE = 2; // 更新
+  DELETE = 3; // 删除
 }

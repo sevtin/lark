@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_convo"
 )
 
-func provideConvo() {
+func init() {
 	Provide(svc_convo.NewConvoService)
 }

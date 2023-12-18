@@ -60,6 +60,14 @@ message BasicUserInfo {
   string avatar = 7; // 头像
 }
 
+message OauthUserInfo {
+  int64 uid = 1; // uid
+  string openid = 2; // openid
+  string nickname = 3; // 昵称
+  string access_token = 4; // access_token
+  string avatar_url = 5; // 头像
+}
+
 message UserSrvInfo {
   int64 uid = 1; // uid
   string nickname = 2; // 昵称

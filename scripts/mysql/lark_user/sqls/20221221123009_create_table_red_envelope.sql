@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS `wallets`;
 CREATE TABLE `wallets` (
   `wallet_id` bigint unsigned NOT NULL COMMENT '钱包唯一ID',
-  `wallet_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '钱包类型',
+  `wallet_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '钱包类型 1-货币 单位(分) 2-钻石 3-金币 4-银币 5-铜币 6-积分',
   `uid` bigint unsigned NOT NULL DEFAULT '0' COMMENT '用户UID',
   `balance` bigint NOT NULL DEFAULT '0' COMMENT '可用余额(balance+frozen_amount=总额)(分)',
   `frozen_amount` bigint NOT NULL DEFAULT '0' COMMENT '冻结金额(分)',
@@ -78,6 +78,7 @@ CREATE TABLE `fund_flows` (
   `flow_id` bigint unsigned NOT NULL COMMENT '流水ID',
   `uid` bigint unsigned NOT NULL DEFAULT '0' COMMENT '用户UID',
   `wallet_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '收/支钱包ID',
+  `wallet_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '钱包类型 1-货币 单位(分) 2-钻石 3-金币 4-银币 5-铜币 6-积分',
   `trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '自编唯一交易编号',
   `assoc_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联ID',
   `trade_type` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '收支类型 1-收入 2-支出',
@@ -90,7 +91,7 @@ CREATE TABLE `fund_flows` (
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`flow_id`),
-  UNIQUE KEY `uniq_tradeNo` (`trade_no`),
+  KEY `idx_tradeNo` (`trade_no`),
   KEY `idx_uid_tradeTypeId_assocId` (`uid`,`trade_type_id`,`assoc_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资金流水表';
 
@@ -165,6 +166,7 @@ CREATE TABLE `payments` (
   `uid` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'uid',
   `seller_id` varchar(64) NOT NULL DEFAULT '' COMMENT '收款账号对应的第三方支付唯一用户号',
   `buyer_id` varchar(64) NOT NULL DEFAULT '' COMMENT '支付人所在支付平台ID',
+  `buyer_email` varchar(64) NOT NULL DEFAULT '' COMMENT '支付人所在支付平台Email',
   `order_id` bigint NOT NULL DEFAULT '0' COMMENT '商户原始订单号',
   `trade_no` varchar(64) NOT NULL DEFAULT '' COMMENT '系统内部唯一订单号，只能是数字、大小写字母_-*',
   `pay_status` tinyint NOT NULL DEFAULT '0' COMMENT '支付状态 0-待支付 1-已支付/已完成 2-已取消 3-失败',

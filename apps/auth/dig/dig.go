@@ -18,7 +18,7 @@ func init() {
 	Provide(server.NewServer)
 	Provide(auth.NewAuthServer)
 	Provide(service.NewAuthService)
-	Provide(repo.NewAuthRepository)
+	Provide(repo.NewOauthUserRepository)
 	Provide(repo.NewAvatarRepository)
 	Provide(repo.NewUserRepository)
 	Provide(repo.NewChatMemberRepository)

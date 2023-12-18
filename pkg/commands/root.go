@@ -28,7 +28,8 @@ func Run(inst MainInstance) {
 		return
 	}
 
-	rand.Seed(time.Now().UTC().UnixNano())
+	//rand.Seed(time.Now().UTC().UnixNano())
+	rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	err := inst.Initialize()

@@ -5,27 +5,18 @@ package service
 
 import (
 	"lark/apps/{{.PackageName}}/internal/config"
-	"lark/domain/cache"
-	"lark/domain/repo"
 )
 
-type {{.UpperServiceName}}Service interface {
+type {{.UpperPackageName}}Service interface {
 	
 }
 
-type {{.LowerServiceName}}Service struct {
-	cfg            *config.Config
-	{{.LowerServiceName}}Repo     repo.{{.UpperServiceName}}Repository
-	{{.LowerServiceName}}Cache cache.{{.UpperServiceName}}Cache
+type {{.LowerPackageName}}Service struct {
+	cfg *config.Config
 }
 
-func New{{.UpperServiceName}}Service(cfg *config.Config, 
-	{{.LowerServiceName}}Repo     repo.{{.UpperServiceName}}Repository,
-	{{.LowerServiceName}}Cache cache.{{.UpperServiceName}}Cache) {{.UpperServiceName}}Service {
-	svc := &{{.LowerServiceName}}Service{cfg: cfg,
-		{{.LowerServiceName}}Repo:  {{.LowerServiceName}}Repo,
-		{{.LowerServiceName}}Cache: {{.LowerServiceName}}Cache,
-	}
+func New{{.UpperPackageName}}Service(cfg *config.Config) {{.UpperPackageName}}Service {
+	svc := &{{.LowerPackageName}}Service{cfg: cfg}
 	return svc
 }
 `)

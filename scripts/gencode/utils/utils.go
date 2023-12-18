@@ -123,3 +123,12 @@ func CamelToSnake(input string) string {
 	}
 	return buffer.String()
 }
+
+func GetName(serviceName string, apiName string) (name string) {
+	if strings.HasPrefix(apiName, serviceName) {
+		name = apiName
+		return
+	}
+	name = serviceName + "_" + apiName
+	return
+}

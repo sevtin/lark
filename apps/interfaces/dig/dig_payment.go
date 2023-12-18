@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_payment"
 )
 
-func providePayment() {
+func init() {
 	Provide(svc_payment.NewPaymentService)
 }

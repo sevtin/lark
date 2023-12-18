@@ -55,7 +55,7 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 
 func (s *authService) signInTransaction(q *entity.MysqlQuery, platform pb_enum.PLATFORM_TYPE) (signIn *do.SignIn) {
 	signIn = new(do.SignIn)
-	signIn.User, signIn.Err = s.authRepo.VerifyIdentity(q)
+	signIn.User, signIn.Err = s.userRepo.VerifyUserIdentity(q)
 	if signIn.Err != nil {
 		signIn.Code = ERROR_CODE_AUTH_QUERY_DB_FAILED
 		signIn.Msg = ERROR_AUTH_QUERY_DB_FAILED

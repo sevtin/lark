@@ -9,19 +9,19 @@ import (
 	"lark/pkg/conf"
 )
 
-type {{.UpperServiceName}}Client interface {
+type {{.UpperPackageName}}Client interface {
 
 }
 
-type {{.LowerServiceName}}Client struct {
+type {{.LowerPackageName}}Client struct {
 	opt *xgrpc.ClientDialOption
 }
 
-func New{{.UpperServiceName}}Client(etcd *conf.Etcd, server *conf.GrpcServer, jaeger *conf.Jaeger, clientName string) {{.UpperServiceName}}Client {
-	return &{{.LowerServiceName}}Client{xgrpc.NewClientDialOption(etcd, server, jaeger, clientName)}
+func New{{.UpperPackageName}}Client(etcd *conf.Etcd, server *conf.GrpcServer, jaeger *conf.Jaeger, clientName string) {{.UpperPackageName}}Client {
+	return &{{.LowerPackageName}}Client{xgrpc.NewClientDialOption(etcd, server, jaeger, clientName)}
 }
 
-func (c *{{.LowerServiceName}}Client) GetClientConn() (conn *grpc.ClientConn) {
+func (c *{{.LowerPackageName}}Client) GetClientConn() (conn *grpc.ClientConn) {
 	conn = xgrpc.GetClientConn(c.opt.DialOption)
 	return
 }

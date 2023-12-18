@@ -4,6 +4,6 @@ import (
 	"lark/apps/interfaces/internal/service/svc_red_env"
 )
 
-func provideRedEnv() {
+func init() {
 	Provide(svc_red_env.NewRedEnvService)
 }

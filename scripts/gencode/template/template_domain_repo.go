@@ -3,14 +3,25 @@ package template
 var DomainRepoTemplate = ParseTemplate(`
 package repo
 
-type {{.UpperServiceName}}Repository interface {
+import (
+	"lark/domain/po"
+	"lark/pkg/common/xmysql"
+)
+
+type {{.UpperModelName}}Repository interface {
 
 }
 
-type {{.LowerServiceName}}Repository struct {
+type {{.LowerModelName}}Repository struct {
 }
 
-func New{{.UpperServiceName}}Repository() {{.UpperServiceName}}Repository {
-	return &{{.LowerServiceName}}Repository{}
+func New{{.UpperModelName}}Repository() {{.UpperModelName}}Repository {
+	return &{{.LowerModelName}}Repository{}
+}
+
+func (r *{{.LowerModelName}}Repository) Create({{.LowerModelName}} *po.{{.UpperModelName}}) (err error) {
+	db:= xmysql.GetDB()
+	err = db.Create({{.LowerModelName}}).Error
+	return
 }
 `)

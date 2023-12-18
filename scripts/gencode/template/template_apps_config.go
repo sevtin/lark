@@ -19,7 +19,7 @@ type Config struct {
 	Etcd             *conf.Etcd         "yaml:"etcd""
 	Mysql            *conf.Mysql        "yaml:"mysql""
 	Redis            *conf.Redis        "yaml:"redis""
-	{{.UpperServiceName}}Server *conf.GrpcServer   "yaml:"{{.PackageName}}_server""
+	{{.UpperPackageName}}Server *conf.GrpcServer   "yaml:"{{.PackageName}}_server""
 	Jaeger           *conf.Jaeger       "yaml:"jaeger""
 }
 
