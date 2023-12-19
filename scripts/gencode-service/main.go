@@ -2,19 +2,23 @@ package main
 
 import (
 	"fmt"
+	"github.com/gertd/go-pluralize"
+	"lark/pkg/conf"
 	"lark/scripts/gencode-service/template"
 	"lark/scripts/gencode/config"
 	"lark/scripts/gencode/utils"
+	"lark/scripts/generate-gorm/gengorm"
 	"strings"
 )
 
 func main() {
 	var (
-		// 驼峰规则
-		packageName = "Canary"      // 程序包名
-		serviceName = "Order"       // 服务实现
-		apiName     = "OrderStatus" // Api 接口
-		modelName   = "Book"        // 表模型
+		cli         = pluralize.NewClient()
+		packageName = "Phoenix" // 程序包名
+		serviceName = "Auth"    // 服务实现
+		apiName     = "SignUp"  // 服务下属 Api
+		tableName   = "user_infos"
+		modelName   = utils.ToCamelCase(cli.Singular(tableName)) // 表模型
 
 		upperPackageName = utils.ToCamel(packageName)
 		lowerPackageName = utils.FirstLower(upperPackageName)
@@ -24,6 +28,19 @@ func main() {
 		lowerApiName     = utils.FirstLower(upperApiName)
 		upperModelName   = utils.ToCamel(modelName)
 		lowerModelName   = utils.FirstLower(upperModelName)
+
+		cfg = &conf.Mysql{
+			Address:      "127.0.0.1",
+			Username:     "root",
+			Password:     "",
+			Db:           "canary",
+			MaxOpenConns: 20,
+			MaxIdleConns: 10,
+			MaxLifetime:  120000,
+			MaxIdleTime:  0,
+			Charset:      "utf8mb4",
+			Debug:        false,
+		}
 	)
 	conf := config.GenConfig{
 		Path:        "",
@@ -67,8 +84,9 @@ func main() {
 	generateDomainCacheCode(conf)
 	generateDomainCrConstCode(conf)
 	generateDomainCrReadCode(conf)
-	generateDomainPoCode(conf)
+	//generateDomainPoCode(conf)
 	generateDomainRepoCode(conf)
+	gengorm.GenGorm(cfg, cli.Plural(tableName), "./domain/po/")
 
 	// Internal
 	generateInternalConfigCode(conf)

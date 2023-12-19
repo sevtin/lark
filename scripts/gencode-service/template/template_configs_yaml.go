@@ -25,9 +25,9 @@ mysql:
   password: lark2022
   debug: false
 redis:
-  address: ["lark-redis-01:7001","lark-redis-02:7002","lark-redis-03:7003","lark-redis-04:7004"]
+  address: ["127.0.0.1:6379"]
   db: 0
-  password: lark2022
+  password:
   prefix: "LK:"
   single: true
 `)

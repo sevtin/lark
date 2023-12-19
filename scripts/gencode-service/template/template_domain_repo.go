@@ -32,7 +32,7 @@ func (r *{{.LowerModelName}}Repository) Update{{.UpperModelName}}(u *entity.Mysq
 	return
 }
 
-func (r *{{.LowerModelName}}Repository) {{.UpperModelName}}Info(q *entity.MysqlQuery)({{.LowerModelName}} *po.{{.UpperModelName}}, err error) {
+func (r *{{.LowerModelName}}Repository) {{.UpperModelName}}(q *entity.MysqlQuery)({{.LowerModelName}} *po.{{.UpperModelName}}, err error) {
 	{{.LowerModelName}} = new(po.{{.UpperModelName}})
 	db := xmysql.GetDB()
 	q.Model = {{.LowerModelName}}

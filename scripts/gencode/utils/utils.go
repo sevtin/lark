@@ -95,6 +95,14 @@ func ToCamel(s string) string {
 	return c.String(s)
 }
 
+func ToCamelCase(str string) string {
+	parts := strings.Split(str, "_")
+	for i, part := range parts {
+		parts[i] = strings.Title(part)
+	}
+	return strings.Join(parts, "")
+}
+
 func FirstUpper(s string) string {
 	if s == "" {
 		return ""

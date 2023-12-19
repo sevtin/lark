@@ -80,7 +80,7 @@ func (mq *RabbitClient) notifyListen() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			xlog.Warn(string(debug.Stack()))
+			xlog.Warn(debug.Stack())
 		}
 	}()
 

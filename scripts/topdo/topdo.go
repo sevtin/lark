@@ -9,6 +9,8 @@ import (
 	"golang.org/x/text/language"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"lark/pkg/constant"
+	"lark/pkg/utils"
 	"log"
 	"os"
 	"regexp"
@@ -167,37 +169,17 @@ func createFile(code string, filename string) (err error) {
 		exists        bool
 		formattedCode []byte
 	)
-	if exists, err = pathExists(filePath); exists == true {
+	if exists, err = utils.PathExists(filePath); exists == true {
 		return
 	}
-	if exists, err = pathExists(path); exists == false {
-		mkdir(path)
+	if exists, err = utils.PathExists(path); exists == false {
+		utils.Mkdir(path)
 	}
 	formattedCode, err = format.Source([]byte(code))
 	if err != nil {
 		return
 	}
 	err = os.WriteFile(filePath, formattedCode, 0776)
-	return
-}
-
-func pathExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
-func mkdir(path string) (err error) {
-	err = os.MkdirAll(path, 0776)
-	if err != nil {
-		return
-	}
-	err = os.Chmod(path, 0776)
 	return
 }
 
@@ -216,7 +198,7 @@ func getColumnTypes(db *gorm.DB, s string) (cts map[string]string, err error) {
 	}
 	types, _ = rows.ColumnTypes()
 	for _, ct = range types {
-		if typename, ok = columnTypes[strings.ToLower(ct.DatabaseTypeName())]; ok == true {
+		if typename, ok = constant.ColumnTypes[strings.ToLower(ct.DatabaseTypeName())]; ok == true {
 			cts[ct.Name()] = typename
 		}
 	}
@@ -281,35 +263,3 @@ func camelToUnderscore(word string) string {
 	}
 	return buffer.String()
 }
-
-var (
-	columnTypes = map[string]string{
-		"tinyint":          "int32",
-		"smallint":         "int32",
-		"mediumint":        "int32",
-		"int":              "int32",
-		"integer":          "int64",
-		"bigint":           "int64",
-		"float":            "float64",
-		"double":           "float64",
-		"decimal":          "float64",
-		"date":             "string",
-		"time":             "string",
-		"year":             "string",
-		"datetime":         "time.Time",
-		"timestamp":        "time.Time",
-		"char":             "string",
-		"varchar":          "string",
-		"tinyblob":         "string",
-		"tinytext":         "string",
-		"blob":             "string",
-		"text":             "string",
-		"mediumblob":       "string",
-		"mediumtext":       "string",
-		"longblob":         "string",
-		"longtext":         "string",
-		"unsigned bigint":  "int64",
-		"unsigned int":     "int",
-		"unsigned tinyint": "int32",
-	}
-)
