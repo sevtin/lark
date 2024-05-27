@@ -158,3 +158,26 @@ func Mkdir(path string) (err error) {
 	err = os.Chmod(path, 0776)
 	return
 }
+
+//func AppendToFile(filename string, content string) (err error) {
+//	var (
+//		file *os.File
+//		wr   = new(bytes.Buffer)
+//		buf  []byte
+//	)
+//	file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+//	if err != nil {
+//		return
+//	}
+//	defer file.Close()
+//	wr.WriteString(content)
+//	if buf, err = format.Source(wr.Bytes()); err != nil {
+//		return
+//	}
+//	wr = bytes.NewBuffer(buf)
+//	_, err = io.WriteString(file, content)
+//	if err != nil {
+//		return
+//	}
+//	return
+//}

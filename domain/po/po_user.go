@@ -22,4 +22,5 @@ type User struct {
 	ServerId    int64  `gorm:"column:server_id;default:0;NOT NULL" json:"server_id"`       // 分配的ws服务器
 	CityId      int    `gorm:"column:city_id;default:0;NOT NULL" json:"city_id"`           // 城市ID
 	Avatar      string `gorm:"column:avatar" json:"avatar"`                                // 小图 72*72
+	Tz          string `gorm:"column:tz;NOT NULL" json:"tz"`                               // 时区
 }

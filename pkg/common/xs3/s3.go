@@ -105,14 +105,14 @@ func (c *S3Client) UploadFile(file *os.File, suffix string) (output *s3manager.U
 // https://docs.aws.amazon.com/zh_cn/sdk-for-go/v1/developer-guide/s3-example-presigned-urls.html
 func (c *S3Client) GetPresignedURL(in *PresignedUrlInput) (out *PresignedUrlOutput, err error) {
 	var (
-		key    = utils.NewUUID()
 		suffix string
+		key    = in.Directory + "/" + in.Key
 		svc    = s3.New(c.sess)
 		req    *request.Request
 	)
 	out = new(PresignedUrlOutput)
 	if in.ContentType == "" {
-		suffix = path.Ext(in.Filename)
+		suffix = path.Ext(in.Key)
 		in.ContentType = utils.GetContentType(suffix)
 	}
 	req, _ = svc.PutObjectRequest(&s3.PutObjectInput{
@@ -126,7 +126,6 @@ func (c *S3Client) GetPresignedURL(in *PresignedUrlInput) (out *PresignedUrlOutp
 	out.Key = key
 	out.ContentType = in.ContentType
 	out.Acl = S3_ACL_PUBLIC_READ
-	out.Filename = in.Filename
 	return
 }
 

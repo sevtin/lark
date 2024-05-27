@@ -38,8 +38,8 @@ mysql:
   username: root
   password: lark2022
   db: lark_wallet
-  max_open_conn: 20
-  max_idle_conn: 10
+  max_open_conns: 20
+  max_idle_conns: 10
   conn_lifetime: 120000
   charset: utf8
 redis:

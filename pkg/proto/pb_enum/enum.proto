@@ -17,6 +17,9 @@ enum TOPIC
   CHAT_INVITE = 2; // 聊天邀请
   RED_ENVELOPE = 3; // 红包
   READ_RECEIPT = 4; // 消息已读回执
+  REGISTER = 5; // quic 连接
+  PING = 6; // quic ping
+  PONG = 7; // quic pong
 }
 
 enum SUB_TOPIC

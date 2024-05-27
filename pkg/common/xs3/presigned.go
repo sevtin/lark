@@ -1,7 +1,8 @@
 package xs3
 
 type PresignedUrlInput struct {
-	Filename    string `json:"filename"`
+	Key         string `json:"key"`
+	Directory   string `json:"directory"`
 	ContentType string `json:"content_type"`
 }
 
@@ -11,5 +12,4 @@ type PresignedUrlOutput struct {
 	Key         string `json:"key"`
 	ContentType string `json:"content_type"`
 	Acl         string `json:"acl"`
-	Filename    string `json:"filename"`
 }

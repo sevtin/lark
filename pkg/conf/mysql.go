@@ -10,7 +10,7 @@ type Mysql struct {
 	MaxLifetime  int    `yaml:"max_lifetime"`
 	MaxIdleTime  int    `yaml:"max_idle_time"`
 	Charset      string `yaml:"charset"`
-	Debug        bool   `yaml:"debug"`
+	LogLevel     int    `yaml:"log_level"`
 }
 
 //type Mysql struct {

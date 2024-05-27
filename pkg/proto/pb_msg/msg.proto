@@ -1,4 +1,4 @@
-syntax ="proto3";
+syntax = "proto3";
 import "pb_enum/enum.proto";
 import "pb_invite/invite.proto";
 import "pb_chat/chat.proto";
@@ -193,7 +193,7 @@ message ChatInvite {
   int64 invitee_uid = 3; // 被邀请人 UID
   pb_enum.CHAT_TYPE chat_type = 4; // ChatType
   string invitation_msg = 5; // 邀请消息
-  pb_invite.InitiatorInfo initiator_info =6; // 发起人信息
+  pb_invite.InitiatorInfo initiator_info = 6; // 发起人信息
   pb_chat.ChatInfo chat_info = 7; // 群信息
 }
 
@@ -209,6 +209,12 @@ message Contact {
 message JoinedGroupChatMessage {
   pb_chat_member.ChatMemberBasicInfo inviter = 1; // 邀请人
   pb_chat_member.ChatMemberBasicInfo invitee = 2; // 被邀请人
+}
+
+message Register {
+  int64 uid = 1; // 用户ID
+  int32 platform = 2; // 平台
+  string token = 3; // token
 }
 
 service Message {

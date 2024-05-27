@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"reflect"
 	"time"
@@ -52,32 +53,64 @@ func NewMysqlQuery() *MysqlQuery {
 
 func NewNormalQuery() *MysqlQuery {
 	return &MysqlQuery{
-		Query: "1=1",
-		Args:  make([]interface{}, 0),
+		Args: make([]interface{}, 0),
+	}
+}
+
+func (m *MysqlQuery) andCondition(condition string) {
+	if m.Query == "" {
+		m.Query = condition
+	} else {
+		m.Query += " AND " + condition
+	}
+}
+
+func (m *MysqlQuery) orCondition(condition string) {
+	if m.Query == "" {
+		m.Query = condition
+	} else {
+		m.Query += " Or " + condition
 	}
 }
 
 func (m *MysqlQuery) NotDeleted(alias string) {
-	m.Query += " AND " + alias + ".deleted_ts=0"
+	clause := alias + ".deleted_ts=0"
+	m.andCondition(clause)
 }
 
 func (m *MysqlQuery) IsNull(field string) {
-	m.Query += " AND " + field + " IS NULL"
+	clause := field + " IS NULL"
+	m.andCondition(clause)
 }
 
 func (m *MysqlQuery) IsNotNull(field string) {
-	m.Query += " AND " + field + " IS NOT NULL"
+	clause := field + " IS NOT NULL"
+	m.andCondition(clause)
 }
 
 func (m *MysqlQuery) SetFilter(query string, value ...interface{}) {
-	m.Query += " AND " + query
+	m.andCondition(query)
+	m.Args = append(m.Args, value...)
+}
+
+func (m *MysqlQuery) SetFilterOr(query string, value ...interface{}) {
+	m.orCondition(query)
 	m.Args = append(m.Args, value...)
 }
 
 func (m *MysqlQuery) Between(field string, begin interface{}, end interface{}) {
-	m.Query += " AND " + field + " BETWEEN ? AND ?"
+	clause := field + " BETWEEN ? AND ?"
+	m.andCondition(clause)
 	m.Args = append(m.Args, begin)
 	m.Args = append(m.Args, end)
+}
+
+func (m *MysqlQuery) OpenParen() {
+	m.Query += "(1=1"
+}
+
+func (m *MysqlQuery) CloseParen() {
+	m.Query += ")"
 }
 
 func (m *MysqlQuery) SetSort(sort string) {
@@ -93,7 +126,15 @@ func (m *MysqlQuery) SetLimit(limit int32) {
 }
 
 func (m *MysqlQuery) AndQuery(query string) {
-	m.Query += " AND " + query
+	m.andCondition(query)
+}
+
+func (m *MysqlQuery) OrQuery(query string) {
+	m.orCondition(query)
+}
+
+func (m *MysqlQuery) SetLink(link string) {
+	m.Query += fmt.Sprintf(" %s ", link)
 }
 
 func (m *MysqlQuery) AppendArg(value interface{}) {
@@ -113,7 +154,7 @@ func (m *MysqlQuery) Reset() {
 func (m *MysqlQuery) Normal() {
 	m.Model = nil
 	m.Fields = ""
-	m.Query = "1=1"
+	m.Query = ""
 	m.Args = make([]interface{}, 0)
 	m.Sort = ""
 	m.Limit = 0
@@ -140,6 +181,19 @@ func (m *MysqlQuery) Delete(db *gorm.DB) (err error) {
 	return db.Model(m.Model).Where(m.Query, m.Args...).Update(Deleted()).Error
 }
 
+func (m *MysqlQuery) SetConditions(obj any) {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i).Interface()
+		tag := field.Tag.Get("where")
+		if tag != "" {
+			m.SetFilter(tag+"=?", value)
+		}
+	}
+}
+
 type MysqlUpdate struct {
 	Query  string
 	Args   []interface{}
@@ -148,9 +202,24 @@ type MysqlUpdate struct {
 
 func NewMysqlUpdate() *MysqlUpdate {
 	return &MysqlUpdate{
-		Query:  "1=1",
 		Args:   make([]interface{}, 0),
 		Values: make(map[string]interface{}),
+	}
+}
+
+func (m *MysqlUpdate) andCondition(condition string) {
+	if m.Query == "" {
+		m.Query = condition
+	} else {
+		m.Query += " AND " + condition
+	}
+}
+
+func (m *MysqlUpdate) orCondition(condition string) {
+	if m.Query == "" {
+		m.Query = condition
+	} else {
+		m.Query += " Or " + condition
 	}
 }
 
@@ -159,12 +228,12 @@ func (m *MysqlUpdate) Set(key string, value interface{}) {
 }
 
 func (m *MysqlUpdate) SetFilter(query string, value ...interface{}) {
-	m.Query += " AND " + query
+	m.andCondition(query)
 	m.Args = append(m.Args, value...)
 }
 
 func (m *MysqlUpdate) AndQuery(query string) {
-	m.Query += " AND " + query
+	m.andCondition(query)
 }
 
 func (m *MysqlUpdate) AppendArg(value interface{}) {
@@ -178,7 +247,7 @@ func (m *MysqlUpdate) Reset() {
 }
 
 func (m *MysqlUpdate) Normal() {
-	m.Query = "1=1"
+	m.Query = ""
 	m.Args = make([]interface{}, 0)
 	m.Values = make(map[string]interface{})
 }
@@ -189,4 +258,21 @@ func (m *MysqlUpdate) Updates(db *gorm.DB, model interface{}) *gorm.DB {
 
 func (m *MysqlUpdate) Delete(db *gorm.DB, model interface{}) *gorm.DB {
 	return db.Model(model).Where(m.Query, m.Args...).Update(Deleted())
+}
+
+func (m *MysqlUpdate) SetConditionsAndValues(obj any) {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i).Interface()
+		tag := field.Tag.Get("where")
+		if tag != "" {
+			m.SetFilter(tag+"=?", value)
+		}
+		tag = field.Tag.Get("update")
+		if tag != "" {
+			m.Set(tag, value)
+		}
+	}
 }

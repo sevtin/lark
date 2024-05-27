@@ -139,11 +139,6 @@ func (c *Client) readLoop() {
 		if len(buf) == 0 {
 			continue
 		}
-		// 限流处理
-		if len(c.hub.readChan) >= WS_CHAN_SERVER_READ_MESSAGE_THRESHOLD {
-			// c.overloadReply(bufMsg)
-			continue
-		}
 		buffer = bytes.NewBuffer(buf)
 		message = &Message{
 			Uid:      c.uid,
@@ -151,8 +146,12 @@ func (c *Client) readLoop() {
 			Hub:      c.hub,
 			Packet:   utils.Decode(buffer, false),
 		}
-		//c.hub.messageHandler(message)
-		c.hub.readChan <- message
+		// c.hub.messageHandler(message)
+		select {
+		case c.hub.readChan <- message:
+		default:
+			// wsLog.Warn("消息缓冲区已满")
+		}
 	}
 }
 
@@ -298,10 +297,11 @@ func (c *Client) Send(message []byte) {
 	if c.closed == true {
 		return
 	}
-	if len(c.sendChan) >= WS_WRITE_MESSAGE_THRESHOLD {
-		return
+	select {
+	case c.sendChan <- message:
+	default:
+		// wsLog.Warn("消息缓冲区已满")
 	}
-	c.sendChan <- message
 }
 
 func (c *Client) Close() (err error) {

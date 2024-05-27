@@ -53,6 +53,19 @@ mysql:
   db: lark_user
   username: root
   password: lark2022
+  log_level: 2
+pg:
+  host: "127.0.0.1"
+  port: 5432
+  user: postgres
+  password: lark2022
+  dbname: canary
+  sslmode: disable
+  max_open_conns: 20
+  max_idle_conns: 10
+  conn_lifetime: 120000
+  charset: utf8
+  log_level: 2
 mongo:
   address: "lark-mongo-msg:27017"
   username: admin

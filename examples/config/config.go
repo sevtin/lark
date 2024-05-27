@@ -15,6 +15,7 @@ type Config struct {
 	GrpcServer       *conf.Grpc          `yaml:"grpc_server"`
 	Etcd             *conf.Etcd          `yaml:"etcd"`
 	Mysql            *conf.Mysql         `yaml:"mysql"`
+	Pg               *conf.Pg            `yaml:"pg"`
 	Mongo            *conf.Mongo         `yaml:"mongo"`
 	Redis            *conf.Redis         `yaml:"redis"`
 	MsgGatewayServer *conf.GrpcServer    `yaml:"msg_gateway_server"`

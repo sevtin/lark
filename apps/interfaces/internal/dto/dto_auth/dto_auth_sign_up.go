@@ -8,6 +8,7 @@ import (
 http://t.zoukankan.com/MyUniverse-p-15227003.html
 https://www.h5w3.com/235615.html
 http://www.zzvips.com/article/222569.html
+https://blog.csdn.net/qq_52510579/article/details/128281060
 */
 type SignUpReq struct {
 	RegPlatform pb_enum.PLATFORM_TYPE `json:"reg_platform" binding:"required,oneof=1 2 3 4 5"` // 注册平台 1:iOS 2:安卓

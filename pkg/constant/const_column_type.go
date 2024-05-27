@@ -35,5 +35,6 @@ var (
 		"bit":               "uint64",
 		"enum":              "string",
 		"set":               "string",
+		"json":              "string",
 	}
 )
