@@ -292,12 +292,24 @@ func Debug(args ...interface{}) {
 	xLogger().Debug(args...)
 }
 
+func Debugf(template string, args ...interface{}) {
+	xLogger().Debugf(template, args...)
+}
+
 func Info(args ...interface{}) {
 	xLogger().Info(args...)
 }
 
+func Infof(template string, args ...interface{}) {
+	xLogger().Infof(template, args...)
+}
+
 func Warn(args ...interface{}) {
 	xLogger().Warn(args...)
+}
+
+func Warnf(template string, args ...interface{}) {
+	xLogger().Warnf(template, args...)
 }
 
 func Error(args ...interface{}) {
@@ -305,7 +317,7 @@ func Error(args ...interface{}) {
 }
 
 func Errorf(template string, args ...interface{}) {
-	xLogger().Errorf(template, args)
+	xLogger().Errorf(template, args...)
 }
 
 func Panic(args ...interface{}) {
