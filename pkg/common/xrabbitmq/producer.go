@@ -27,14 +27,6 @@ func (r *RabbitProducer) Send(msg []byte) (err error) {
 	return r.publish(r.cfg.Exchange, r.cfg.RouteKey, msg)
 }
 
-/*
-安装延迟插件
-https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases
-mv rabbitmq_delayed_message_exchange-3.10.0.ez /opt/rabbitmq/plugins
-rabbitmq-plugins enable rabbitmq_delayed_message_exchange
-rabbitmq-plugins list
-delayTime:毫秒
-*/
 func (r *RabbitProducer) SendDelay(msg []byte, delayTime int64) (err error) {
 	if len(msg) == 0 {
 		return
@@ -42,8 +34,8 @@ func (r *RabbitProducer) SendDelay(msg []byte, delayTime int64) (err error) {
 	var (
 		queue          amqp.Queue
 		expiration     = strconv.FormatInt(delayTime, 10)
-		delayQueueName = r.cfg.Queue + "_delay:" + expiration
-		delayRouteKey  = r.cfg.RouteKey + "_delay:" + expiration
+		delayQueueName = r.cfg.Queue + "_delay"
+		delayRouteKey  = r.cfg.RouteKey + "_delay"
 		args           = amqp.Table{
 			"x-dead-letter-exchange":    r.cfg.Exchange,
 			"x-dead-letter-routing-key": r.cfg.RouteKey,
