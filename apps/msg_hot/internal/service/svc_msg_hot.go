@@ -5,6 +5,7 @@ import (
 	"lark/apps/msg_hot/internal/config"
 	"lark/domain/mrepo"
 	"lark/pkg/common/xkafka"
+	"lark/pkg/common/xlog"
 	"lark/pkg/obj"
 )
 
@@ -38,19 +39,14 @@ func (s *messageHotService) Setup(_ sarama.ConsumerGroupSession) error {
 }
 func (s *messageHotService) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (s *messageHotService) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	var (
-		msg *sarama.ConsumerMessage
-		err error
-	)
 	for {
 		select {
-		case msg = <-claim.Messages():
-			if msg == nil {
-				continue
+		case msg, ok := <-claim.Messages():
+			if ok == false {
+				xlog.Info("message channel was closed")
+				return nil
 			}
-			if err = s.msgHandle[msg.Topic](msg.Value, string(msg.Key)); err != nil {
-				continue
-			}
+			s.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 			session.MarkMessage(msg, "")
 		case <-session.Context().Done():
 			return nil

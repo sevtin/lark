@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
+	"lark/pkg/common/xlog"
 	"lark/pkg/proto/pb_cm"
 	"sync/atomic"
 )
@@ -14,19 +15,14 @@ func (s *cloudMessageService) Setup(_ sarama.ConsumerGroupSession) error {
 }
 func (s *cloudMessageService) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (s *cloudMessageService) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	var (
-		msg *sarama.ConsumerMessage
-		err error
-	)
 	for {
 		select {
-		case msg = <-claim.Messages():
-			if msg == nil {
-				continue
+		case msg, ok := <-claim.Messages():
+			if ok == false {
+				xlog.Info("message channel was closed")
+				return nil
 			}
-			if err = s.msgHandle[msg.Topic](msg.Value, string(msg.Key)); err != nil {
-				continue
-			}
+			s.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 			session.MarkMessage(msg, "")
 		case <-session.Context().Done():
 			return nil

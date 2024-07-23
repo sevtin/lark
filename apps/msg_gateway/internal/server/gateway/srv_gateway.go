@@ -10,6 +10,7 @@ import (
 	"lark/domain/cache"
 	"lark/pkg/common/xgrpc"
 	"lark/pkg/common/xkafka"
+	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmonitor"
 	"lark/pkg/constant"
 	"lark/pkg/obj"
@@ -69,19 +70,14 @@ func (s *gatewayServer) Setup(_ sarama.ConsumerGroupSession) error {
 }
 func (s *gatewayServer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (s *gatewayServer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	var (
-		msg *sarama.ConsumerMessage
-		err error
-	)
 	for {
 		select {
-		case msg = <-claim.Messages():
-			if msg == nil {
-				continue
+		case msg, ok := <-claim.Messages():
+			if ok == false {
+				xlog.Info("message channel was closed")
+				return nil
 			}
-			if err = s.msgHandle[msg.Topic](msg.Value, string(msg.Key)); err != nil {
-				continue
-			}
+			s.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 			session.MarkMessage(msg, "")
 		case <-session.Context().Done():
 			return nil
