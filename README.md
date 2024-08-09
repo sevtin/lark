@@ -37,11 +37,11 @@ Lark是一个开源的Golang IM服务端项目，具有高性能和可扩展等�
 ![](assets/images/lark-architecture-diagram.png)
 
 ### 项目推荐
-```
+
 Golang + Vue3 加密币模拟交易所。
 https://github.com/sevtin/coinex
 https://www.eipistar.com/
-```
+
 
 ### 单机版运行步骤
 
