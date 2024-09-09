@@ -33,7 +33,7 @@ for i in ${service_names[*]}; do
     pid="${name}| awk '{print \$2}'"
     echo -e "${SKY_BLUE_PREFIX}Killing service:lark_$i pid:$(eval $pid)${COLOR_SUFFIX}"
     #kill the service that existed
-    kill -9 $(eval $pid)
+    kill -15 $(eval $pid)
     echo -e "${SKY_BLUE_PREFIX}service:lark_$i was killed ${COLOR_SUFFIX}"
   fi
 done
