@@ -180,6 +180,7 @@ message MessageOperation {
   int64 seq_id = 4;
   int64 srv_msg_id = 5;
   pb_enum.MSG_OPERATION opn = 6;
+  pb_enum.CHAT_TYPE chat_type = 7; // 会话类型
 }
 
 message MessageOperationResp {

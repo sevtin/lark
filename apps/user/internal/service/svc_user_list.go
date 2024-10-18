@@ -17,7 +17,7 @@ func (s *userService) GetUserList(ctx context.Context, req *pb_user.GetUserListR
 	resp.List, err = s.userRepo.UserList(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	return

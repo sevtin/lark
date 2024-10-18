@@ -2,7 +2,6 @@ package service
 
 import (
 	"gorm.io/gorm"
-	"lark/domain/do"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
@@ -18,9 +17,7 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 		key1     = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + htk
 		key2     = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + htk
 		uidCount = len(uidList)
-
-		uid   int64
-		index int
+		uid      int64
 	)
 	defer func() {
 		if err != nil {
@@ -67,37 +64,31 @@ func (s *chatService) removeChatMember(u *entity.MysqlUpdate, chatId int64, uidL
 	if err != nil {
 		return
 	}
+	if uidCount == 0 {
+		return
+	}
 	xants.Submit(func() {
 		var (
-			keys   []string
-			fields []string
-			field  string
-			kv     *do.KeysValues
-			err    error
+			removes = map[string][]string{}
+			sKey    string
+			field   string
+			slot    = ":0"
 		)
-		keys = make([]string, uidCount*2)
-		fields = make([]string, uidCount*2)
-		for index, uid = range uidList {
+		for _, uid = range uidList {
 			field = utils.ToString(uid)
-			keys[index] = key1
-			fields[index] = field
-
-			keys[index+uidCount] = key2
-			fields[index+uidCount] = field
-		}
-		if len(keys) == 0 {
-			return
-		}
-		err = s.chatMemberCache.HDelChatMembers(keys, fields)
-		if err != nil {
-			xlog.Warn(err.Error())
-			kv = &do.KeysValues{
-				Keys:   keys,
-				Values: fields,
+			if chatType != pb_enum.CHAT_TYPE_PRIVATE {
+				slot = utils.GetChatSlot(uid)
 			}
-			_, _, err = s.cacheProducer.Push(kv, constant.CONST_MSG_KEY_CACHE_REMOVE_CHAT_MEMBER)
-			if err != nil {
-				xlog.Warn(err.Error())
+			sKey = key1 + slot
+			removes[sKey] = append(removes[sKey], field)
+			removes[key2] = append(removes[key2], field)
+		}
+		terr := s.chatMemberCache.HDelChatMembers(removes)
+		if terr != nil {
+			xlog.Warnf("remove chat member failed. err: %s,removes: %v", terr.Error(), removes)
+			_, _, terr = s.cacheProducer.Push(removes, constant.CONST_MSG_KEY_CACHE_REMOVE_CHAT_MEMBER)
+			if terr != nil {
+				xlog.Errorf("push remove chat member message failed. err: %s,removes: %v", terr.Error(), removes)
 			}
 		}
 	})

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"gorm.io/gorm"
 	"lark/business/biz_chat_invite"
 	"lark/domain/do"
@@ -18,6 +17,7 @@ import (
 	"lark/pkg/proto/pb_dist"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_invite"
+	"lark/pkg/utils"
 )
 
 func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGroupChatReq) (resp *pb_chat.CreateGroupChatResp, _ error) {
@@ -53,6 +53,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 
 	// 2 构建chat模型
 	chat = &po.Chat{
+		ChatId:     xsnowflake.NewSnowflakeID(),
 		CreatorUid: req.CreatorUid,
 		ChatType:   int(pb_enum.CHAT_TYPE_GROUP),
 		Avatar:     constant.CONST_AVATAR_SMALL,
@@ -79,6 +80,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			MemberAvatar: creator.Avatar,
 			ChatAvatar:   chat.Avatar,
 			Sync:         constant.SYNCHRONIZE_USER_INFO,
+			Slot:         int(utils.ChatSlot(creator.Uid)),
 		}
 		err = s.chatMemberRepo.TxCreate(tx, member)
 		if err != nil {
@@ -132,18 +134,18 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 
 	xants.Submit(func() {
 		var (
-			err error
+			terr error
 		)
 		// 8 缓存成员hash
-		err = s.chatMemberCache.HSetNXChatMember(member.ChatId, member.Uid, fmt.Sprintf("%d,%d", creator.ServerId, member.Status))
-		if err != nil {
-			xlog.Warn(err.Error())
+		terr = s.chatMemberCache.HSetNXChatMember(chat.ChatId, pb_enum.CHAT_TYPE_GROUP, chat.CreatorUid, "0")
+		if terr != nil {
+			xlog.Warnf("cache chat member failed. err: %s", terr.Error())
 			var (
-				kfv = do.KeyFieldValue{member.ChatId, member.Uid, fmt.Sprintf("%d,%d", creator.ServerId, member.Status)}
+				kfv = do.KeyFieldValue{chat.ChatId, chat.CreatorUid, "0"}
 			)
-			_, _, err = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT)
-			if err != nil {
-				xlog.Warn(err.Error())
+			_, _, terr = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT)
+			if terr != nil {
+				xlog.Errorf("push chat member cache message failed. err:%s,chatId:%v,uid:%v", terr.Error(), member.ChatId, member.Uid)
 			}
 		}
 		// 9 邀请推送

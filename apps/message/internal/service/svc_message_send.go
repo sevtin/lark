@@ -30,19 +30,19 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	// 1、参数校验
 	if err = s.validate.Struct(req.Msg); err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
-		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if inbox.Msg.AssocId, err = s.verifyMessage(req); err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
-		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	// 2、重复消息校验
 	result, ok = s.chatMessageCache.RepeatMessageVerify(s.cfg.Redis.Prefix, req.Msg.ChatId, req.Msg.CliMsgId)
 	if ok == false {
 		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, result)
-		xlog.Warn(ERROR_CODE_MESSAGE_VALIDATOR_ERR, result)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	senderInfo, err = s.getSenderInfo(req.Msg.ChatId, req.Msg.SenderId, resp)
 	if err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_GET_SENDER_INFO_FAILED, err.Error())
-		xlog.Warn(ERROR_CODE_MESSAGE_GET_SENDER_INFO_FAILED, ERROR_MESSAGE_GET_SENDER_INFO_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if senderInfo.Uid == 0 {
@@ -65,7 +65,7 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	// 4、补充消息内容
 	if seqId, err = s.chatMessageCache.IncrSeqID(req.Msg.ChatId); err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_INCR_SEQ_ID_FAILED, ERROR_MESSAGE_INCR_SEQ_ID_FAILED)
-		xlog.Warn(ERROR_CODE_MESSAGE_INCR_SEQ_ID_FAILED, ERROR_MESSAGE_INCR_SEQ_ID_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	copier.Copy(inbox.Msg, req.Msg)
@@ -80,13 +80,13 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	// 5、将消息推送到kafka消息队列
 	if s.producer == nil {
 		resp.Set(ERROR_CODE_MESSAGE_PRODUCER_IS_NULL, ERROR_MESSAGE_PRODUCER_IS_NULL)
-		xlog.Warn(ERROR_CODE_MESSAGE_PRODUCER_IS_NULL, ERROR_MESSAGE_PRODUCER_IS_NULL)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG)
 	if err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED)
-		xlog.Warn(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	chatSeq := &pb_msg.ChatSeq{
@@ -125,13 +125,13 @@ func (s *messageService) getSenderInfo(chatId int64, uid int64, resp *pb_msg.Sen
 	}
 	reply = s.chatMemberClient.GetChatMemberInfo(req)
 	if reply == nil {
-		xlog.Warn(ERROR_CODE_MESSAGE_GRPC_SERVICE_FAILURE, ERROR_MESSAGE_GRPC_SERVICE_FAILURE)
 		resp.Set(ERROR_CODE_MESSAGE_GRPC_SERVICE_FAILURE, ERROR_MESSAGE_GRPC_SERVICE_FAILURE)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	if reply.Code > 0 {
-		xlog.Warn(reply.Code, reply.Msg)
 		resp.Set(reply.Code, reply.Msg)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	err = s.authentication(reply.Info)

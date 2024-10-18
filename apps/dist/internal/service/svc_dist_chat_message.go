@@ -5,9 +5,11 @@ import (
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
+	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_gw"
 	"lark/pkg/proto/pb_mq"
 	"lark/pkg/proto/pb_obj"
+	"sync"
 )
 
 func (s *distService) sendChatMessage(buf []byte) (err error) {
@@ -16,23 +18,27 @@ func (s *distService) sendChatMessage(buf []byte) (err error) {
 	)
 	if err = proto.Unmarshal(buf, inbox); err != nil {
 		xlog.Warn(ERROR_CODE_DIST_PROTOCOL_UNMARSHAL_ERR, ERROR_DIST_PROTOCOL_UNMARSHAL_ERR, err.Error())
-		// 丢弃无法解析的数据
-		err = nil
 		return
 	}
-	s.queues <- struct{}{}
-	xants.Submit(func() {
-		s.messageDistribution(inbox)
-	})
+	s.messageDistribution(inbox)
 	return
 }
 
 func (s *distService) messageDistribution(inbox *pb_mq.InboxMessage) {
-	defer func() {
-		<-s.queues
-	}()
-	distMembers := s.getChatMembers(inbox.Msg.ChatId)
-	s.sendMessage(inbox, distMembers)
+	wg := new(sync.WaitGroup)
+	slots := int(constant.MAX_CHAT_SLOT)
+	if inbox.Msg.ChatType == pb_enum.CHAT_TYPE_PRIVATE {
+		slots = 0
+	}
+	for i := 0; i < slots; i++ {
+		wg.Add(1)
+		go func(slot int) {
+			defer wg.Done()
+			distMembers := s.getChatMembers(inbox.Msg.ChatId, slot)
+			s.sendMessage(inbox, distMembers)
+		}(i)
+	}
+	wg.Wait()
 }
 
 func (s *distService) sendMessage(inbox *pb_mq.InboxMessage, distMembers map[int64][]*pb_obj.Int64Array) {
@@ -43,6 +49,7 @@ func (s *distService) sendMessage(inbox *pb_mq.InboxMessage, distMembers map[int
 		return
 	}
 	var (
+		wg   = new(sync.WaitGroup)
 		body []byte
 		err  error
 	)
@@ -60,13 +67,16 @@ func (s *distService) sendMessage(inbox *pb_mq.InboxMessage, distMembers map[int
 			SenderPlatform: inbox.Msg.SenderPlatform,
 			Body:           body,
 		}
-		s.asyncSendMessage(msgReq, serverId, constant.CONST_MSG_KEY_PUSH_ONLINE)
+		s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_PUSH_ONLINE)
 	}
+	wg.Wait()
 	return
 }
 
-func (s *distService) asyncSendMessage(req *pb_gw.SendTopicMessageReq, serverId int64, key string) {
+func (s *distService) asyncSendMessage(wg *sync.WaitGroup, req *pb_gw.SendTopicMessageReq, serverId int64, key string) {
+	wg.Add(1)
 	xants.Submit(func() {
+		defer wg.Done()
 		var (
 			resp *pb_gw.SendTopicMessageResp
 			err  error

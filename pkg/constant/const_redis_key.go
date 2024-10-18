@@ -1,5 +1,10 @@
 package constant
 
+const (
+	RV_SIGN_NULL  = "NULL"
+	RV_SIGN_EXIST = "EXIST"
+)
+
 // 无状态
 const (
 	RK_MSG_CLI_MSG_ID   = "MSG:CLI_MSG_ID:" // 缓存客户端消息ID + ChatId + CliMsgId {}
@@ -23,6 +28,7 @@ const (
 	RK_SYNC_USER_SERVER            = "SRV:"                   // WS服务器ID {}
 	RK_SYNC_MSG_CACHE              = "MSG:CACHE:"             // 消息缓存 + ChatId + seqId {}
 	RK_SYNC_DIST_CHAT_MEMBER_HASH  = "CHAT:DIST_MEMBER_HASH:" // 消息派发Chat成员列表 {}
+	RK_SYNC_DIST_CHAT_MEMBER_FLAG  = "CHAT:DIST_MEMBER_FLAG:"
 	RK_SYNC_CHAT_MEMBER_INFO_HASH  = "CHAT:MEMBER_INFO_HASH:" // Chat成员信息列表 {}
 	RK_SYNC_GROUP_CHAT_INFO        = "CHAT:GROUP_CHAT_INFO:"  // {}
 	RK_SYNC_SERVER_MSG_GATEWAY     = "SERVER:MSG_GATEWAY"

@@ -203,7 +203,7 @@ func PresignedPostPolicy(bucketName string, objectName string, uid int64, suffix
 	// Only allow content size in range 1KB to 1MB.
 	policy.SetContentLengthRange(1024, 1024*1024*1024)
 	// Add a user metadata using the key "custom" and value "user"
-	policy.SetUserMetadata(utils.Int64ToStr(uid), utils.NewUUID())
+	policy.SetUserMetadata(cast.ToString(uid), utils.NewUUID())
 	// Get the POST form key/value object:
 	return minioc.client.PresignedPostPolicy(context.Background(), policy)
 }

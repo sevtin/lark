@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"github.com/spf13/cast"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xsnowflake"
 	"lark/pkg/conf"
@@ -33,7 +34,7 @@ func init() {
 	config.ServerID = *serverId
 
 	xsnowflake.NewSnowflake(config.ServerID)
-	xlog.Shared(config.Log, config.Name+utils.IntToStr(config.ServerID))
+	xlog.Shared(config.Log, config.Name+cast.ToString(config.ServerID))
 }
 
 func NewConfig() *Config {

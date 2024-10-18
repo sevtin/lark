@@ -63,7 +63,7 @@ func (s *chatMessageService) SearchMessage(ctx context.Context, req *pb_chat_msg
 
 	if err = json.NewEncoder(&buf).Encode(query); err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_ENCODING_FAILED, ERROR_CHAT_MSG_ENCODING_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_ENCODING_FAILED, ERROR_CHAT_MSG_ENCODING_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	client = xes.GetClient()
@@ -76,18 +76,18 @@ func (s *chatMessageService) SearchMessage(ctx context.Context, req *pb_chat_msg
 	)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_SEARCH_FAILED, ERROR_CHAT_MSG_SEARCH_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_SEARCH_FAILED, ERROR_CHAT_MSG_SEARCH_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	defer res.Body.Close()
 	if res.IsError() {
 		resp.Set(ERROR_CODE_CHAT_MSG_SEARCH_FAILED, ERROR_CHAT_MSG_SEARCH_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_SEARCH_FAILED, ERROR_CHAT_MSG_SEARCH_FAILED, res.StatusCode)
+		xlog.Warn(resp.Code, resp.Msg, res.StatusCode)
 		return
 	}
 	if err = json.NewDecoder(res.Body).Decode(&r); err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_DECODE_FAILED, ERROR_CHAT_MSG_DECODE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_DECODE_FAILED, ERROR_CHAT_MSG_DECODE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	resp.List = make([]*pb_chat_msg.MessageSummary, len(r["hits"].(map[string]interface{})["hits"].([]interface{})))

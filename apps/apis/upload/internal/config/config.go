@@ -39,7 +39,7 @@ func init() {
 	config.Port = *port
 
 	xsnowflake.NewSnowflake(config.ServerID)
-	xlog.Shared(config.Log, config.Name+utils.IntToStr(config.ServerID))
+	xlog.Shared(config.Log, config.Name+cast.ToString(config.ServerID))
 }
 
 func NewConfig() *Config {

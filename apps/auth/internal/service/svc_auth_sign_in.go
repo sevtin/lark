@@ -7,7 +7,6 @@ import (
 	"lark/pkg/common/xlog"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
-	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
@@ -16,10 +15,9 @@ import (
 func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp *pb_auth.SignInResp, _ error) {
 	resp = &pb_auth.SignInResp{UserInfo: &pb_user.UserInfo{Avatar: &pb_user.AvatarInfo{}}}
 	var (
-		q         = entity.NewMysqlQuery()
-		signIn    *do.SignIn
-		server    *pb_auth.ServerInfo
-		onOffResp *pb_chat_member.ChatMemberOnOffLineResp
+		q      = entity.NewMysqlQuery()
+		signIn *do.SignIn
+		server *pb_auth.ServerInfo
 	)
 	switch req.AccountType {
 	case pb_enum.ACCOUNT_TYPE_MOBILE:
@@ -39,10 +37,10 @@ func (s *authService) SignIn(ctx context.Context, req *pb_auth.SignInReq) (resp 
 		return
 	}
 	server = s.getWsServer()
-	onOffResp = s.chatMemberOnOffLine(signIn.User.Uid, int64(server.ServerId), req.Platform)
-	if onOffResp == nil {
+	_, _, err := s.online.UserOnline(signIn.User.Uid, int64(server.ServerId), req.Platform)
+	if err != nil {
 		resp.Set(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
-		xlog.Warn(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	_ = copier.Copy(resp.UserInfo, signIn.User)

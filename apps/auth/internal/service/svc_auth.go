@@ -5,6 +5,7 @@ import (
 	"golang.org/x/oauth2"
 	"lark/apps/auth/internal/config"
 	chat_member_client "lark/apps/chat_member/client"
+	"lark/business/biz_online"
 	"lark/domain/cache"
 	"lark/domain/repo"
 	"lark/pkg/common/xoauth2"
@@ -32,6 +33,7 @@ type authService struct {
 	chatMemberClient  chat_member_client.ChatMemberClient
 	googleOauthConfig *oauth2.Config
 	githubOauthConfig *oauth2.Config
+	online            biz_online.Online
 }
 
 func NewAuthService(cfg *config.Config,
@@ -41,7 +43,8 @@ func NewAuthService(cfg *config.Config,
 	chatMemberRepo repo.ChatMemberRepository,
 	authCache cache.AuthCache,
 	userCache cache.UserCache,
-	svrMgrCache cache.ServerMgrCache) AuthService {
+	svrMgrCache cache.ServerMgrCache,
+	online biz_online.Online) AuthService {
 	chatMemberClient := chat_member_client.NewChatMemberClient(cfg.Etcd, cfg.ChatMemberServer, cfg.Jaeger, cfg.Name)
 	svc := &authService{cfg: cfg,
 		oauthUserRepo:    oauthUserRepo,
@@ -52,6 +55,7 @@ func NewAuthService(cfg *config.Config,
 		userCache:        userCache,
 		svrMgrCache:      svrMgrCache,
 		chatMemberClient: chatMemberClient,
+		online:           online,
 	}
 	svc.googleOauthConfig = xoauth2.NewGoogleOauthConfig(cfg.Google)
 	svc.githubOauthConfig = xoauth2.NewGithubOauthConfig(cfg.Github)

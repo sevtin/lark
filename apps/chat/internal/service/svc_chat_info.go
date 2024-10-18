@@ -21,7 +21,7 @@ func (s *chatService) GetChatInfo(ctx context.Context, req *pb_chat.GetChatInfoR
 	chat, err = s.chatRepo.Chat(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	copier.Copy(resp.ChatInfo, chat)

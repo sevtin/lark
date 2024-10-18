@@ -89,7 +89,7 @@ func ConnectDB(cfg *conf.Mysql) (db *gorm.DB, err error) {
 		cfg.Address,
 		cfg.Db)
 	if cfg.LogLevel == 0 {
-		cfg.LogLevel = 2
+		cfg.LogLevel = 4
 	}
 	// 定义日志配置
 	gormLogger := logger.New(

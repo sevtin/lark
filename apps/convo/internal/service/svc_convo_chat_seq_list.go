@@ -26,13 +26,13 @@ func (s *convoService) ConvoChatSeqListOld(ctx context.Context, req *pb_convo.Co
 	buf, err = utils.DecodeString(req.ChatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED)
-		xlog.Warn(ERROR_CODE_CONVO_DECODE_FAILED, ERROR_CONVO_DECODE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	buf, err = utils.UnGzip(buf)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_UN_GZIP_FAILED, ERROR_CONVO_UN_GZIP_FAILED)
-		xlog.Warn(ERROR_CODE_CONVO_UN_GZIP_FAILED, ERROR_CONVO_UN_GZIP_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	val = string(buf)
@@ -47,7 +47,7 @@ func (s *convoService) ConvoChatSeqListOld(ctx context.Context, req *pb_convo.Co
 	seqIdTsList, err = s.convoCache.MGetSeqIdTsList(chatIds)
 	if err != nil {
 		resp.Set(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED)
-		xlog.Warn(ERROR_CODE_CONVO_REDIS_GET_FAILED, ERROR_CONVO_REDIS_GET_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if len(chatIds) != len(seqIdTsList) {

@@ -28,13 +28,13 @@ func (s *chatInviteService) InitiateChatInvite(_ context.Context, req *pb_invite
 		)
 		if len(req.InviteeUids) != 1 {
 			resp.Set(ERROR_CODE_CHAT_INVITE_PARAMETER_ERROR, ERROR_CHAT_INVITE_PARAMETER_ERROR)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_PARAMETER_ERROR, ERROR_CHAT_INVITE_PARAMETER_ERROR)
+			xlog.Warn(resp.Code, resp.Msg)
 			return
 		}
 		inviteeUid = req.InviteeUids[0]
 		if req.InitiatorUid == inviteeUid {
 			resp.Set(ERROR_CODE_CHAT_INVITE_INITIATOR_INVITEE_SAME, ERROR_CHAT_INVITE_INITIATOR_INVITEE_SAME)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_INITIATOR_INVITEE_SAME, ERROR_CHAT_INVITE_INITIATOR_INVITEE_SAME)
+			xlog.Warn(resp.Code, resp.Msg)
 			return
 		}
 		req.ChatId = xsnowflake.NewSnowflakeID()
@@ -44,7 +44,7 @@ func (s *chatInviteService) InitiateChatInvite(_ context.Context, req *pb_invite
 		)
 		if req.ChatId <= 0 {
 			resp.Set(ERROR_CODE_CHAT_INVITE_PARAM_ERR, ERROR_CHAT_INVITE_PARAM_ERR)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_PARAM_ERR, ERROR_CHAT_INVITE_PARAM_ERR, req.String())
+			xlog.Warn(resp.Code, resp.Msg, req.String())
 			return
 		}
 		w.SetFilter("chat_id=?", req.ChatId)
@@ -52,12 +52,12 @@ func (s *chatInviteService) InitiateChatInvite(_ context.Context, req *pb_invite
 		memberCount, err = s.chatMemberRepo.ChatMemberCount(w)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
 			return
 		}
 		if memberCount > 0 {
 			resp.Set(ERROR_CODE_CHAT_INVITE_REPEAT_INVITATION, ERROR_CHAT_INVITE_REPEAT_INVITATION)
-			xlog.Warn(ERROR_CODE_CHAT_INVITE_REPEAT_INVITATION, ERROR_CHAT_INVITE_REPEAT_INVITATION, req.String())
+			xlog.Warn(resp.Code, resp.Msg, req.String())
 			return
 		}
 	}
@@ -76,7 +76,7 @@ func (s *chatInviteService) InitiateChatInvite(_ context.Context, req *pb_invite
 	err = s.chatInviteRepo.CreateChatInvites(invites)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_INSERT_VALUE_FAILED, ERROR_CHAT_INVITE_INSERT_VALUE_FAILED, err)
+		xlog.Warn(resp.Code, resp.Msg, err)
 		return
 	}
 	xants.Submit(func() {

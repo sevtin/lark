@@ -72,7 +72,6 @@ message UserSrvInfo {
   int64 uid = 1; // uid
   string nickname = 2; // 昵称
   string avatar = 3; // 头像
-  int64 server_id = 4; // ws服务器
 }
 
 message GetBasicUserInfoListReq {

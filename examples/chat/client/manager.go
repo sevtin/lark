@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/spf13/cast"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xredis"
 	"lark/pkg/common/xtimer"
@@ -11,6 +12,7 @@ import (
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/utils"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -53,57 +55,66 @@ func (m *Manager) Run() {
 	var (
 		uid        int64
 		uidStr     string
-		kv1        = map[string]string{}
-		kv2        = map[string]string{}
 		key        string
 		err        error
-		sid        int64 = 10000
 		memberInfo *pb_chat_member.ChatMemberInfo
 		jsonStr    string
 		start      = m.FirstUid
 		end        = start + m.MemberCount
+		status     = map[int64]map[string]string{}
+		servers    = map[int64]map[string]string{}
+		infos      = map[string]string{}
+		sid        = utils.NewServerId(0, 1, 1)
 	)
 
 	m.debug()
 
 	for uid = start; uid < end; uid++ {
-		uidStr = utils.Int64ToStr(uid)
+		uidStr = cast.ToString(uid)
 		// 0:ServerId, 1:Platform, 2:Uid, 3:Status
-		if m.Cluster == true {
-			sid = uid % int64(m.ServerCount)
-			switch sid {
-			case 1:
-				sid = 20000
-			case 2:
-				sid = 30000
-			default:
-				sid = 10000
-			}
-			kv1[uidStr] = fmt.Sprintf("%d,%d", sid, 0)
-		} else {
-			kv1[uidStr] = fmt.Sprintf("%d,%d", sid, 0)
-		}
-
 		memberInfo = &pb_chat_member.ChatMemberInfo{
 			ChatId:       m.ChatId,
 			ChatType:     pb_enum.CHAT_TYPE_GROUP,
 			Uid:          uid,
-			Alias:        "昵称:" + utils.Int64ToStr(uid),
+			Alias:        "昵称:" + cast.ToString(uid),
 			MemberAvatar: "https://photos.bucket.lark.com/b11883ba-f3d7-4164-a593-700c177c37c8",
 			RoleId:       1,
 		}
 		jsonStr, _ = utils.Marshal(memberInfo)
-		kv2[uidStr] = jsonStr
-		xredis.Set(constant.RK_SYNC_USER_SERVER+utils.GetHashTagKey(uid), sid, 0)
+
+		// 成员列表
+		cs := uid % constant.MAX_CHAT_SLOT
+		if _, ok := status[cs]; ok == false {
+			status[cs] = make(map[string]string)
+		}
+		status[cs][uidStr] = "0"
+
+		us := uid % constant.MAX_USER_SLOT
+		if _, ok := servers[us]; ok == false {
+			servers[us] = make(map[string]string)
+		}
+		servers[us][uidStr] = cast.ToString(sid)
+		infos[uidStr] = jsonStr
 	}
-	key = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.GetHashTagKey(m.ChatId)
-	err = xredis.HMSet(key, kv1)
-	if err != nil {
-		xlog.Error(err.Error())
-		return
+
+	for r, kvs := range status {
+		key = constant.RK_SYNC_DIST_CHAT_MEMBER_HASH + utils.GetHashTagKey(m.ChatId) + ":" + strconv.Itoa(int(r))
+		err = xredis.HMSet(key, kvs)
+		if err != nil {
+			xlog.Error(err.Error())
+			return
+		}
+	}
+	for r, kvs := range servers {
+		key = constant.RK_SYNC_USER_SERVER + strconv.Itoa(int(r))
+		err = xredis.HMSet(key, kvs)
+		if err != nil {
+			xlog.Error(err.Error())
+			return
+		}
 	}
 	key = constant.RK_SYNC_CHAT_MEMBER_INFO_HASH + utils.GetHashTagKey(m.ChatId)
-	err = xredis.HMSet(key, kv2)
+	err = xredis.HMSet(key, infos)
 	if err != nil {
 		xlog.Error(err.Error())
 		return
@@ -157,7 +168,7 @@ func (m *Manager) batchCreate(count int64) {
 				port = 7301
 			}
 		}
-		m.newConnection(ch, i, server+":"+utils.IntToStr(port))
+		m.newConnection(ch, i, server+":"+cast.ToString(port))
 		//server, _, port = m.getServer()
 	}
 	close(ch)

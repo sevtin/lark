@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"lark/domain/do"
 	"lark/domain/po"
-	"lark/pkg/common/xants"
 	"lark/pkg/common/xjwt"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xmysql"
@@ -14,7 +13,6 @@ import (
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
-	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
@@ -54,6 +52,12 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 		resp.Set(signUp.Code, signUp.Msg)
 		return
 	}
+	err = s.userCache.SetServerId(user.Uid, user.ServerId)
+	if err != nil {
+		resp.Set(ERROR_CODE_AUTH_UPDATE_USER_SERVER_ID_FAILED, ERROR_AUTH_UPDATE_USER_SERVER_ID_FAILED)
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
+		return
+	}
 
 	_ = copier.Copy(resp.UserInfo, user)
 	_ = copier.Copy(resp.UserInfo.Avatar, avatar)
@@ -61,12 +65,6 @@ func (s *authService) SignUp(ctx context.Context, req *pb_auth.SignUpReq) (resp 
 	resp.RefreshToken = signUp.RefreshToken
 	resp.Server = server
 
-	_ = xants.Submit(func() {
-		terr := s.userCache.SetUserServer(user.Uid, user.ServerId)
-		if terr != nil {
-			xlog.Warn(terr.Error())
-		}
-	})
 	return
 }
 
@@ -147,15 +145,6 @@ func (s *authService) RecheckMobile(uid int64, mobile string, resp *pb_auth.Sign
 		return
 	}
 	return
-}
-
-func (s *authService) chatMemberOnOffLine(uid int64, serverId int64, platform pb_enum.PLATFORM_TYPE) (resp *pb_chat_member.ChatMemberOnOffLineResp) {
-	req := &pb_chat_member.ChatMemberOnOffLineReq{
-		Uid:      uid,
-		ServerId: serverId,
-		Platform: platform,
-	}
-	return s.chatMemberClient.ChatMemberOnOffLine(req)
 }
 
 func (s *authService) getWsServer() (wsServer *pb_auth.ServerInfo) {

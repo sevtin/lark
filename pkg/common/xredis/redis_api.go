@@ -118,6 +118,10 @@ func HSetNX(key, field string, value interface{}) error {
 	return cli.HSetNX(key, field, value)
 }
 
+func HSetNXEx(key, field string, value interface{}, ex time.Duration) (err error) {
+	return cli.HSetNXEx(key, field, value, ex)
+}
+
 func HDels(key string, fields []string) error {
 	return cli.HDels(key, fields)
 }
@@ -130,7 +134,7 @@ func HMSet(key string, values map[string]string) error {
 	return cli.HMSet(key, values)
 }
 
-func CHMSet(key string, values map[string]interface{}, expire time.Duration) (err error) {
+func CHMSet(key string, values map[string]string, expire time.Duration) (err error) {
 	return cli.CHMSet(key, values, expire)
 }
 
@@ -146,8 +150,8 @@ func HGet(key string, field string) (val string, err error) {
 	return cli.HGet(key, field)
 }
 
-func CHDel(keys []string, fields []string) (err error) {
-	return cli.CHDel(keys, fields)
+func CHDel(maps map[string][]string) (err error) {
+	return cli.CHDel(maps)
 }
 
 // Sequence ID

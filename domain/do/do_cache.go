@@ -8,6 +8,7 @@ type KeysValues struct {
 type KeyMaps struct {
 	Key  interface{}       `json:"key"`
 	Maps map[string]string `json:"maps"`
+	Ex   interface{}       `json:"ex"`
 }
 
 type KeyFieldValue struct {
@@ -20,4 +21,9 @@ type KeysFieldValues struct {
 	Keys   []string `json:"keys"`
 	Field  string   `json:"field"`
 	Values []string `json:"values"`
+}
+
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

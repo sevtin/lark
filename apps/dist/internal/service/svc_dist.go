@@ -29,7 +29,6 @@ type distService struct {
 	watcher          *xetcd.Watcher
 	serverMgrCache   cache.ServerMgrCache
 	chatMemberCache  cache.ChatMemberCache
-	queues           chan struct{}
 }
 
 func NewDistService(cfg *config.Config, serverMgrCache cache.ServerMgrCache, chatMemberCache cache.ChatMemberCache) DistService {
@@ -42,7 +41,6 @@ func NewDistService(cfg *config.Config, serverMgrCache cache.ServerMgrCache, cha
 		chatMemberClient: chatMemberClient,
 		serverMgrCache:   serverMgrCache,
 		chatMemberCache:  chatMemberCache,
-		queues:           make(chan struct{}, 8),
 	}
 
 	svc.msgHandle[cfg.MsgConsumer.Topic[0]] = svc.MessageHandler

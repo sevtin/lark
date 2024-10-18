@@ -17,7 +17,7 @@ func (s *userService) GetBasicUserInfoList(ctx context.Context, req *pb_user.Get
 	resp.List, err = s.userRepo.BasicUserInfoList(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	xants.Submit(func() {

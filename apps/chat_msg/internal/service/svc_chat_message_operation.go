@@ -32,7 +32,7 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 	// 1、超过10分钟无法测回
 	if nowTs-message.SrvTs > constant.CONST_SECOND_10_MINUTES {
 		resp.Set(ERROR_CODE_CHAT_MSG_BEYOND_OPERABLE_TIME, ERROR_CHAT_MSG_BEYOND_OPERABLE_TIME)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_BEYOND_OPERABLE_TIME, ERROR_CHAT_MSG_BEYOND_OPERABLE_TIME)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	switch pb_enum.MSG_OPERATION(message.Status) {
@@ -49,10 +49,11 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 	// 3、消息推送
 	copier.Copy(opnReq.Operation, req)
 	opnReq.Operation.SrvMsgId = message.SrvMsgId
+	opnReq.Operation.ChatType = pb_enum.CHAT_TYPE(message.ChatType)
 	_, _, err = s.producer.EnQueue(opnReq, constant.CONST_MSG_KEY_OPERATION)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_ENQUEUE_FAILED, ERROR_CHAT_MSG_ENQUEUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_ENQUEUE_FAILED, ERROR_CHAT_MSG_ENQUEUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	return

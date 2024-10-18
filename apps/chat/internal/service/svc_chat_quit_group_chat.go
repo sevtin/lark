@@ -29,7 +29,7 @@ func (s *chatService) QuitGroupChat(ctx context.Context, req *pb_chat.QuitGroupC
 	_, err = s.removeChatMember(u, req.ChatId, []int64{req.Uid}, pb_enum.CHAT_TYPE_GROUP)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 
@@ -77,6 +77,7 @@ func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTop
 	}
 	w.SetFilter("chat_id=?", chatId)
 	w.SetFilter("uid IN(?)", uidList)
+	w.SetLimit(int32(len(uidList)))
 	memberList, err = s.chatMemberRepo.ChatMemberBasicInfoList(w)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())

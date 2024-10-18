@@ -139,6 +139,7 @@ func (c *Client) readLoop() {
 		if len(buf) == 0 {
 			continue
 		}
+		// TODO:调试用,正式环境客服端使用http请求发送消息
 		buffer = bytes.NewBuffer(buf)
 		message = &Message{
 			Uid:      c.uid,

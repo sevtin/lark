@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_member"
@@ -19,15 +18,13 @@ func (s *chatMemberService) GetChatMemberInfo(ctx context.Context, req *pb_chat_
 	resp.Info, err = s.chatMemberRepo.ChatMember(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if resp.Info.Uid == 0 {
-		resp.Set(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED)
+		resp.Set(ERROR_CODE_CHAT_MEMBER_NON_CHAT_MEMBER, ERROR_CHAT_MEMBER_NON_CHAT_MEMBER)
 		return
 	}
-	xants.Submit(func() {
-		s.chatMemberCache.SetChatMemberInfo(resp.Info)
-	})
+	s.chatMemberCache.SetChatMemberInfo(resp.Info)
 	return
 }

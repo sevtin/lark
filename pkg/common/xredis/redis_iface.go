@@ -37,14 +37,15 @@ type RedisIface interface {
 	HScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error)
 	HSet(key string, value interface{}) error
 	HSetNX(key, field string, value interface{}) error
+	HSetNXEx(key, field string, value interface{}, ex time.Duration) (err error)
 	HDels(key string, fields []string) error
 	HDel(key string, field string) error
 	HMSet(key string, values map[string]string) error
-	CHMSet(key string, values map[string]interface{}, expire time.Duration) (err error)
+	CHMSet(key string, values map[string]string, expire time.Duration) (err error)
 	CBatchHSet(keys []string, field string, values []string) (err error)
 	HMGet(key string, fields ...string) []interface{}
 	HGet(key string, field string) (val string, err error)
-	CHDel(keys []string, fields []string) (err error)
+	CHDel(maps map[string][]string) (err error)
 	GetMaxSeqID(chatId int64) (seqId uint64, err error)
 	IncrSeqID(chatId int64) (int64, error)
 	DecrSeqID(chatId int64) (int64, error)

@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/copier"
 	"google.golang.org/protobuf/proto"
 	"lark/domain/po"
-	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
@@ -34,8 +33,6 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 	)
 	if err = proto.Unmarshal(msg, req); err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, err.Error())
-		// 丢弃无法解析的数据
-		err = nil
 		return
 	}
 	if req.Msg.SrvMsgId == 0 {
@@ -44,12 +41,7 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 	copier.Copy(message, req.Msg)
 	message.Body = utils.MsgBodyToStr(req.Msg.MsgType, req.Msg.Body)
 
-	// 1、消息缓存
-	xants.Submit(func() {
-		s.chatMessageCache.SetConvoMessage(message)
-	})
-
-	// 2、消息入库
+	// 1、消息入库
 	if err = s.chatMessageRepo.Create(message); err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_INSERT_MESSAGE_FAILED, ERROR_MSG_HISTORY_INSERT_MESSAGE_FAILED, err.Error())
 		switch err.(type) {
@@ -61,6 +53,9 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 		}
 		return
 	}
+
+	// 2、消息缓存
+	s.chatMessageCache.SetConvoMessage(message)
 	return
 }
 
@@ -82,22 +77,20 @@ func (s *messageHistoryService) MessageOperation(msg []byte) (err error) {
 	if message.SrvMsgId == 0 {
 		return
 	}
-
-	// 1、更新缓存
 	message.Status = int(req.Operation.Opn)
 	message.UpdatedTs = nowTs
-	err = s.chatMessageCache.SetChatMessage(message)
-	if err != nil {
-		return
-	}
-
-	// 2、更新 message
+	// 1、更新 message
 	u.SetFilter("chat_id=?", req.Operation.ChatId)
 	u.SetFilter("seq_id=?", req.Operation.SeqId)
 	u.Set("status", req.Operation.Opn)
 	err = s.chatMessageRepo.UpdateMessage(u)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_UPDATE_VALUE_FAILED, ERROR_MSG_HISTORY_UPDATE_VALUE_FAILED, err.Error())
+		return
+	}
+	// 2、更新缓存
+	err = s.chatMessageCache.SetChatMessage(message)
+	if err != nil {
 		return
 	}
 	return

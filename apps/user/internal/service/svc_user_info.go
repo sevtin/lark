@@ -24,7 +24,7 @@ func (s *userService) GetUserInfo(ctx context.Context, req *pb_user.UserInfoReq)
 	err = s.queryUserInfo(req.Uid, resp)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if resp.UserInfo.Uid == 0 {
@@ -33,7 +33,7 @@ func (s *userService) GetUserInfo(ctx context.Context, req *pb_user.UserInfoReq)
 	err = s.queryUserAvatar(resp.UserInfo.Uid, resp)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	xants.Submit(func() {
@@ -52,12 +52,12 @@ func (s *userService) queryUserInfo(uid int64, resp *pb_user.UserInfoResp) (err 
 	err = s.userRepo.QueryUser(q, user)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if user.Uid == 0 {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	copier.Copy(resp.UserInfo, user)
@@ -74,7 +74,7 @@ func (s *userService) queryUserAvatar(uid int64, resp *pb_user.UserInfoResp) (er
 	avatar, err = s.avatarRepo.Avatar(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	copier.Copy(resp.UserInfo.Avatar, avatar)

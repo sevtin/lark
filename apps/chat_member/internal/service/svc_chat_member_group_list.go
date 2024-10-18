@@ -22,7 +22,7 @@ func (s *chatMemberService) GetGroupChatList(ctx context.Context, req *pb_chat_m
 	resp.List, err = s.chatMemberRepo.GroupChatBasicInfoList(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MEMBER_QUERY_DB_FAILED, ERROR_CHAT_MEMBER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	return

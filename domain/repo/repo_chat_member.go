@@ -60,8 +60,7 @@ func (r *chatMemberRepository) DistMemberList(w *entity.MysqlQuery) (list []*pb_
 	list = make([]*pb_chat_member.DistMember, 0)
 	db := xmysql.GetDB()
 	err = db.Table("chat_members m").
-		Select("u.server_id,m.uid,m.status").
-		Joins("LEFT JOIN users u ON u.uid=m.uid").
+		Select("m.uid,m.status").
 		Where(w.Query, w.Args...).
 		Find(&list).Error
 	return

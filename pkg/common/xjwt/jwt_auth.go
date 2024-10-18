@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
+	"github.com/spf13/cast"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
@@ -36,7 +37,7 @@ func CreateToken(uid int64, platform int32, access bool, expiresIn int) (t *JwtT
 	claims[JWT_KEY_EXP] = expire
 	claims[JWT_KEY_IAT] = now.Unix()
 	claims[constant.USER_JWT_SESSION_ID] = sessionId
-	claims[constant.USER_UID] = utils.Int64ToStr(uid)
+	claims[constant.USER_UID] = cast.ToString(uid)
 	claims[constant.USER_PLATFORM] = platform
 
 	tokenStr, err = token.SignedString([]byte(constant.JWT_TOKEN_SECRET_KEY))

@@ -9,10 +9,6 @@ func (s *chatMemberServer) GetChatMemberInfo(ctx context.Context, req *pb_chat_m
 	return s.chatMemberService.GetChatMemberInfo(ctx, req)
 }
 
-func (s *chatMemberServer) ChatMemberOnOffLine(ctx context.Context, req *pb_chat_member.ChatMemberOnOffLineReq) (resp *pb_chat_member.ChatMemberOnOffLineResp, err error) {
-	return s.chatMemberService.ChatMemberOnOffLine(ctx, req)
-}
-
 func (s *chatMemberServer) GetDistMemberList(ctx context.Context, req *pb_chat_member.GetDistMemberListReq) (resp *pb_chat_member.GetDistMemberListResp, err error) {
 	return s.chatMemberService.GetDistMemberList(ctx, req)
 }

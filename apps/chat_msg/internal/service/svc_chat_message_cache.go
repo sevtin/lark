@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/spf13/cast"
 	"lark/domain/po"
 	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
@@ -119,7 +120,7 @@ func (s *chatMessageService) GetCacheChatMessageList(req *pb_chat_msg.GetChatMes
 		val     interface{}
 	)
 	for index, seqId = range req.SeqIds {
-		key = xredis.GetPrefix() + constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + utils.Int64ToStr(seqId)
+		key = xredis.GetPrefix() + constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(req.ChatId) + ":" + cast.ToString(seqId)
 		keys[index] = key
 		seqMaps[seqId] = 0
 	}

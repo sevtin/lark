@@ -12,7 +12,7 @@ import (
 type MsgClient interface {
 	SendChatMessage(req *pb_msg.SendChatMessageReq) (resp *pb_msg.SendChatMessageResp)
 	// 弃用
-	MessageOperation(req *pb_msg.MessageOperationReq) (resp *pb_msg.MessageOperationResp)
+	//MessageOperation(req *pb_msg.MessageOperationReq) (resp *pb_msg.MessageOperationResp)
 }
 
 type msgClient struct {

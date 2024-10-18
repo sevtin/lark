@@ -6,6 +6,7 @@ import (
 	"lark/apps/auth/internal/server"
 	"lark/apps/auth/internal/server/auth"
 	"lark/apps/auth/internal/service"
+	"lark/business/biz_online"
 	"lark/domain/cache"
 	"lark/domain/repo"
 	"log"
@@ -25,6 +26,7 @@ func init() {
 	Provide(cache.NewAuthCache)
 	Provide(cache.NewUserCache)
 	Provide(cache.NewServerMgrCache)
+	Provide(biz_online.NewOnline)
 }
 
 func Invoke(i interface{}) error {

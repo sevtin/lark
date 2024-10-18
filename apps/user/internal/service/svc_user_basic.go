@@ -21,12 +21,12 @@ func (s *userService) GetBasicUserInfo(ctx context.Context, req *pb_user.GetBasi
 	err = s.userRepo.QueryUser(q, user)
 	if err != nil {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if resp.UserInfo.Uid == 0 {
 		resp.Set(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_USER_QUERY_DB_FAILED, ERROR_USER_QUERY_DB_FAILED)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	resp.UserInfo = &pb_user.BasicUserInfo{

@@ -44,24 +44,24 @@ func (s *distService) MessageHandler(msg []byte, msgKey string) (err error) {
 	return
 }
 
-func (s *distService) getChatMembers(chatId int64) (serverMembers map[int64][]*pb_obj.Int64Array) {
+func (s *distService) getChatMembers(chatId int64, slot int) (serverMembers map[int64][]*pb_obj.Int64Array) {
 	var (
 		hashmap map[string]string
 	)
 	// 1万人占用 753KB Redis Memory
-	hashmap = s.chatMemberCache.GetAllDistChatMembers(chatId)
+	hashmap = s.chatMemberCache.GetDistChatMembers(chatId, slot)
 	if len(hashmap) > 0 {
 		serverMembers = logic.GetMembersFromHash(hashmap)
 	} else {
-		hashmap = s.getMemberList(chatId)
+		hashmap = s.getMemberList(chatId, slot)
 		serverMembers = logic.GetMembersFromHash(hashmap)
 	}
 	return
 }
 
-func (s *distService) getMemberList(chatId int64) (members map[string]string) {
+func (s *distService) getMemberList(chatId int64, slot int) (members map[string]string) {
 	var (
-		userListReq = &pb_chat_member.GetDistMemberListReq{ChatId: chatId}
+		userListReq = &pb_chat_member.GetDistMemberListReq{ChatId: chatId, Slot: int32(slot)}
 		resp        *pb_chat_member.GetDistMemberListResp
 	)
 	resp = s.chatMemberClient.GetDistMemberList(userListReq)

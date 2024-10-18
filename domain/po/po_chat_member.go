@@ -18,4 +18,5 @@ type ChatMember struct {
 	Status       int    `gorm:"column:status;default:0;NOT NULL" json:"status"`           // NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言
 	JoinSource   int    `gorm:"column:join_source;default:0;NOT NULL" json:"join_source"` // 加入源
 	ReadSeq      int    `gorm:"column:read_seq;default:0;NOT NULL" json:"read_seq"`       // 已读最后SEQ ID
+	Slot         int    `gorm:"column:slot;default:0;NOT NULL" json:"slot"`               // 槽位
 }

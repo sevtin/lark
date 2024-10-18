@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/spf13/cast"
 	"lark/apps/server_mgr/internal/config"
 	"lark/domain/cache"
 	"lark/pkg/common/xetcd"
@@ -52,7 +53,7 @@ func (s *serverMgrService) watchMessageGateway() {
 			var (
 				name, port = utils.GetServer(k)
 				portVal, _ = utils.ToInt(port)
-				member     = name + ":" + utils.IntToStr(portVal+1)
+				member     = name + ":" + cast.ToString(portVal+1)
 			)
 			members[member] = member
 			return true
@@ -78,7 +79,7 @@ func (s *serverMgrService) changeWatcher(kv *xetcd.KeyValue, eventType int) {
 	var (
 		name, port = utils.GetServer(kv.Key)
 		portVal, _ = utils.ToInt(port)
-		member     = name + ":" + utils.IntToStr(portVal+1)
+		member     = name + ":" + cast.ToString(portVal+1)
 		err        error
 	)
 

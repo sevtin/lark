@@ -2,13 +2,14 @@ package cache
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
+	"github.com/spf13/cast"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xredis"
 	"lark/pkg/constant"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
+	"sync"
 )
 
 type UserCache interface {
@@ -18,12 +19,10 @@ type UserCache interface {
 	GetBasicUserInfo(uid int64) (info *pb_user.BasicUserInfo, err error)
 	SetBasicUserInfo(info *pb_user.BasicUserInfo) (err error)
 	SetBasicUserInfoList(list []*pb_user.BasicUserInfo) (err error)
-	SetUserServerList(list []*pb_user.UserServerId) (err error)
 	GetUserServerList(uids []int64) (srvMaps map[int64]int64, notUids []int64, err error)
 	SignOut(uid int64, platform pb_enum.PLATFORM_TYPE) (err error)
 	GetServerId(uid int64) (serverId string, err error)
 	SetServerId(uid int64, serverId int64) (err error)
-	SetUserServer(uid int64, serverId int64) (err error)
 }
 
 type userCache struct {
@@ -96,69 +95,45 @@ func (c *userCache) SetBasicUserInfoList(list []*pb_user.BasicUserInfo) (err err
 	return
 }
 
-func (c *userCache) SetUserServerList(list []*pb_user.UserServerId) (err error) {
-	if len(list) == 0 {
-		return
-	}
-	var (
-		srv  *pb_user.UserServerId
-		pipe = xredis.Pipeline()
-	)
-	for _, srv = range list {
-		pipe.Set(context.Background(),
-			xredis.RealKey(constant.RK_SYNC_USER_SERVER+utils.GetHashTagKey(srv.Uid)),
-			srv.ServerId,
-			constant.CONST_DURATION_USER_INFO_SECOND)
-	}
-	_, err = pipe.Exec(context.Background())
-	return
-}
-
-func (c *userCache) GetUserServerList(uids []int64) (srvMaps map[int64]int64, notUids []int64, err error) {
-	srvMaps = make(map[int64]int64)
+func (c *userCache) GetUserServerList(uids []int64) (srvIds map[int64]int64, notUids []int64, err error) {
+	srvIds = make(map[int64]int64)
 	notUids = uids
-	var (
-		uidList  = make([]string, len(uids))
-		index    int
-		uid      int64
-		values   []string
-		val      interface{}
-		serverId int64
-		uidMaps  = make(map[int64]int64)
-	)
 	if len(uids) == 0 {
 		return
 	}
-	for index, uid = range uids {
-		uidMaps[uid] = uid
-		uidList[index] = constant.RK_SYNC_USER_SERVER + utils.GetHashTagKey(uid)
+	var (
+		key    = constant.RK_SYNC_USER_SERVER
+		uid    int64
+		slots  = map[int64][]string{}
+		slot   int64
+		uidArr []string
+	)
+	srvIds = make(map[int64]int64)
+	for _, uid = range uids {
+		slot = utils.UserSlot(uid)
+		// 相同slot的uid放入一组
+		slots[slot] = append(slots[slot], cast.ToString(uid))
 	}
-	values, err = xredis.CMGet(uidList)
-	if err != nil {
-		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
-		return
+	// 遍历字典
+	wg := &sync.WaitGroup{}
+	lock := &sync.RWMutex{}
+	for slot, uidArr = range slots {
+		wg.Add(1)
+		go func(w *sync.WaitGroup, s int64, ids []string) {
+			defer w.Done()
+			servers := xredis.HMGet(key+cast.ToString(s), ids...)
+			lock.Lock()
+			for i, sid := range servers {
+				if sid == nil {
+					notUids = append(notUids, cast.ToInt64(ids[i]))
+					continue
+				}
+				srvIds[cast.ToInt64(ids[i])] = cast.ToInt64(sid)
+			}
+			lock.Unlock()
+		}(wg, slot, uidArr)
 	}
-	for index, val = range values {
-		if val == nil {
-			continue
-		}
-		serverId, _ = utils.ToInt64(val)
-		if serverId == 0 {
-			continue
-		}
-		uid = uids[index]
-		srvMaps[uid] = serverId
-		delete(uidMaps, uid)
-	}
-	notUids = make([]int64, len(uidMaps))
-	if len(uidMaps) == 0 {
-		return
-	}
-	index = -1
-	for _, uid = range uidMaps {
-		index++
-		notUids[index] = uid
-	}
+	wg.Wait()
 	return
 }
 
@@ -168,9 +143,8 @@ func (c *userCache) SignOut(uid int64, platform pb_enum.PLATFORM_TYPE) (err erro
 		platformStr = utils.Int32ToStr(int32(platform))
 		key1        = constant.RK_SYNC_USER_ACCESS_TOKEN_SESSION_ID + htk + ":" + platformStr
 		key2        = constant.RK_SYNC_USER_REFRESH_TOKEN_SESSION_ID + htk + ":" + platformStr
-		key3        = constant.RK_SYNC_USER_SERVER + htk
 	)
-	err = xredis.CUnlink([]string{key1, key2, key3})
+	err = xredis.CUnlink([]string{key1, key2})
 	if err != nil {
 		return
 	}
@@ -179,10 +153,9 @@ func (c *userCache) SignOut(uid int64, platform pb_enum.PLATFORM_TYPE) (err erro
 
 func (c *userCache) SetServerId(uid int64, serverId int64) (err error) {
 	var (
-		key = constant.RK_SYNC_USER_SERVER + utils.GetHashTagKey(uid)
+		key = constant.RK_SYNC_USER_SERVER + utils.GetUserSlot(uid)
 	)
-	// 更新serverId缓存
-	err = Set(key, serverId, constant.CONST_DURATION_USER_SERVER_ID_SECOND)
+	err = xredis.HSetNX(key, utils.Int64ToStr(uid), serverId)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_SET_FAILED, ERROR_CACHE_REDIS_SET_FAILED, err.Error())
 	}
@@ -191,15 +164,16 @@ func (c *userCache) SetServerId(uid int64, serverId int64) (err error) {
 
 func (c *userCache) GetServerId(uid int64) (serverId string, err error) {
 	var (
-		key = constant.RK_SYNC_USER_SERVER + utils.GetHashTagKey(uid)
+		key = constant.RK_SYNC_USER_SERVER + utils.GetChatSlot(uid)
 	)
-	serverId, err = xredis.Get(key)
+	serverId, err = xredis.HGet(key, utils.Int64ToStr(uid))
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CACHE_REDIS_GET_FAILED, ERROR_CACHE_REDIS_GET_FAILED, err.Error())
 	}
 	return
 }
 
+/*
 func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error) {
 	var (
 		i       int
@@ -222,6 +196,7 @@ func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error
 	}
 	return
 }
+*/
 
 //func (c *userCache) SetUserAndServer(info *pb_user.UserInfo, serverId int64) (err error) {
 //	var (
@@ -238,11 +213,3 @@ func (c *userCache) GetServerIds(uidList []int64) (serverIds []string, err error
 //		constant.CONST_DURATION_USER_INFO_SECOND)
 //	return
 //}
-
-func (c *userCache) SetUserServer(uid int64, serverId int64) (err error) {
-	var (
-		key = constant.RK_SYNC_USER_SERVER + utils.GetHashTagKey(uid)
-	)
-	Set(key, serverId, constant.CONST_DURATION_USER_INFO_SECOND)
-	return
-}

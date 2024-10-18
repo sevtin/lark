@@ -1,10 +1,13 @@
 package logic
 
 import (
-	"fmt"
+	"github.com/spf13/cast"
+	"lark/pkg/common/xredis"
+	"lark/pkg/constant"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_obj"
 	"lark/pkg/utils"
+	"sync"
 )
 
 func GetMembersFromHash(hashmap map[string]string) (distMembers map[int64][]*pb_obj.Int64Array) {
@@ -16,16 +19,53 @@ func GetMembersFromHash(hashmap map[string]string) (distMembers map[int64][]*pb_
 
 func groupFromHashmap(hashmap map[string]string) (distMembers map[int64][]*pb_obj.Int64Array) {
 	var (
-		uid      string
-		str      string
-		array    *pb_obj.Int64Array
-		serverId int64
+		srvIds    = getUsersServerId(hashmap)
+		uid       string
+		uidVal    int64
+		status    string
+		statusVal int64
+		array     *pb_obj.Int64Array
+		serverId  int64
 	)
 	distMembers = make(map[int64][]*pb_obj.Int64Array)
-	for uid, str = range hashmap {
-		array, serverId = pb_obj.MemberInt64Array(str, uid)
+	for uid, status = range hashmap {
+		uidVal = cast.ToInt64(uid)
+		serverId, _ = srvIds[uidVal]
+		statusVal = cast.ToInt64(status)
+		array = pb_obj.MemberInt64Array(uidVal, statusVal, serverId)
 		setDistMembers(distMembers, serverId, array)
 	}
+	return
+}
+
+func getUsersServerId(hashmap map[string]string) (srvIds map[int64]int64) {
+	var (
+		key   = constant.RK_SYNC_USER_SERVER
+		uid   string
+		slots = map[int64][]string{}
+		slot  int64
+		uids  []string
+	)
+	srvIds = make(map[int64]int64)
+	for uid, _ = range hashmap {
+		slot = utils.UserSlot(cast.ToInt64(uid))
+		slots[slot] = append(slots[slot], uid)
+	}
+	wg := &sync.WaitGroup{}
+	lock := &sync.RWMutex{}
+	for slot, uids = range slots {
+		wg.Add(1)
+		go func(w *sync.WaitGroup, s int64, ids []string) {
+			defer w.Done()
+			servers := xredis.HMGet(key+cast.ToString(s), ids...)
+			lock.Lock()
+			for i, sid := range servers {
+				srvIds[cast.ToInt64(ids[i])] = cast.ToInt64(sid)
+			}
+			lock.Unlock()
+		}(wg, slot, uids)
+	}
+	wg.Wait()
 	return
 }
 
@@ -65,12 +105,10 @@ func putInt64Array(distMembers map[int64][]*pb_obj.Int64Array, array *pb_obj.Int
 
 func GetDistMembers(serverId int64, uid int64, status int64) (distMembers map[int64][]*pb_obj.Int64Array) {
 	var (
-		str   string
 		array *pb_obj.Int64Array
 	)
 	distMembers = make(map[int64][]*pb_obj.Int64Array)
-	str = fmt.Sprintf("%d,%d", serverId, status)
-	array, serverId = pb_obj.MemberInt64Array(str, uid)
+	array = pb_obj.MemberInt64Array(uid, serverId, status)
 	setDistMembers(distMembers, serverId, array)
 	return
 }

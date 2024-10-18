@@ -3,25 +3,26 @@ package service
 import "errors"
 
 const (
-	ERROR_CODE_AUTH_ACCOUNT_TYPE_ERR                             int32 = 2001
-	ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR                      int32 = 2002
-	ERROR_CODE_AUTH_QUERY_DB_FAILED                              int32 = 2003
-	ERROR_CODE_AUTH_REDIS_GET_FAILED                             int32 = 2004
-	ERROR_CODE_AUTH_REGISTER_ERR                                 int32 = 2005
-	ERROR_CODE_AUTH_INSERT_VALUE_FAILED                          int32 = 2006
-	ERROR_CODE_AUTH_ACCOUNT_DOES_NOT_EXIST                       int32 = 2007
-	ERROR_CODE_AUTH_MOBILE_HAS_BEEN_REGISTERED                   int32 = 2008
-	ERROR_CODE_AUTH_LOGOUT_FAILED                                int32 = 2009
-	ERROR_CODE_AUTH_UPDATE_VALUE_FAILED                          int32 = 2010
-	ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED                        int32 = 2011
-	ERROR_CODE_AUTH_REDIS_SET_FAILED                             int32 = 2012
-	ERROR_CODE_AUTH_JWT_TOKEN_ERR                                int32 = 2013
-	ERROR_CODE_AUTH_JWT_SESSION_ID_ERR                           int32 = 2014
-	ERROR_CODE_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT int32 = 2015
-	ERROR_CODE_AUTH_OAUTH_TOKEN_ACQUISITION_FAILED               int32 = 2016
-	ERROR_CODE_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           int32 = 2017
-	ERROR_CODE_AUTH_OAUTH_USER_INFO_QUERY_FAILED                 int32 = 2018
-	ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE                         int32 = 2019
+	ERROR_CODE_AUTH_ACCOUNT_TYPE_ERR                             int32 = 200001
+	ERROR_CODE_AUTH_ACCOUNT_OR_PASSWORD_ERR                      int32 = 200002
+	ERROR_CODE_AUTH_QUERY_DB_FAILED                              int32 = 200003
+	ERROR_CODE_AUTH_REDIS_GET_FAILED                             int32 = 200004
+	ERROR_CODE_AUTH_REGISTER_ERR                                 int32 = 200005
+	ERROR_CODE_AUTH_INSERT_VALUE_FAILED                          int32 = 200006
+	ERROR_CODE_AUTH_ACCOUNT_DOES_NOT_EXIST                       int32 = 200007
+	ERROR_CODE_AUTH_MOBILE_HAS_BEEN_REGISTERED                   int32 = 200008
+	ERROR_CODE_AUTH_LOGOUT_FAILED                                int32 = 200009
+	ERROR_CODE_AUTH_UPDATE_VALUE_FAILED                          int32 = 200010
+	ERROR_CODE_AUTH_GENERATE_TOKEN_FAILED                        int32 = 200011
+	ERROR_CODE_AUTH_REDIS_SET_FAILED                             int32 = 200012
+	ERROR_CODE_AUTH_JWT_TOKEN_ERR                                int32 = 200013
+	ERROR_CODE_AUTH_JWT_SESSION_ID_ERR                           int32 = 200014
+	ERROR_CODE_AUTH_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT int32 = 200015
+	ERROR_CODE_AUTH_OAUTH_TOKEN_ACQUISITION_FAILED               int32 = 200016
+	ERROR_CODE_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           int32 = 200017
+	ERROR_CODE_AUTH_OAUTH_USER_INFO_QUERY_FAILED                 int32 = 200018
+	ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE                         int32 = 200019
+	ERROR_CODE_AUTH_UPDATE_USER_SERVER_ID_FAILED                 int32 = 200020
 )
 
 const (
@@ -44,6 +45,7 @@ const (
 	ERROR_AUTH_OAUTH_USER_INFO_ACQUISITION_FAILED           = "获取用户信息失败"
 	ERROR_AUTH_OAUTH_USER_INFO_QUERY_FAILED                 = "查询用户信息失败"
 	ERROR_AUTH_GRPC_SERVICE_FAILURE                         = "服务故障"
+	ERROR_AUTH_UPDATE_USER_SERVER_ID_FAILED                 = "更新ServerId失败"
 )
 
 var (

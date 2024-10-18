@@ -10,6 +10,7 @@ import (
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_gw"
 	"lark/pkg/proto/pb_obj"
+	"sync"
 )
 
 func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.ChatInviteNotificationReq) (resp *pb_dist.ChatInviteNotificationResp, err error) {
@@ -18,6 +19,7 @@ func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.C
 		index        int
 		notification *pb_dist.ChatInviteNotification
 		serverId     int64
+		wg           = new(sync.WaitGroup)
 	)
 	for index, _ = range req.Notifications {
 		notification = req.Notifications[index]
@@ -40,8 +42,9 @@ func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.C
 				SenderPlatform: 0,
 				Body:           body,
 			}
-			s.asyncSendMessage(msgReq, serverId, constant.CONST_MSG_KEY_CHAT_INVITE)
+			s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_CHAT_INVITE)
 		}
 	}
+	wg.Wait()
 	return
 }

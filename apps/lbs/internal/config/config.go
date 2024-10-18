@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"github.com/spf13/cast"
 	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
 	"lark/pkg/utils"
@@ -37,7 +38,7 @@ func init() {
 	config.GrpcServer.ServerID = config.ServerID
 	config.GrpcServer.Port = *grpcPort
 
-	xlog.Shared(config.Log, config.Name+utils.IntToStr(config.ServerID))
+	xlog.Shared(config.Log, config.Name+cast.ToString(config.ServerID))
 }
 
 func NewConfig() *Config {

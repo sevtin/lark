@@ -43,7 +43,7 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 		cacheList, err = s.GetCacheChatMessageList(req)
 		if err != nil {
 			resp.Set(ERROR_CODE_CHAT_MSG_REDIS_GET_FAILED, ERROR_CHAT_MSG_REDIS_GET_FAILED)
-			xlog.Warn(ERROR_CODE_CHAT_MSG_REDIS_GET_FAILED, ERROR_CHAT_MSG_REDIS_GET_FAILED, err.Error())
+			xlog.Warn(resp.Code, resp.Msg, err.Error())
 			return
 		}
 		if len(cacheList) == length {
@@ -56,7 +56,7 @@ func (s *chatMessageService) GetChatMessageList(ctx context.Context, req *pb_cha
 	list, err = s.GetHistoryMessageList(req)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_QUERY_DB_FAILED, ERROR_CHAT_MSG_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_MSG_QUERY_DB_FAILED, ERROR_CHAT_MSG_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if len(cacheList) > 0 && len(list) > 0 {

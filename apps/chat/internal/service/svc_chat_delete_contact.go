@@ -23,7 +23,7 @@ func (s *chatService) DeleteContact(ctx context.Context, req *pb_chat.DeleteCont
 	_, err = s.removeChatMember(u, req.ChatId, []int64{req.Uid, req.ContactId}, pb_enum.CHAT_TYPE_PRIVATE)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	return

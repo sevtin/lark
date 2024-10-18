@@ -25,7 +25,7 @@ func (s *chatService) GroupChatDetails(ctx context.Context, req *pb_chat.GroupCh
 	chat, err = s.chatRepo.Chat(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if chat.ChatId == 0 {
@@ -35,7 +35,7 @@ func (s *chatService) GroupChatDetails(ctx context.Context, req *pb_chat.GroupCh
 	user, err = cr_user.GetBasicUserInfo(s.userCache, s.userRepo, chat.CreatorUid)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_QUERY_DB_FAILED, ERROR_CHAT_QUERY_DB_FAILED, chat.CreatorUid)
+		xlog.Warn(resp.Code, resp.Msg, chat.CreatorUid)
 		return
 	}
 	copier.Copy(resp.Details, chat)

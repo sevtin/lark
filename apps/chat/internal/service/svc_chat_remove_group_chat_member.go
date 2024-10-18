@@ -63,7 +63,7 @@ func (s *chatService) RemoveGroupChatMember(ctx context.Context, req *pb_chat.Re
 	_, err = s.removeChatMember(u, req.ChatId, req.MemberList, pb_enum.CHAT_TYPE_GROUP)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_UPDATE_VALUE_FAILED, ERROR_CHAT_UPDATE_VALUE_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"github.com/jinzhu/copier"
+	"github.com/spf13/cast"
 	"lark/domain/po"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xredis"
@@ -36,7 +37,7 @@ func NewChatMessageCache() ChatMessageCache {
 
 func (c *chatMessageCache) GetChatMessage(chatId int64, seqId int64) (message *po.Message, err error) {
 	var (
-		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(chatId) + ":" + utils.Int64ToStr(seqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(chatId) + ":" + cast.ToString(seqId)
 	)
 	message = new(po.Message)
 	err = Get(key, message)
@@ -45,7 +46,7 @@ func (c *chatMessageCache) GetChatMessage(chatId int64, seqId int64) (message *p
 
 func (c *chatMessageCache) SetChatMessage(message *po.Message) (err error) {
 	var (
-		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(message.ChatId) + ":" + utils.Int64ToStr(message.SeqId)
+		key = constant.RK_SYNC_MSG_CACHE + utils.GetHashTagKey(message.ChatId) + ":" + cast.ToString(message.SeqId)
 	)
 	err = Set(key, message, constant.CONST_DURATION_MSG_CACHE_SECOND)
 	return
@@ -54,13 +55,13 @@ func (c *chatMessageCache) SetChatMessage(message *po.Message) (err error) {
 func (c *chatMessageCache) SetConvoMessage(message *po.Message) (err error) {
 	var (
 		htk  = utils.GetHashTagKey(message.ChatId)
-		key1 = constant.RK_SYNC_MSG_CACHE + htk + ":" + utils.Int64ToStr(message.SeqId)
+		key1 = constant.RK_SYNC_MSG_CACHE + htk + ":" + cast.ToString(message.SeqId)
 		key2 = constant.RK_MSG_CONVO_MSG + htk
 		//key3 = constant.RK_MSG_SEQ_TS + htk
 		cm   = new(pb_convo.ConvoMessage)
 		val1 string
 		val2 string
-		//val3 = utils.Int64ToStr(message.SeqId) + "," + utils.Int64ToStr(message.SrvTs)
+		//val3 = cast.ToString(message.SeqId) + "," + cast.ToString(message.SrvTs)
 	)
 	copier.Copy(cm, message)
 	val1, err = utils.Marshal(message)
@@ -82,7 +83,7 @@ func (c *chatMessageCache) SetConvoMessage(message *po.Message) (err error) {
 
 func (c *chatMessageCache) RepeatMessageVerify(prefix string, chatId int64, msgId int64) (r string, ok bool) {
 	var (
-		key    = prefix + constant.RK_MSG_CLI_MSG_ID + utils.Int64ToStr(chatId) + ":" + utils.GetHashTagKey(msgId)
+		key    = prefix + constant.RK_MSG_CLI_MSG_ID + cast.ToString(chatId) + ":" + utils.GetHashTagKey(msgId)
 		result interface{}
 		err    error
 	)

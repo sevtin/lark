@@ -11,7 +11,6 @@ import (
 
 type ChatMemberClient interface {
 	GetChatMemberInfo(req *pb_chat_member.GetChatMemberInfoReq) (resp *pb_chat_member.GetChatMemberInfoResp)
-	ChatMemberOnOffLine(req *pb_chat_member.ChatMemberOnOffLineReq) (resp *pb_chat_member.ChatMemberOnOffLineResp)
 	GetDistMemberList(req *pb_chat_member.GetDistMemberListReq) (resp *pb_chat_member.GetDistMemberListResp)
 	GetChatMemberList(req *pb_chat_member.GetChatMemberListReq) (resp *pb_chat_member.GetChatMemberListResp)
 	GetContactList(req *pb_chat_member.GetContactListReq) (resp *pb_chat_member.GetContactListResp)
@@ -39,20 +38,6 @@ func (c *chatMemberClient) GetChatMemberInfo(req *pb_chat_member.GetChatMemberIn
 	client := pb_chat_member.NewChatMemberClient(conn)
 	var err error
 	resp, err = client.GetChatMemberInfo(context.Background(), req)
-	if err != nil {
-		xlog.Warn(err.Error())
-	}
-	return
-}
-
-func (c *chatMemberClient) ChatMemberOnOffLine(req *pb_chat_member.ChatMemberOnOffLineReq) (resp *pb_chat_member.ChatMemberOnOffLineResp) {
-	conn := c.GetClientConn()
-	if conn == nil {
-		return
-	}
-	client := pb_chat_member.NewChatMemberClient(conn)
-	var err error
-	resp, err = client.ChatMemberOnOffLine(context.Background(), req)
 	if err != nil {
 		xlog.Warn(err.Error())
 	}

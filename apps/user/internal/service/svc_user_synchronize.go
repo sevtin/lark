@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/spf13/cast"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_member"
@@ -12,7 +13,7 @@ func (s *userService) updateChatMemberCacheInfo(uid int64) (err error) {
 		w       = entity.NewMysqlQuery()
 		members []*pb_chat_member.ChatMemberInfo
 		member  *pb_chat_member.ChatMemberInfo
-		uidStr  = utils.Int64ToStr(uid)
+		uidStr  = cast.ToString(uid)
 		jsonStr string
 		key     string
 		keys    []string

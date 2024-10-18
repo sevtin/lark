@@ -17,19 +17,19 @@ var (
 )
 
 const (
-	ERROR_CODE_USER_ACCOUNT_TYPE_ERR                             int32 = 1001
-	ERROR_CODE_USER_ACCOUNT_OR_PASSWORD_ERR                      int32 = 1002
-	ERROR_CODE_USER_QUERY_DB_FAILED                              int32 = 1003
-	ERROR_CODE_USER_REDIS_GET_FAILED                             int32 = 1004
-	ERROR_CODE_USER_REDIS_SET_FAILED                             int32 = 1005
-	ERROR_CODE_USER_SET_AVATAR_FAILED                            int32 = 1006
-	ERROR_CODE_USER_UPDATE_VALUE_FAILED                          int32 = 1007
-	ERROR_CODE_USER_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT int32 = 1008
-	ERROR_CODE_USER_LARK_ID_HAS_BEEN_OCCUPIED                    int32 = 1009
-	ERROR_CODE_USER_MARSHAL_FAILED                               int32 = 1010
-	ERROR_CODE_USER_CACHE_CHAT_MEMBER_INFO_FAILED                int32 = 1011
-	ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED                     int32 = 1012
-	ERROR_CODE_USER_PARAM_ERR                                    int32 = 1013
+	ERROR_CODE_USER_ACCOUNT_TYPE_ERR                             int32 = 100001
+	ERROR_CODE_USER_ACCOUNT_OR_PASSWORD_ERR                      int32 = 100002
+	ERROR_CODE_USER_QUERY_DB_FAILED                              int32 = 100003
+	ERROR_CODE_USER_REDIS_GET_FAILED                             int32 = 100004
+	ERROR_CODE_USER_REDIS_SET_FAILED                             int32 = 100005
+	ERROR_CODE_USER_SET_AVATAR_FAILED                            int32 = 100006
+	ERROR_CODE_USER_UPDATE_VALUE_FAILED                          int32 = 100007
+	ERROR_CODE_USER_THE_MOBILE_HAS_BEEN_BOUND_TO_ANOTHER_ACCOUNT int32 = 100008
+	ERROR_CODE_USER_LARK_ID_HAS_BEEN_OCCUPIED                    int32 = 100009
+	ERROR_CODE_USER_MARSHAL_FAILED                               int32 = 100010
+	ERROR_CODE_USER_CACHE_CHAT_MEMBER_INFO_FAILED                int32 = 100011
+	ERROR_CODE_USER_UPDATE_USER_CACHE_FAILED                     int32 = 100012
+	ERROR_CODE_USER_PARAM_ERR                                    int32 = 100013
 )
 
 const (

@@ -23,12 +23,12 @@ const (
 )
 
 const (
-	CONST_DURATION_USER_SERVER_ID_SECOND = 60 * 60 * 24 * 7 * time.Second //用户 server id 缓存时间
+	CONST_DURATION_USER_SERVER_ID_SECOND = 60 * 60 * 24 * 60 * time.Second //用户 server id 缓存时间
 )
 
 const (
-	CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND = 60 * 60 * 24 * 7 * time.Second //消息分发缓存hash
-	CONST_DURATION_CHAT_MEMBER_INFO_HASH_SECOND = 60 * 60 * 24 * 7 * time.Second //chat成员缓存hash
+	CONST_DURATION_DIST_CHAT_MEMBER_HASH_SECOND = 60 * 60 * 24 * 120 * time.Second //消息分发缓存hash
+	CONST_DURATION_CHAT_MEMBER_INFO_HASH_SECOND = 60 * 60 * 24 * 7 * time.Second   //chat成员缓存hash
 )
 
 const (

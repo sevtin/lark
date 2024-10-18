@@ -14,13 +14,13 @@ CREATE TABLE `chat_members` (
   `status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT 'NORMAL:正常模式 MUTE:开启免打扰 BANNED:被禁言',
   `join_source` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '加入源',
   `read_seq` int unsigned NOT NULL DEFAULT '0' COMMENT '已读最后SEQ ID',
+  `slot` int unsigned NOT NULL DEFAULT '0' COMMENT '槽位',
   `created_ts` bigint NOT NULL DEFAULT '0',
   `updated_ts` bigint NOT NULL DEFAULT '0',
   `deleted_ts` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`chat_id`,`uid`,`deleted_ts`),
   KEY `idx_chatType` (`chat_type`),
-  KEY `idx_sync` (`sync`),
-  KEY `idx_status` (`status`),
+  KEY `idx_slot_status_uid_deletedTs` (`slot`,`status`,`uid`,`deleted_ts`),
   KEY `idx_joinSource` (`join_source`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

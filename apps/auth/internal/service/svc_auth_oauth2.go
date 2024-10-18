@@ -10,7 +10,6 @@ import (
 	"lark/pkg/common/xsnowflake"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_auth"
-	"lark/pkg/proto/pb_chat_member"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
@@ -22,6 +21,7 @@ func (s *authService) oauth2Logic(user *po.OauthUser, platform pb_enum.PLATFORM_
 	}
 	var (
 		q         = entity.NewMysqlQuery()
+		uid       int64
 		oauthUser *pdo.OauthUser
 		server    *pb_auth.ServerInfo
 	)
@@ -41,8 +41,7 @@ func (s *authService) oauth2Logic(user *po.OauthUser, platform pb_enum.PLATFORM_
 			return
 		}
 		var (
-			signIn    *do.SignIn
-			onOffResp *pb_chat_member.ChatMemberOnOffLineResp
+			signIn *do.SignIn
 		)
 		q.Normal()
 		q.SetFilter("uid=?", oauthUser.Uid)
@@ -51,30 +50,41 @@ func (s *authService) oauth2Logic(user *po.OauthUser, platform pb_enum.PLATFORM_
 			aui.Set(signIn.Code, signIn.Msg)
 			return
 		}
-		onOffResp = s.chatMemberOnOffLine(signIn.User.Uid, int64(server.ServerId), platform)
-		if onOffResp == nil {
-			aui.Set(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
-			xlog.Warn(ERROR_CODE_AUTH_GRPC_SERVICE_FAILURE, ERROR_AUTH_GRPC_SERVICE_FAILURE)
-			return
-		}
+		uid = oauthUser.Uid
 		_ = copier.Copy(aui.UserInfo, signIn.User)
 		_ = copier.Copy(aui.UserInfo.Avatar, signIn.Avatar)
 		aui.AccessToken = signIn.AccessToken
 		aui.RefreshToken = signIn.RefreshToken
+
+		_, _, err = s.online.UserOnline(uid, int64(server.ServerId), platform)
+		if err != nil {
+			aui.Set(ERROR_CODE_AUTH_UPDATE_USER_SERVER_ID_FAILED, ERROR_AUTH_UPDATE_USER_SERVER_ID_FAILED)
+			xlog.Warn(aui.Code, aui.Msg, err.Error())
+			return
+		}
 	} else {
 		//首次注册
 		var (
+			srvId  int64
 			signUp *do.SignUp
 		)
-		signUp, err = s.registerUser(user, platform, int64(server.ServerId))
+		srvId, signUp, err = s.registerUser(user, platform, int64(server.ServerId))
 		if signUp.Err != nil || signUp.Code > 0 {
 			aui.Set(signUp.Code, signUp.Msg)
 			return
 		}
+		uid = signUp.User.Uid
 		_ = copier.Copy(aui.UserInfo, signUp.User)
 		_ = copier.Copy(aui.UserInfo.Avatar, signUp.Avatar)
 		aui.AccessToken = signUp.AccessToken
 		aui.RefreshToken = signUp.RefreshToken
+
+		err = s.userCache.SetServerId(user.Uid, srvId)
+		if err != nil {
+			aui.Set(ERROR_CODE_AUTH_UPDATE_USER_SERVER_ID_FAILED, ERROR_AUTH_UPDATE_USER_SERVER_ID_FAILED)
+			xlog.Warn(aui.Code, aui.Msg, err.Error())
+			return
+		}
 	}
 	aui.Server = server
 	return
@@ -100,11 +110,12 @@ func (s *authService) updateGithubUserInfo(user *po.OauthUser) (err error) {
 	return
 }
 
-func (s *authService) registerUser(oauthUser *po.OauthUser, platform pb_enum.PLATFORM_TYPE, serverId int64) (signUp *do.SignUp, err error) {
+func (s *authService) registerUser(oauthUser *po.OauthUser, platform pb_enum.PLATFORM_TYPE, serverId int64) (srvId int64, signUp *do.SignUp, err error) {
 	var (
 		user   *po.User
 		avatar *po.Avatar
 	)
+	srvId = utils.NewServerId(0, serverId, platform)
 	oauthUser.Uid = xsnowflake.NewSnowflakeID()
 	oauthUser.OauthId = xsnowflake.NewSnowflakeID()
 	user = &po.User{
@@ -121,7 +132,7 @@ func (s *authService) registerUser(oauthUser *po.OauthUser, platform pb_enum.PLA
 		Email:       oauthUser.Email,
 		Mobile:      "",
 		RegPlatform: int(platform),
-		ServerId:    utils.NewServerId(0, serverId, platform),
+		ServerId:    srvId,
 		CityId:      0,
 		Avatar:      oauthUser.AvatarUrl,
 	}

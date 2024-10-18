@@ -7,10 +7,9 @@ var (
 )
 
 type ChatCreator struct {
-	Uid      int64  `json:"uid" field:"uid"`             // 用户ID 系统生成
-	Nickname string `json:"nickname" field:"nickname"`   // 昵称
-	ServerId int64  `json:"server_id" field:"server_id"` // 分配的ws服务器
-	Avatar   string `json:"avatar" field:"avatar"`       // 小图 72*72
+	Uid      int64  `json:"uid" field:"uid"`           // 用户ID 系统生成
+	Nickname string `json:"nickname" field:"nickname"` // 昵称
+	Avatar   string `json:"avatar" field:"avatar"`     // 小图 72*72
 }
 
 func (p *ChatCreator) GetFields() string {

@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 	"lark/domain/do"
@@ -21,6 +21,7 @@ import (
 	"lark/pkg/proto/pb_msg"
 	"lark/pkg/proto/pb_user"
 	"lark/pkg/utils"
+	"strconv"
 )
 
 func (s *chatInviteService) ChatInviteHandle(ctx context.Context, req *pb_invite.ChatInviteHandleReq) (resp *pb_invite.ChatInviteHandleResp, _ error) {
@@ -87,22 +88,22 @@ func (s *chatInviteService) chatInviteExists(req *pb_invite.ChatInviteHandleReq,
 	invite, err = s.chatInviteRepo.ChatInvite(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if invite.InviteId == 0 {
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	if invite.HandleResult != 0 {
 		resp.Set(ERROR_CODE_CHAT_INVITE_HAS_HANDLED, ERROR_CHAT_INVITE_HAS_HANDLED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_HAS_HANDLED, ERROR_CHAT_INVITE_HAS_HANDLED)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	if req.HandlerUid != invite.InviteeUid {
 		resp.Set(ERROR_CODE_CHAT_INVITE_BAD_HANDLER, ERROR_CHAT_INVITE_BAD_HANDLER)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_BAD_HANDLER, ERROR_CHAT_INVITE_BAD_HANDLER)
+		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
 	cont = true
@@ -121,7 +122,7 @@ func (s *chatInviteService) alreadyMember(invite *po.ChatInvite, resp *pb_invite
 	count, err = s.chatMemberRepo.ChatMemberCount(w)
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED)
-		xlog.Warn(ERROR_CODE_CHAT_INVITE_QUERY_DB_FAILED, ERROR_CHAT_INVITE_QUERY_DB_FAILED, err.Error())
+		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	if count > 0 {
@@ -138,8 +139,6 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		w           = entity.NewMysqlQuery()
 		chat        *po.Chat
 		members     []*po.ChatMember
-		servers     []int64
-		serverId    int64
 		member      *po.ChatMember
 		memberCount int
 		list        []*pb_user.UserSrvInfo
@@ -194,7 +193,6 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 		return
 	}
 	members = make([]*po.ChatMember, memberCount)
-	servers = make([]int64, memberCount)
 	for index, user = range list {
 		switch pb_enum.CHAT_TYPE(invite.ChatType) {
 		case pb_enum.CHAT_TYPE_PRIVATE:
@@ -214,8 +212,8 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 				Alias:        info.Nickname,
 				MemberAvatar: info.Avatar,
 				Sync:         constant.SYNCHRONIZE_USER_INFO,
+				Slot:         int(utils.ChatSlot(info.Uid)),
 			}
-			serverId = info.ServerId
 		case pb_enum.CHAT_TYPE_GROUP:
 			member = &po.ChatMember{
 				ChatId:       invite.ChatId,
@@ -226,11 +224,10 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 				Sync:         constant.SYNCHRONIZE_USER_INFO,
 				ChatAvatar:   chat.Avatar,
 				ChatName:     chat.Name,
+				Slot:         int(utils.ChatSlot(user.Uid)),
 			}
-			serverId = user.ServerId
 		}
 		members[index] = member
-		servers[index] = serverId
 	}
 	// 7 成为 chat member
 	err = s.chatMemberRepo.TxCreateMultiple(tx, members)
@@ -240,21 +237,36 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 	}
 	xants.Submit(func() {
 		var (
-			distMaps = make(map[string]string)
-			km       *do.KeyMaps
-			err      error
+			memberMaps       = make(map[int64]map[string]string)
+			slot       int64 = 0
+			ok         bool
+			kvs        map[string]string
+			km         *do.KeyMaps
+			terr       error
 		)
-		for index, member = range members {
-			distMaps[utils.Int64ToStr(member.Uid)] = fmt.Sprintf("%d,%d", servers[index], member.Status)
-		}
 		// 8 缓存 chat member
-		err = s.chatMemberCache.HMSetChatMembers(member.ChatId, distMaps)
-		if err != nil {
-			xlog.Warn(err.Error())
-			km = &do.KeyMaps{Key: member.ChatId, Maps: distMaps}
-			_, _, err = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION)
-			if err != nil {
-				xlog.Warn(err.Error())
+		for index, member = range members {
+			if pb_enum.CHAT_TYPE(chat.ChatType) != pb_enum.CHAT_TYPE_PRIVATE {
+				slot = utils.ChatSlot(member.Uid)
+			}
+			if _, ok = memberMaps[slot]; !ok {
+				memberMaps[slot] = make(map[string]string)
+			}
+			memberMaps[slot][cast.ToString(member.Uid)] = strconv.Itoa(member.Status)
+		}
+		for slot, kvs = range memberMaps {
+			terr = s.chatMemberCache.HMSetChatMembers(chat.ChatId, int(slot), kvs)
+			if terr != nil {
+				xlog.Warnf("cache chat member failed. err: %s", terr.Error())
+				km = &do.KeyMaps{
+					Key:  chat.ChatId,
+					Maps: kvs,
+					Ex:   slot,
+				}
+				_, _, terr = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION)
+				if terr != nil {
+					xlog.Errorf("push chat member cache message failed. err:%s,chatId:%v,kvs:%v", terr.Error(), chat.ChatId, kvs)
+				}
 			}
 		}
 		// 9 邀请成功推送

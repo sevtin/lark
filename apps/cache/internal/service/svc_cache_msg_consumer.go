@@ -2,9 +2,11 @@ package service
 
 import (
 	"github.com/IBM/sarama"
+	"github.com/spf13/cast"
 	"lark/domain/do"
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
+	"lark/pkg/proto/pb_enum"
 	"lark/pkg/utils"
 )
 
@@ -35,26 +37,22 @@ func (s *cacheService) MessageHandler(msg []byte, key string) (err error) {
 		return
 	}
 	switch key {
-	case constant.CONST_MSG_KEY_CACHE_ON_OFF_LINE:
-		var (
-			obj = new(do.KeysFieldValues)
-		)
-		utils.ByteToObj(msg, obj)
-		err = s.chatMemberCache.HSetDistChatMembers(obj.Keys, obj.Field, obj.Values)
 	case constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION:
 		var (
 			obj    = new(do.KeyMaps)
 			chatId int64
+			slot   int
 		)
 		utils.ByteToObj(msg, obj)
-		chatId, _ = utils.ToInt64(obj.Key)
-		err = s.chatMemberCache.HMSetChatMembers(chatId, obj.Maps)
+		chatId = cast.ToInt64(obj.Key)
+		slot = cast.ToInt(obj.Ex)
+		err = s.chatMemberCache.HMSetChatMembers(chatId, slot, obj.Maps)
 	case constant.CONST_MSG_KEY_CACHE_REMOVE_CHAT_MEMBER:
 		var (
-			obj = new(do.KeysValues)
+			obj = map[string][]string{}
 		)
 		utils.ByteToObj(msg, obj)
-		err = s.chatMemberCache.HDelChatMembers(obj.Keys, obj.Values)
+		err = s.chatMemberCache.HDelChatMembers(obj)
 	case constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT:
 		var (
 			obj    = new(do.KeyFieldValue)
@@ -66,7 +64,7 @@ func (s *cacheService) MessageHandler(msg []byte, key string) (err error) {
 		chatId, _ = utils.ToInt64(obj.Key)
 		uid, _ = utils.ToInt64(obj.Field)
 		value = utils.ToString(obj.Value)
-		err = s.chatMemberCache.HSetNXChatMember(chatId, uid, value)
+		err = s.chatMemberCache.HSetNXChatMember(chatId, pb_enum.CHAT_TYPE_GROUP, uid, value)
 	}
 	return
 }

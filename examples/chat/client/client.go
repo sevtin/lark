@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/spf13/cast"
 	"google.golang.org/protobuf/proto"
 	"lark/domain/cache"
 	"lark/pkg/common/xjwt"
@@ -57,7 +58,7 @@ func NewClient(uid int64, mgr *Manager, host string) (client *Client) {
 		onlineAt: ts,
 		sendChan: make(chan []byte, WS_CHAN_CLIENT_WRITE_MESSAGE_SIZE),
 		closed:   false,
-		nickname: "昵称:" + utils.Int64ToStr(uid),
+		nickname: "昵称:" + cast.ToString(uid),
 	}
 
 	u = url.URL{Scheme: "ws", Host: host, Path: "/"}
@@ -70,7 +71,7 @@ func NewClient(uid int64, mgr *Manager, host string) (client *Client) {
 
 	token, _ = xjwt.CreateToken(client.uid, client.platform, true, constant.CONST_DURATION_SHA_JWT_ACCESS_TOKEN_EXPIRE_IN_SECOND)
 	header = make(map[string][]string)
-	header[WS_KEY_UID] = []string{utils.Int64ToStr(uid)}
+	header[WS_KEY_UID] = []string{cast.ToString(uid)}
 	header[WS_KEY_PLATFORM] = []string{"1"}
 	header[WS_KEY_COOKIE] = []string{token.Token}
 	err = authCache.SetAccessTokenSessionId(client.uid, client.platform, token.SessionId)
@@ -318,7 +319,7 @@ func (c *Client) SendMsg(chatId int64) (err error) {
 		CliMsgId: xsnowflake.NewSnowflakeID(), //客户端唯一消息号
 		ChatId:   chatId,
 		MsgType:  1,
-		Body:     utils.Str2Bytes("文本聊天消息" + utils.Int64ToStr(c.uid)),
+		Body:     utils.Str2Bytes("文本聊天消息" + cast.ToString(c.uid)),
 		SentTs:   utils.NowUnix(),
 	}
 	msgBuf, _ = proto.Marshal(msgBody)

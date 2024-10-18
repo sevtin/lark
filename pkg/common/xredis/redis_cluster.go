@@ -275,6 +275,18 @@ func (r *RedisCluster) HSetNX(key, field string, value interface{}) error {
 	return r.client.HSetNX(context.Background(), key, field, value).Err()
 }
 
+func (r *RedisCluster) HSetNXEx(key, field string, value interface{}, ex time.Duration) (err error) {
+	key = RealKey(key)
+	var (
+		pipe = r.client.Pipeline()
+		ctx  = context.Background()
+	)
+	pipe.HSetNX(ctx, key, field, value)
+	pipe.Expire(ctx, key, ex)
+	_, err = pipe.Exec(ctx)
+	return
+}
+
 func (r *RedisCluster) HDels(key string, fields []string) error {
 	key = RealKey(key)
 	return r.client.HDel(context.Background(), key, fields...).Err()
@@ -290,7 +302,7 @@ func (r *RedisCluster) HMSet(key string, values map[string]string) error {
 	return r.client.HMSet(context.Background(), key, values).Err()
 }
 
-func (r *RedisCluster) CHMSet(key string, values map[string]interface{}, expire time.Duration) (err error) {
+func (r *RedisCluster) CHMSet(key string, values map[string]string, expire time.Duration) (err error) {
 	var (
 		pipe = r.client.Pipeline()
 	)
@@ -333,21 +345,18 @@ func (r *RedisCluster) HGet(key string, field string) (val string, err error) {
 	return
 }
 
-func (r *RedisCluster) CHDel(keys []string, fields []string) (err error) {
-	if len(keys) == 0 || len(fields) == 0 {
-		return
-	}
-	if len(keys) != len(fields) {
+func (r *RedisCluster) CHDel(maps map[string][]string) (err error) {
+	if len(maps) == 0 {
 		return
 	}
 	var (
-		i    int
-		key  string
-		pipe = r.client.Pipeline()
+		key    string
+		fields []string
+		pipe   = r.client.Pipeline()
 	)
-	for i, key = range keys {
+	for key, fields = range maps {
 		key = RealKey(key)
-		pipe.HDel(context.Background(), key, fields[i])
+		pipe.HDel(context.Background(), key, fields...)
 	}
 	_, err = pipe.Exec(context.Background())
 	return
