@@ -99,5 +99,3 @@ Step 9
 <img src="assets/images/Alipay.jpg" alt="Alipay" width="30%"/>
 </center>
 
-[![Stargazers over time](https://starchart.cc/sevtin/lark.svg)](https://starchart.cc/sevtin/lark)
-
