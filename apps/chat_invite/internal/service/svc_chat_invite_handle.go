@@ -263,7 +263,7 @@ func (s *chatInviteService) acceptInvitation(tx *gorm.DB, invite *po.ChatInvite,
 					Maps: kvs,
 					Ex:   slot,
 				}
-				_, _, terr = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION)
+				_, _, terr = s.cacheProducer.Push(km, constant.CONST_MSG_KEY_CACHE_AGREE_INVITATION+utils.GetChatPartition(chat.ChatId))
 				if terr != nil {
 					xlog.Errorf("push chat member cache message failed. err:%s,chatId:%v,kvs:%v", terr.Error(), chat.ChatId, kvs)
 				}
@@ -344,10 +344,10 @@ func (s *chatInviteService) addedContactMessage(chat *po.Chat, invite *po.ChatIn
 		inbox = &pb_mq.InboxMessage{
 			Topic:    pb_enum.TOPIC_CHAT,
 			SubTopic: pb_enum.SUB_TOPIC_CHAT_MSG,
-			Msg:      msg,
 		}
+		inbox.Body, _ = proto.Marshal(msg)
 		// 将消息推送到kafka消息队列
-		_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG)
+		_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG+utils.GetChatPartition(msg.ChatId))
 		if err != nil {
 			xlog.Warn(ERROR_CODE_CHAT_INVITE_ENQUEUE_FAILED, ERROR_CHAT_INVITE_ENQUEUE_FAILED, err.Error())
 			return
@@ -426,10 +426,10 @@ func (s *chatInviteService) joinedChatGroupMessage(chat *po.Chat, invite *po.Cha
 	inbox = &pb_mq.InboxMessage{
 		Topic:    pb_enum.TOPIC_CHAT,
 		SubTopic: pb_enum.SUB_TOPIC_CHAT_JOINED_GROUP_CHAT,
-		Msg:      msg,
 	}
+	inbox.Body, _ = proto.Marshal(msg)
 	// 将消息推送到kafka消息队列
-	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG)
+	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG+utils.GetChatPartition(msg.ChatId))
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_INVITE_ENQUEUE_FAILED, ERROR_CHAT_INVITE_ENQUEUE_FAILED, err.Error())
 		return

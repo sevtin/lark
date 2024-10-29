@@ -143,7 +143,7 @@ func (s *chatService) CreateGroupChat(ctx context.Context, req *pb_chat.CreateGr
 			var (
 				kfv = do.KeyFieldValue{chat.ChatId, chat.CreatorUid, "0"}
 			)
-			_, _, terr = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT)
+			_, _, terr = s.cacheProducer.Push(kfv, constant.CONST_MSG_KEY_CACHE_CREATE_GROUP_CHAT+utils.GetChatPartition(chat.ChatId))
 			if terr != nil {
 				xlog.Errorf("push chat member cache message failed. err:%s,chatId:%v,uid:%v", terr.Error(), member.ChatId, member.Uid)
 			}

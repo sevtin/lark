@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"google.golang.org/protobuf/proto"
 	"lark/pkg/common/xants"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xsnowflake"
@@ -92,14 +93,13 @@ func (s *chatService) quitGroupChatMessage(chatId int64, uidList []int64, subTop
 		return
 	}
 	msg.Body = []byte(jsonStr)
-
 	inbox = &pb_mq.InboxMessage{
 		Topic:    pb_enum.TOPIC_CHAT,
 		SubTopic: subTopic,
-		Msg:      msg,
 	}
+	inbox.Body, _ = proto.Marshal(msg)
 	// 将消息推送到kafka消息队列
-	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG)
+	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG+utils.GetChatPartition(chatId))
 	if err != nil {
 		xlog.Warn(ERROR_CODE_CHAT_ENQUEUE_FAILED, ERROR_CHAT_ENQUEUE_FAILED, err.Error())
 		return

@@ -14,12 +14,13 @@ enum TOPIC
 {
   UNKNOWN_TOPIC = 0;
   CHAT = 1; // 聊天
-  CHAT_INVITE = 2; // 聊天邀请
-  RED_ENVELOPE = 3; // 红包
-  READ_RECEIPT = 4; // 消息已读回执
-  REGISTER = 5; // quic 连接
-  PING = 6; // quic ping
-  PONG = 7; // quic pong
+  MSG_OPR = 2; // 消息操作
+  CHAT_INVITE = 3; // 聊天邀请
+  RED_ENVELOPE = 4; // 红包
+  READ_RECEIPT = 5; // 消息已读回执
+  REGISTER = 6; // quic 连接
+  PING = 7; // quic ping
+  PONG = 8; // quic pong
 }
 
 enum SUB_TOPIC

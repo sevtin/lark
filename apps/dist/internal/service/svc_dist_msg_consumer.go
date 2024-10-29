@@ -2,12 +2,14 @@ package service
 
 import (
 	"github.com/IBM/sarama"
+	"google.golang.org/protobuf/proto"
 	"lark/apps/dist/internal/logic"
 	gw_client "lark/apps/msg_gateway/client"
 	"lark/pkg/common/xkafka"
 	"lark/pkg/common/xlog"
-	"lark/pkg/constant"
 	"lark/pkg/proto/pb_chat_member"
+	"lark/pkg/proto/pb_enum"
+	"lark/pkg/proto/pb_mq"
 	"lark/pkg/proto/pb_obj"
 )
 
@@ -34,12 +36,18 @@ func (s *distService) ConsumeClaim(session sarama.ConsumerGroupSession, claim sa
 }
 
 func (s *distService) MessageHandler(msg []byte, msgKey string) (err error) {
-	switch msgKey {
-	case constant.CONST_MSG_KEY_MSG:
-		s.sendChatMessage(msg)
-	case constant.CONST_MSG_KEY_OPERATION:
-		s.messageOperation(msg)
+	index := new(pb_mq.InboxMessage)
+	if err = proto.Unmarshal(msg, index); err != nil {
+		xlog.Warn(ERROR_CODE_DIST_PROTOCOL_UNMARSHAL_FAILED, ERROR_DIST_PROTOCOL_UNMARSHAL_FAILED, err.Error())
+		return
+	}
+	switch index.Topic {
+	case pb_enum.TOPIC_CHAT, pb_enum.TOPIC_RED_ENVELOPE:
+		err = s.sendChatMessage(index.Topic, index.SubTopic, index.Body)
+	case pb_enum.TOPIC_MSG_OPR:
+		err = s.messageOperation(index.Topic, index.SubTopic, index.Body)
 	default:
+		return
 	}
 	return
 }

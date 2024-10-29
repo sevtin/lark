@@ -3,12 +3,14 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"google.golang.org/protobuf/proto"
 	"lark/domain/po"
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
 	"lark/pkg/proto/pb_chat_msg"
 	"lark/pkg/proto/pb_enum"
+	"lark/pkg/proto/pb_mq"
 	"lark/pkg/proto/pb_msg"
 	"lark/pkg/utils"
 )
@@ -18,11 +20,11 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 	var (
 		message *po.Message
 		nowTs   = utils.NowUnix()
-		opnReq  = &pb_msg.MessageOperationReq{
-			Topic:     pb_enum.TOPIC_CHAT,
-			SubTopic:  pb_enum.SUB_TOPIC_CHAT_OPERATION,
-			Operation: &pb_msg.MessageOperation{},
+		inbox   = &pb_mq.InboxMessage{
+			Topic:    pb_enum.TOPIC_MSG_OPR,
+			SubTopic: pb_enum.SUB_TOPIC_CHAT_OPERATION,
 		}
+		operation = new(pb_msg.MessageOperation)
 	)
 	message, err = s.GetMessage(req.ChatId, req.SeqId)
 	if err != nil {
@@ -47,10 +49,11 @@ func (s *chatMessageService) MessageOperation(ctx context.Context, req *pb_chat_
 	}
 
 	// 3、消息推送
-	copier.Copy(opnReq.Operation, req)
-	opnReq.Operation.SrvMsgId = message.SrvMsgId
-	opnReq.Operation.ChatType = pb_enum.CHAT_TYPE(message.ChatType)
-	_, _, err = s.producer.EnQueue(opnReq, constant.CONST_MSG_KEY_OPERATION)
+	copier.Copy(operation, req)
+	operation.SrvMsgId = message.SrvMsgId
+	operation.ChatType = pb_enum.CHAT_TYPE(message.ChatType)
+	inbox.Body, _ = proto.Marshal(operation)
+	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_OPERATION+utils.GetChatPartition(req.ChatId))
 	if err != nil {
 		resp.Set(ERROR_CODE_CHAT_MSG_ENQUEUE_FAILED, ERROR_CHAT_MSG_ENQUEUE_FAILED)
 		xlog.Warn(resp.Code, resp.Msg, err.Error())

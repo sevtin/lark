@@ -7,67 +7,61 @@ import (
 	"lark/pkg/constant"
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_gw"
-	"lark/pkg/proto/pb_mq"
+	"lark/pkg/proto/pb_msg"
 	"lark/pkg/proto/pb_obj"
+	"lark/pkg/utils"
 	"sync"
 )
 
-func (s *distService) sendChatMessage(buf []byte) (err error) {
+func (s *distService) sendChatMessage(topic pb_enum.TOPIC, subTopic pb_enum.SUB_TOPIC, buf []byte) (err error) {
 	var (
-		inbox = new(pb_mq.InboxMessage)
+		chatMsg = new(pb_msg.SrvChatMessage)
 	)
-	if err = proto.Unmarshal(buf, inbox); err != nil {
-		xlog.Warn(ERROR_CODE_DIST_PROTOCOL_UNMARSHAL_ERR, ERROR_DIST_PROTOCOL_UNMARSHAL_ERR, err.Error())
+	if err = proto.Unmarshal(buf, chatMsg); err != nil {
+		xlog.Warn(ERROR_CODE_DIST_PROTOCOL_UNMARSHAL_FAILED, ERROR_DIST_PROTOCOL_UNMARSHAL_FAILED, err.Error())
 		return
 	}
-	s.messageDistribution(inbox)
+	s.messageDistribution(topic, subTopic, chatMsg, buf)
 	return
 }
 
-func (s *distService) messageDistribution(inbox *pb_mq.InboxMessage) {
+func (s *distService) messageDistribution(topic pb_enum.TOPIC, subTopic pb_enum.SUB_TOPIC, msg *pb_msg.SrvChatMessage, body []byte) {
 	wg := new(sync.WaitGroup)
 	slots := int(constant.MAX_CHAT_SLOT)
-	if inbox.Msg.ChatType == pb_enum.CHAT_TYPE_PRIVATE {
+	if msg.ChatType == pb_enum.CHAT_TYPE_PRIVATE {
 		slots = 1
 	}
 	for i := 0; i < slots; i++ {
 		wg.Add(1)
 		go func(slot int) {
 			defer wg.Done()
-			distMembers := s.getChatMembers(inbox.Msg.ChatId, slot)
-			s.sendMessage(inbox, distMembers)
+			distMembers := s.getChatMembers(msg.ChatId, slot)
+			s.sendMessage(topic, subTopic, msg, body, distMembers)
 		}(i)
 	}
 	wg.Wait()
 }
 
-func (s *distService) sendMessage(inbox *pb_mq.InboxMessage, distMembers map[int64][]*pb_obj.Int64Array) {
-	if inbox.Msg.SrvMsgId == 0 {
+func (s *distService) sendMessage(topic pb_enum.TOPIC, subTopic pb_enum.SUB_TOPIC, msg *pb_msg.SrvChatMessage, body []byte, distMembers map[int64][]*pb_obj.Int64Array) {
+	if msg.SrvMsgId == 0 {
 		return
 	}
 	if len(distMembers) == 0 {
 		return
 	}
 	var (
-		wg   = new(sync.WaitGroup)
-		body []byte
-		err  error
+		wg = new(sync.WaitGroup)
 	)
-	body, err = proto.Marshal(inbox.Msg)
-	if err != nil {
-		xlog.Warn(ERROR_CODE_DIST_PROTOCOL_MARSHAL_ERR, ERROR_DIST_PROTOCOL_MARSHAL_ERR, err.Error())
-		return
-	}
 	for serverId, _ := range distMembers {
 		msgReq := &pb_gw.SendTopicMessageReq{
-			Topic:          inbox.Topic,
-			SubTopic:       inbox.SubTopic,
+			Topic:          topic,
+			SubTopic:       subTopic,
 			Members:        distMembers[serverId],
-			SenderId:       inbox.Msg.SenderId,
-			SenderPlatform: inbox.Msg.SenderPlatform,
+			SenderId:       msg.SenderId,
+			SenderPlatform: msg.SenderPlatform,
 			Body:           body,
 		}
-		s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_PUSH_ONLINE)
+		s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_PUSH_ONLINE+utils.GetChatPartition(msg.ChatId))
 	}
 	wg.Wait()
 	return

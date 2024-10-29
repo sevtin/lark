@@ -8,38 +8,43 @@ import (
 	"lark/pkg/common/xlog"
 	"lark/pkg/constant"
 	"lark/pkg/entity"
+	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_mq"
 	"lark/pkg/proto/pb_msg"
 	"lark/pkg/utils"
 )
 
 func (s *messageHistoryService) MessageHandler(msg []byte, msgKey string) (err error) {
-	switch msgKey {
-	case constant.CONST_MSG_KEY_MSG:
-		err = s.SaveMessage(msg)
+	inbox := new(pb_mq.InboxMessage)
+	if err = proto.Unmarshal(msg, inbox); err != nil {
+		xlog.Warn(ERROR_CODE_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, err.Error())
 		return
-	case constant.CONST_MSG_KEY_OPERATION:
-		err = s.MessageOperation(msg)
-		return
+	}
+	switch inbox.Topic {
+	case pb_enum.TOPIC_CHAT, pb_enum.TOPIC_RED_ENVELOPE:
+		err = s.SaveMessage(inbox.Body)
+	case pb_enum.TOPIC_MSG_OPR:
+		err = s.MessageOperation(inbox.Body)
 	default:
 		return
 	}
+	return
 }
 
 func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 	var (
-		req     = new(pb_mq.InboxMessage)
+		chatMsg = new(pb_msg.SrvChatMessage)
 		message = new(po.Message)
 	)
-	if err = proto.Unmarshal(msg, req); err != nil {
+	if err = proto.Unmarshal(msg, chatMsg); err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, err.Error())
 		return
 	}
-	if req.Msg.SrvMsgId == 0 {
+	if chatMsg.SrvMsgId == 0 {
 		return
 	}
-	copier.Copy(message, req.Msg)
-	message.Body = utils.MsgBodyToStr(req.Msg.MsgType, req.Msg.Body)
+	copier.Copy(message, chatMsg)
+	message.Body = utils.MsgBodyToStr(chatMsg.MsgType, chatMsg.Body)
 
 	// 1、消息入库
 	if err = s.chatMessageRepo.Create(message); err != nil {
@@ -61,28 +66,28 @@ func (s *messageHistoryService) SaveMessage(msg []byte) (err error) {
 
 func (s *messageHistoryService) MessageOperation(msg []byte) (err error) {
 	var (
-		req     = new(pb_msg.MessageOperationReq)
-		u       = entity.NewMysqlUpdate()
-		message *po.Message
-		nowTs   = utils.NowUnix()
+		operation = new(pb_msg.MessageOperation)
+		u         = entity.NewMysqlUpdate()
+		message   *po.Message
+		nowTs     = utils.NowUnix()
 	)
-	if err = proto.Unmarshal(msg, req); err != nil {
+	if err = proto.Unmarshal(msg, operation); err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HISTORY_PROTOCOL_UNMARSHAL_ERR, err.Error())
 		return
 	}
-	message, err = s.GetMessage(req.Operation.ChatId, req.Operation.SeqId)
+	message, err = s.GetMessage(operation.ChatId, operation.SeqId)
 	if err != nil {
 		return
 	}
 	if message.SrvMsgId == 0 {
 		return
 	}
-	message.Status = int(req.Operation.Opn)
+	message.Status = int(operation.Opn)
 	message.UpdatedTs = nowTs
 	// 1、更新 message
-	u.SetFilter("chat_id=?", req.Operation.ChatId)
-	u.SetFilter("seq_id=?", req.Operation.SeqId)
-	u.Set("status", req.Operation.Opn)
+	u.SetFilter("chat_id=?", operation.ChatId)
+	u.SetFilter("seq_id=?", operation.SeqId)
+	u.Set("status", operation.Opn)
 	err = s.chatMessageRepo.UpdateMessage(u)
 	if err != nil {
 		xlog.Warn(ERROR_CODE_MSG_HISTORY_UPDATE_VALUE_FAILED, ERROR_MSG_HISTORY_UPDATE_VALUE_FAILED, err.Error())

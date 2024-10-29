@@ -10,6 +10,7 @@ import (
 	"lark/pkg/proto/pb_enum"
 	"lark/pkg/proto/pb_gw"
 	"lark/pkg/proto/pb_obj"
+	"lark/pkg/utils"
 	"sync"
 )
 
@@ -26,10 +27,16 @@ func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.C
 		var (
 			distMembers map[int64][]*pb_obj.Int64Array
 			body        []byte
+			chatId      int64
 		)
+		if notification.Invite.ChatInfo == nil {
+			chatId = notification.Invite.InviteId
+		} else {
+			chatId = notification.Invite.ChatInfo.ChatId
+		}
 		body, err = proto.Marshal(notification.Invite)
 		if err != nil {
-			xlog.Warn(ERROR_CODE_DIST_PROTOCOL_MARSHAL_ERR, ERROR_DIST_PROTOCOL_MARSHAL_ERR, err.Error())
+			xlog.Warn(ERROR_CODE_DIST_PROTOCOL_MARSHAL_FAILED, ERROR_DIST_PROTOCOL_MARSHAL_FAILED, err.Error())
 			return
 		}
 		distMembers = logic.GetDistMembers(notification.ReceiverServerId, notification.ReceiverId, 0)
@@ -42,7 +49,7 @@ func (s *distService) ChatInviteNotification(ctx context.Context, req *pb_dist.C
 				SenderPlatform: 0,
 				Body:           body,
 			}
-			s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_CHAT_INVITE)
+			s.asyncSendMessage(wg, msgReq, serverId, constant.CONST_MSG_KEY_CHAT_INVITE+utils.GetChatPartition(chatId))
 		}
 	}
 	wg.Wait()

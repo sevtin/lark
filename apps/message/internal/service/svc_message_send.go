@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"google.golang.org/protobuf/proto"
 	"lark/pkg/common/xlog"
 	"lark/pkg/common/xsnowflake"
 	"lark/pkg/constant"
@@ -19,8 +20,8 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		inbox = &pb_mq.InboxMessage{
 			Topic:    req.Topic,
 			SubTopic: req.SubTopic,
-			Msg:      new(pb_msg.SrvChatMessage),
 		}
+		chatMsg    = new(pb_msg.SrvChatMessage)
 		senderInfo *pb_chat_member.ChatMemberInfo
 		seqId      int64
 		result     string
@@ -29,19 +30,19 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 	)
 	// 1、参数校验
 	if err = s.validate.Struct(req.Msg); err != nil {
-		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
+		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_FAILED, ERROR_MESSAGE_VALIDATOR_FAILED)
 		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
-	if inbox.Msg.AssocId, err = s.verifyMessage(req); err != nil {
-		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, ERROR_MESSAGE_VALIDATOR_ERR)
+	if chatMsg.AssocId, err = s.verifyMessage(req); err != nil {
+		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_FAILED, ERROR_MESSAGE_VALIDATOR_FAILED)
 		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	// 2、重复消息校验
 	result, ok = s.chatMessageCache.RepeatMessageVerify(s.cfg.Redis.Prefix, req.Msg.ChatId, req.Msg.CliMsgId)
 	if ok == false {
-		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_ERR, result)
+		resp.Set(ERROR_CODE_MESSAGE_VALIDATOR_FAILED, result)
 		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
@@ -68,35 +69,35 @@ func (s *messageService) SendChatMessage(ctx context.Context, req *pb_msg.SendCh
 		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
-	copier.Copy(inbox.Msg, req.Msg)
-	inbox.Msg.SrvMsgId = xsnowflake.NewSnowflakeID()
-	inbox.Msg.ChatType = senderInfo.ChatType
-	inbox.Msg.SeqId = seqId
-	inbox.Msg.SrvTs = utils.NowUnix()
-	inbox.Msg.MsgFrom = pb_enum.MSG_FROM_USER
-	inbox.Msg.SenderName = senderInfo.Alias
-	inbox.Msg.SenderAvatar = senderInfo.MemberAvatar
-
+	copier.Copy(chatMsg, req.Msg)
+	chatMsg.SrvMsgId = xsnowflake.NewSnowflakeID()
+	chatMsg.ChatType = senderInfo.ChatType
+	chatMsg.SeqId = seqId
+	chatMsg.SrvTs = utils.NowUnix()
+	chatMsg.MsgFrom = pb_enum.MSG_FROM_USER
+	chatMsg.SenderName = senderInfo.Alias
+	chatMsg.SenderAvatar = senderInfo.MemberAvatar
+	inbox.Body, _ = proto.Marshal(chatMsg)
 	// 5、将消息推送到kafka消息队列
 	if s.producer == nil {
 		resp.Set(ERROR_CODE_MESSAGE_PRODUCER_IS_NULL, ERROR_MESSAGE_PRODUCER_IS_NULL)
 		xlog.Warn(resp.Code, resp.Msg)
 		return
 	}
-	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG)
+	_, _, err = s.producer.EnQueue(inbox, constant.CONST_MSG_KEY_MSG+utils.GetChatPartition(chatMsg.ChatId))
 	if err != nil {
 		resp.Set(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED)
 		xlog.Warn(resp.Code, resp.Msg, err.Error())
 		return
 	}
 	chatSeq := &pb_msg.ChatSeq{
-		ChatId:   inbox.Msg.ChatId,
+		ChatId:   chatMsg.ChatId,
 		SeqId:    seqId,
-		SrvTs:    inbox.Msg.SrvTs,
-		SenderId: inbox.Msg.SenderId,
-		MsgFrom:  inbox.Msg.MsgFrom,
+		SrvTs:    chatMsg.SrvTs,
+		SenderId: chatMsg.SenderId,
+		MsgFrom:  chatMsg.MsgFrom,
 	}
-	_, _, err = s.seqProducer.EnQueue(chatSeq, constant.CONST_MSG_KEY_CHAT_SEQ)
+	_, _, err = s.seqProducer.EnQueue(chatSeq, constant.CONST_MSG_KEY_CHAT_SEQ+utils.GetChatPartition(chatMsg.ChatId))
 	if err != nil {
 		xlog.Warn(ERROR_CODE_MESSAGE_ENQUEUE_FAILED, ERROR_MESSAGE_ENQUEUE_FAILED, err.Error())
 	}

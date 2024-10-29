@@ -68,6 +68,18 @@ func MsgBodyToStr(msgType pb_enum.MSG_TYPE, buf []byte) (str string) {
 		str = ToString(content)
 	case pb_enum.MSG_TYPE_ACCEPTED_CHAT_INVITE, pb_enum.MSG_TYPE_CHAT_INVITE_MSG, pb_enum.MSG_TYPE_QUIT_GROUP_CHAT, pb_enum.MSG_TYPE_REMOVE_CHAT_MEMBER:
 		str = Bytes2Str(buf)
+	case pb_enum.MSG_TYPE_GIVE_RED_ENV:
+		var (
+			content = new(pb_msg.GiveRedEnvelope)
+		)
+		proto.Unmarshal(buf, content)
+		str = ToString(content)
+	case pb_enum.MSG_TYPE_RECEIVE_RED_ENV:
+		var (
+			content = new(pb_msg.ReceiveRedEnvelope)
+		)
+		proto.Unmarshal(buf, content)
+		str = ToString(content)
 	default:
 		str = Bytes2Str(buf)
 	}

@@ -59,3 +59,9 @@ rabbitmq:
 msg_producer:
   address: ["lark-kafka-01:9092","lark-kafka-02:9094","lark-kafka-03:9096"]
   topic: "give_red_env"
+message_server:
+  name: lark_message_server
+  cert:
+    cert_file: ./configs/tls/grpc/server.pem
+    enabled: true
+    server_name_override: lark.com

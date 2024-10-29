@@ -15,31 +15,34 @@ import (
 )
 
 func (s *messageHotService) MessageHandler(msg []byte, msgKey string) (err error) {
-	switch msgKey {
-	case constant.CONST_MSG_KEY_MSG:
-		err = s.SaveMessage(msg)
+	inbox := new(pb_mq.InboxMessage)
+	if err = proto.Unmarshal(msg, inbox); err != nil {
+		xlog.Warn(ERROR_CODE_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, ERROR_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, err.Error())
 		return
-	case constant.CONST_MSG_KEY_RECALL:
-		err = s.MessageRecall(msg)
-		return
+	}
+	switch inbox.Topic {
+	case pb_enum.TOPIC_CHAT, pb_enum.TOPIC_RED_ENVELOPE:
+		err = s.SaveMessage(inbox.Body)
+	case pb_enum.TOPIC_MSG_OPR:
+		err = s.MessageRecall(inbox.Body)
 	default:
 		return
 	}
+	return
 }
 
 func (s *messageHotService) SaveMessage(msg []byte) (err error) {
 	var (
-		req     = new(pb_mq.InboxMessage)
+		chatMsg = new(pb_msg.SrvChatMessage)
 		message = new(po.Message)
 	)
-	if err = proto.Unmarshal(msg, req); err != nil {
-		xlog.Warn(ERROR_CODE_MSG_HOT_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HOT_PROTOCOL_UNMARSHAL_ERR, err.Error())
-		// 丢弃无法解析的数据
-		err = nil
+	if err = proto.Unmarshal(msg, chatMsg); err != nil {
+		xlog.Warn(ERROR_CODE_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, ERROR_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, err.Error())
+		return
 	}
 	// 消息入库
-	copier.Copy(message, req.Msg)
-	message.Body = utils.MsgBodyToStr(req.Msg.MsgType, req.Msg.Body)
+	copier.Copy(message, chatMsg)
+	message.Body = utils.MsgBodyToStr(chatMsg.MsgType, chatMsg.Body)
 	message.UpdatedTs = utils.NowUnix()
 	if err = s.messageHotRepo.Create(message); err != nil {
 		xlog.Warn(err.Error())
@@ -58,15 +61,15 @@ func (s *messageHotService) SaveMessage(msg []byte) (err error) {
 
 func (s *messageHotService) MessageRecall(msg []byte) (err error) {
 	var (
-		req = new(pb_msg.MessageOperationReq)
-		u   = entity.NewMongoUpdate()
+		operation = new(pb_msg.MessageOperation)
+		u         = entity.NewMongoUpdate()
 	)
-	if err = proto.Unmarshal(msg, req); err != nil {
-		xlog.Warn(ERROR_CODE_MSG_HOT_PROTOCOL_UNMARSHAL_ERR, ERROR_MSG_HOT_PROTOCOL_UNMARSHAL_ERR, err.Error())
+	if err = proto.Unmarshal(msg, operation); err != nil {
+		xlog.Warn(ERROR_CODE_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, ERROR_MSG_HOT_PROTOCOL_UNMARSHAL_FAILED, err.Error())
 		return
 	}
-	u.SetFilter("srv_msg_id", req.Operation.SrvMsgId)
-	u.SetFilter("sender_id", req.Operation.SenderId)
+	u.SetFilter("srv_msg_id", operation.SrvMsgId)
+	u.SetFilter("sender_id", operation.SenderId)
 	u.Set("status", pb_enum.MSG_OPERATION_RECALL)
 	if err = s.messageHotRepo.Update(u); err != nil {
 		xlog.Warn(err.Error())
