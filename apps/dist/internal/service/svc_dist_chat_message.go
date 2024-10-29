@@ -28,7 +28,7 @@ func (s *distService) messageDistribution(inbox *pb_mq.InboxMessage) {
 	wg := new(sync.WaitGroup)
 	slots := int(constant.MAX_CHAT_SLOT)
 	if inbox.Msg.ChatType == pb_enum.CHAT_TYPE_PRIVATE {
-		slots = 0
+		slots = 1
 	}
 	for i := 0; i < slots; i++ {
 		wg.Add(1)
