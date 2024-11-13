@@ -1,6 +1,7 @@
 package xmysql
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -16,6 +17,13 @@ import (
 
 var (
 	ERR_DB_INSTANCE_IS_EMPTY = errors.New("database instance is empty")
+)
+
+const (
+	TransactionTimeout5s  = 5 * time.Second
+	TransactionTimeout10s = 10 * time.Second
+	TransactionTimeout30s = 30 * time.Second
+	TransactionTimeout60s = 60 * time.Second
 )
 
 var (
@@ -64,7 +72,8 @@ func Transaction(handle func(tx *gorm.DB) (err error)) (err error) {
 		err = ERR_DB_INSTANCE_IS_EMPTY
 		return
 	}
-	tx := db.Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	ctx, cancel := context.WithTimeout(context.Background(), TransactionTimeout5s)
+	tx := db.WithContext(ctx).Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
 	err = handle(tx)
 	if err != nil {
 		terr = tx.Rollback().Error
@@ -146,9 +155,3 @@ func Connected() bool {
 	return cli.connected
 }
 
-/*
-SetMaxOpenConns：设置池中与数据打开的最大连接数，默认不限制连接数量。一般来说，该值设置的越大，可以并发执行的数据库查询就越多。
-SetMaxIdleConns：设置池中最大空闲连接数，默认值是2. 理论上有更多的空闲连接可以减少从头建立新连接的概率，建立连接的过程比较耗时。但是过多的空闲连接会浪费内存占用。如果一个连接空闲时间过长，它也可能变得不可用。MySQL默认会自动关闭8小时未使用的连接。
-SetConnMaxIdleTime：设置池中连接在关闭之前可用空闲的最长时间，默认是不限制时间。如果设置为2小时，表示池中自上次使用以后在池中空闲了2小时的连接将标为过期被清理。
-SetConnMaxLifetime：设置池中连接关闭前可以保持打开的最长时间，默认是不限制时间。
-*/
