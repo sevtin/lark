@@ -7,7 +7,6 @@ import (
 	"lark/pkg/common/xlog"
 	"lark/pkg/conf"
 	"runtime/debug"
-	"strings"
 	"time"
 )
 
@@ -32,12 +31,12 @@ type Rabbitmq struct {
 	waitingTime time.Duration
 }
 
-func getAMQPUrl(cfg *conf.Rabbitmq) (url string) {
+func getAMQPUrl(cfg *conf.Rabbitmq, addr string) (url string) {
 	url = fmt.Sprintf(
 		"amqp://%s:%s@%s/%s",
 		cfg.Username,
 		cfg.Password,
-		strings.Join(cfg.Address, ","),
+		addr,
 		cfg.Vhost,
 	)
 	return
@@ -60,12 +59,17 @@ func (r *Rabbitmq) connect() (err error) {
 	}()
 	r.close()
 
-	if conn, err = amqp.Dial(getAMQPUrl(r.cfg)); err != nil {
-		xlog.Warnf("amqp dial error: %s", err.Error())
+	for _, addr := range r.cfg.Address {
+		if conn, err = amqp.Dial(getAMQPUrl(r.cfg, addr)); err != nil {
+			xlog.Warnf("amqp dial error: %s", err.Error())
+			continue
+		}
+	}
+	if conn == nil {
 		return
 	}
 	if ch, err = conn.Channel(); err != nil {
-		xlog.Warnf("amqp channel error: %s", err.Error())
+		xlog.Errorf("amqp channel error: %s", err.Error())
 		return
 	}
 	r.conn = conn
@@ -96,11 +100,11 @@ func (r *Rabbitmq) notifyListen() {
 			if err != nil {
 				xlog.Warnf("amqp notify error: %s", err.Error())
 			}
+			time.Sleep(r.waitingTime * time.Second)
 			r.waitingTime *= 2
 			if r.waitingTime > MaxWaitingTime {
 				r.waitingTime = MaxWaitingTime
 			}
-			time.Sleep(r.waitingTime * time.Second)
 			xlog.Warn("Reconnecting to RabbitMQ...")
 			r.connect()
 		}
