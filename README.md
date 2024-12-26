@@ -45,7 +45,7 @@ Step 1
 git clone -b standalone git@github.com:sevtin/lark.git
 
 Step 2
-创建日志文件目录
+创建日志文件目录,并设置权限
 /var/log/lark
 
 Step 3
