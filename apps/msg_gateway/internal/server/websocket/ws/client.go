@@ -12,7 +12,6 @@ import (
 )
 
 type Client struct {
-	lock      sync.RWMutex
 	hub       *Hub
 	conn      *websocket.Conn
 	uid       int64 // 用户ID
@@ -76,20 +75,16 @@ func (c *Client) debug() {
 }
 
 func (c *Client) closeConn() {
-	c.lock.Lock()
-	if c.closed == true {
-		c.lock.Unlock()
-		return
-	}
-	c.closed = true
-	c.lock.Unlock()
-	close(c.closeChan)
-	c.hub.unregisterChan <- c
-	nowAt := time.Now()
-	c.conn.SetWriteDeadline(nowAt.Add(WS_RW_DEAD_LINE))
-	c.conn.SetReadDeadline(nowAt.Add(WS_RW_DEAD_LINE))
-	// 耗时操作!!!
-	c.conn.Close()
+	sync.OnceFunc(func() {
+		c.closed = true
+		close(c.closeChan)
+		c.hub.unregisterChan <- c
+		nowAt := time.Now()
+		c.conn.SetWriteDeadline(nowAt.Add(WS_RW_DEAD_LINE))
+		c.conn.SetReadDeadline(nowAt.Add(WS_RW_DEAD_LINE))
+		// 耗时操作!!!
+		c.conn.Close()
+	})
 }
 
 func (c *Client) readLoop() {
