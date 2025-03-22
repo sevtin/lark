@@ -161,6 +161,7 @@ func (c *Client) pongHandler(appData string) (err error) {
 }
 
 func (c *Client) pingHandler(appData string) (err error) {
+	// TODO: 此次待优化,写入数据需要在一个线程中
 	err = c.conn.WriteControl(websocket.PongMessage, WS_MSG_BUF_PONG, c.hub.now.Add(time.Second))
 	/*
 		if err == websocket.ErrCloseSent {
